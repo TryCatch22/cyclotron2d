@@ -9,59 +9,44 @@ using Microsoft.Xna.Framework.Input;
 namespace Tron
 {
 	public enum Direction { Left, Right, Up, Down }
+
 	class Cycle
 	{
+		// Velocity is magnitude and direction.
+		// Speed is magnitude, Direction is direction.
 		public const float Speed = 2;
 
+		// Self-explanatory
 		public Vector2 Position { get; set; }
-		public Vector2 Velocity { get; private set; }
+		public Direction Direction { get; set; }
+
+		// A reference to the grid we're playing on, to do coordinate conversions
 		public Grid Grid { get; set; }
+
+		// The list of positions on the map at which we've made turns.
+		// This is used to draw our trail.
 		public List<Vector2> Vertices = new List<Vector2>();
 
-		public Vector2 GridPosition { get { return Grid.ToGridCoords(Position); } }
-		public Direction Direction
-		{
-			get
-			{
-				if (Velocity == Vector2.UnitX * Speed)
-					return Direction.Right;
-				else if (Velocity == -Vector2.UnitX * Speed)
-					return Direction.Left;
-				else if (Velocity == Vector2.UnitY * Speed)
-					return Direction.Down;
-				else if (Velocity == -Vector2.UnitY * Speed)
-					return Direction.Up;
-				throw new Exception("Invalid velocity");
-			}
-		}
+		// Velocity can't be set. It's a function of Direction and Speed.
+		public Vector2 Velocity { get { return DirectionToVelocity(Direction); } }
 
+		// The position in grid coordinates.
+		public Vector2 GridPosition { get { return Grid.ToGridCoords(Position); } }
+
+		// Press P! But don't hold it...
 		public bool Paused { get; set; }
 
+		// We only turn on grid lines, so if the input is received early, we have to keep track of it.
 		Vector2? nextGridCrossing = null;
 		Direction scheduledDirection;
 
 		public Cycle()
 		{
-			Velocity = DirectionToVelocity(Direction.Right);
+			Direction = Direction.Right;
 			Vertices.Add(Position);
 		}
 
-		public Vector2 DirectionToVelocity(Direction direction)
-		{
-			switch (direction)
-			{
-				case Direction.Down:
-					return Vector2.UnitY * Speed;
-				case Direction.Left:
-					return -Vector2.UnitX * Speed;
-				case Direction.Right:
-					return Vector2.UnitX * Speed;
-				case Direction.Up:
-					return -Vector2.UnitY * Speed;
-			}
-			throw new Exception("Is there a fifth direction?");
-		}
-
+		// Turn soon.
 		public void ScheduleTurn(Direction direction)
 		{
 			// No scheduling of turns if there's already one scheduled, or if we're going in the right direction already,
@@ -85,9 +70,10 @@ namespace Tron
 			scheduledDirection = direction;
 		}
 
+		// Turn now.
 		private void Turn(Direction direction)
 		{
-			Velocity = DirectionToVelocity(direction);
+			Direction = direction;
 			Position = Grid.ToWorldCoords(GridPosition);
 			Vertices.Add(Position);
 		}
@@ -113,38 +99,43 @@ namespace Tron
 				return;
 
 			Position += Velocity;
-			if (nextGridCrossing != null)
-			{
-				bool turn = false;
-				switch (Direction)
-				{
-					case Direction.Down:
-						if (Position.Y >= nextGridCrossing.Value.Y)
-							turn = true;
-						break;
-					case Direction.Up:
-						if (Position.Y <= nextGridCrossing.Value.Y)
-							turn = true;
-						break;
-					case Direction.Right:
-						if (Position.X >= nextGridCrossing.Value.X)
-							turn = true;
-						break;
-					case Direction.Left:
-						if (Position.X <= nextGridCrossing.Value.X)
-							turn = true;
-						break;
-					default:
-						throw new Exception("Invalid direction");
-				}
-				if (turn)
-				{
-					nextGridCrossing = null;
-					Turn(scheduledDirection);
-				}
-			}
 
+			CheckScheduledTurn();
 			CheckForCollision();
+		}
+
+		private void CheckScheduledTurn()
+		{
+			if (nextGridCrossing == null)
+				return;
+
+			bool turn = false;
+			switch (Direction)
+			{
+				case Direction.Down:
+					if (Position.Y >= nextGridCrossing.Value.Y)
+						turn = true;
+					break;
+				case Direction.Up:
+					if (Position.Y <= nextGridCrossing.Value.Y)
+						turn = true;
+					break;
+				case Direction.Right:
+					if (Position.X >= nextGridCrossing.Value.X)
+						turn = true;
+					break;
+				case Direction.Left:
+					if (Position.X <= nextGridCrossing.Value.X)
+						turn = true;
+					break;
+				default:
+					throw new Exception("Invalid direction");
+			}
+			if (turn)
+			{
+				nextGridCrossing = null;
+				Turn(scheduledDirection);
+			}
 		}
 
 		private void CheckForCollision()
@@ -153,7 +144,7 @@ namespace Tron
 			for (int i = 0; i < Vertices.Count - 2; i++)
 			{
 				var line = new Line(Vertices[i], Vertices[i + 1]);
-				if (Line.FindIntersection(line, travelledLine) != null)
+				if (Line.FindIntersection(line, travelledLine) != IntersectionType.None)
 				{
 					throw new Exception("You die!");
 				}
@@ -185,5 +176,22 @@ namespace Tron
 
 			spriteBatch.Draw(Art.Pixel, rect, Color.Red);
 		}
+
+		public static Vector2 DirectionToVelocity(Direction direction)
+		{
+			switch (direction)
+			{
+				case Direction.Down:
+					return Vector2.UnitY * Speed;
+				case Direction.Left:
+					return -Vector2.UnitX * Speed;
+				case Direction.Right:
+					return Vector2.UnitX * Speed;
+				case Direction.Up:
+					return -Vector2.UnitY * Speed;
+			}
+			throw new Exception("Is there a fifth direction?");
+		}
+
 	}
 }
