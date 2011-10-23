@@ -61,7 +61,7 @@ namespace Tron
 		private static bool AreProjectionsIntersecting(Vector2 point1, Vector2 point2, Vector2 point3, Vector2 point4)
 		{
 			float x1 = Math.Abs(point1.X), x2 = Math.Abs(point2.X), x3 = Math.Abs(point3.X), x4 = Math.Abs(point4.X);
-			if (x1 == 0 && x2 == 0)
+			if (x1 == x2)
 			{
 				// If the lines are perfectly along the Y-axis.
 				x1 = Math.Abs(point1.Y);
