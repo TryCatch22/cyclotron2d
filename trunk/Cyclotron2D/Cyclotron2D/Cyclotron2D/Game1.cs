@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
-namespace Tron
+namespace Cyclotron2D
 {
 	/// <summary>
 	/// This is the main type for your game
@@ -97,6 +97,7 @@ namespace Tron
 			spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
 			grid.Draw(spriteBatch);
 			cycle.Draw(spriteBatch);
+			Messages.Draw(spriteBatch, gameTime);
 			spriteBatch.End();
 
 			base.Draw(gameTime);

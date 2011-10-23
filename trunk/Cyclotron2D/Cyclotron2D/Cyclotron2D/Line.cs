@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 
-namespace Tron
+namespace Cyclotron2D
 {
 	public enum IntersectionType { None, Collinear, Point }
 

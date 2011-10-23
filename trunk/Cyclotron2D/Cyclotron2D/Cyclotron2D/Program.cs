@@ -1,6 +1,6 @@
 using System;
 
-namespace Tron
+namespace Cyclotron2D
 {
 #if WINDOWS || XBOX
     static class Program

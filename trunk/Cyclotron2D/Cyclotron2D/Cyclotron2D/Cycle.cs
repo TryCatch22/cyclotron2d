@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace Tron
+namespace Cyclotron2D
 {
 	public enum Direction { Left, Right, Up, Down }
 
@@ -146,7 +146,7 @@ namespace Tron
 				var line = new Line(Vertices[i], Vertices[i + 1]);
 				if (Line.FindIntersection(line, travelledLine) != IntersectionType.None)
 				{
-					throw new Exception("You die!");
+					Messages.Add("You die!");
 				}
 			}
 		}
