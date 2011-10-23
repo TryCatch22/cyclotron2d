@@ -40,6 +40,8 @@ namespace Cyclotron2D
 		Vector2? nextGridCrossing = null;
 		Direction scheduledDirection;
 
+		bool wasColliding = false;
+
 		public Cycle()
 		{
 			Direction = Direction.Right;
@@ -141,14 +143,22 @@ namespace Cyclotron2D
 		private void CheckForCollision()
 		{
 			var travelledLine = new Line(Position, Vertices.Last());
+			bool hasCollisions = false;
 			for (int i = 0; i < Vertices.Count - 2; i++)
 			{
 				var line = new Line(Vertices[i], Vertices[i + 1]);
 				if (Line.FindIntersection(line, travelledLine) != IntersectionType.None)
 				{
-					Messages.Add("You die!");
+					hasCollisions = true;
+					if (!wasColliding)
+					{
+						wasColliding = true;
+						Messages.Add("You die!");
+					}
 				}
 			}
+			if (!hasCollisions)
+				wasColliding = false;
 		}
 
 		public void Draw(SpriteBatch spriteBatch)
