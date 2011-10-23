@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 #endregion
 
-namespace Tron
+namespace Cyclotron2D
 {
     /// <summary>
     /// This class provides additional functionality for dealing with keyboard input. It can detect
