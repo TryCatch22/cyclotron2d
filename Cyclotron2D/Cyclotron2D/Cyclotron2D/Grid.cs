@@ -9,7 +9,7 @@ namespace Cyclotron2D
 {
 	class Grid
 	{
-		public const int PixelsPerInterval = 50;
+		public const int PixelsPerInterval = 3;
 
 		public Vector2 Size { get; private set; }
 		public Vector2 GridSize { get { return new Vector2((int)Math.Ceiling(Size.X / PixelsPerInterval), (int)Math.Ceiling(Size.Y / PixelsPerInterval)); } }
