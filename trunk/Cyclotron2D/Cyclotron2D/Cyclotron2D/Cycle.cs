@@ -51,10 +51,13 @@ namespace Cyclotron2D
 		// Turn soon.
 		public void ScheduleTurn(Direction direction)
 		{
-			// No scheduling of turns if there's already one scheduled, or if we're going in the right direction already,
-			// or if it's a turn in the opposite direction of that we're already traveling.
-			if (nextGridCrossing != null || Direction == direction || DirectionToVelocity(direction) + Velocity == Vector2.Zero)
+			// If the turn is either in the same or the opposite direction that we're going,
+			// do nothing, and make cancel any scheduled turn.
+			if (Direction == direction || DirectionToVelocity(direction) + Velocity == Vector2.Zero)
+			{
+				nextGridCrossing = null;
 				return;
+			}
 
 			if (Grid.ToWorldCoords(GridPosition) == Position)
 			{

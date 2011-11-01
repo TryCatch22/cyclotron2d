@@ -8,19 +8,23 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using GameStateManagement;
 
 namespace Cyclotron2D
 {
+	public enum GameState { Lobby, WaitingForClients, SearchingForHost, Hosting, PlayingAsClient }
+
 	/// <summary>
 	/// This is the main type for your game
 	/// </summary>
 	public class Game1 : Microsoft.Xna.Framework.Game
 	{
+		public static readonly string Name = System.Environment.MachineName;
+
 		GraphicsDeviceManager graphics;
 		SpriteBatch spriteBatch;
 
-		Grid grid;
-		Cycle cycle;
+		ScreenManager screenManager;
 
 		public Game1()
 		{
@@ -29,6 +33,13 @@ namespace Cyclotron2D
 
 			//graphics.IsFullScreen = true;
 			IsMouseVisible = true;
+
+			screenManager = new ScreenManager(this);
+			Components.Add(screenManager);
+
+			// Activate the first screens.
+			screenManager.AddScreen(new BackgroundScreen(), null);
+			screenManager.AddScreen(new MainMenuScreen(), null);
 		}
 
 		/// <summary>
@@ -39,9 +50,6 @@ namespace Cyclotron2D
 		/// </summary>
 		protected override void Initialize()
 		{
-			grid = new Grid(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-			cycle = new Cycle() { Grid = grid };
-
 			base.Initialize();
 		}
 
@@ -53,7 +61,6 @@ namespace Cyclotron2D
 		{
 			// Create a new SpriteBatch, which can be used to draw textures.
 			spriteBatch = new SpriteBatch(GraphicsDevice);
-
 			Art.LoadContent(Content);
 		}
 
@@ -73,16 +80,6 @@ namespace Cyclotron2D
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update(GameTime gameTime)
 		{
-			CKeyboard.Update(gameTime);
-
-			if (CKeyboard.WasPressed(Keys.F2))
-				Initialize();
-			else if (CKeyboard.WasPressed(Keys.P))
-				cycle.Paused = !cycle.Paused;
-
-			cycle.HandleInput(Keyboard.GetState());
-			cycle.Update();
-
 			base.Update(gameTime);
 		}
 
@@ -94,13 +91,11 @@ namespace Cyclotron2D
 		{
 			GraphicsDevice.Clear(Color.Black);
 
+			base.Draw(gameTime);
+
 			spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
-			grid.Draw(spriteBatch);
-			cycle.Draw(spriteBatch);
 			Messages.Draw(spriteBatch, gameTime);
 			spriteBatch.End();
-
-			base.Draw(gameTime);
 		}
 	}
 }
