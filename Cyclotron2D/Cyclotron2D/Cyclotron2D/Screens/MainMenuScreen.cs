@@ -10,6 +10,7 @@
 #region Using Statements
 using Microsoft.Xna.Framework;
 using Cyclotron2D;
+using System.Threading;
 #endregion
 
 namespace GameStateManagement
@@ -31,16 +32,22 @@ namespace GameStateManagement
             // Create our menu entries.
             MenuEntry startGameMenuEntry = new MenuEntry("Start Game");
             MenuEntry joinGameMenuEntry = new MenuEntry("Join Game");
+			MenuEntry startServerGameMenuEntry = new MenuEntry("Start Server (local)");
+			MenuEntry joinServerGameMenuEntry = new MenuEntry("Join Server (local)");
             MenuEntry exitMenuEntry = new MenuEntry("Exit");
 
             // Hook up menu event handlers.
             startGameMenuEntry.Selected += StartGameMenuEntrySelected;
             joinGameMenuEntry.Selected += JoinGameMenuEntrySelected;
+			startServerGameMenuEntry.Selected += startServerMenuEntrySelected;
+			joinServerGameMenuEntry.Selected += joinServerMenuEntrySelected;
             exitMenuEntry.Selected += OnCancel;
 
             // Add entries to the menu.
 			MenuEntries.Add(startGameMenuEntry);
 			MenuEntries.Add(joinGameMenuEntry);
+			MenuEntries.Add(startServerGameMenuEntry);
+			MenuEntries.Add(joinServerGameMenuEntry);
             MenuEntries.Add(exitMenuEntry);
         }
 
@@ -70,6 +77,16 @@ namespace GameStateManagement
 			var client = new Client(9876);
 			client.Connect();
         }
+
+		void startServerMenuEntrySelected(object sender, PlayerIndexEventArgs e) {
+			Lobby gameServer = new Lobby();
+			gameServer.start();
+		}
+
+		void joinServerMenuEntrySelected(object sender, PlayerIndexEventArgs e) {
+			NetworkClient client = new NetworkClient();
+			client.Receive();
+		}
 
 
         /// <summary>
