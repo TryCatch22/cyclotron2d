@@ -79,7 +79,7 @@ namespace GameStateManagement
         }
 
 		void startServerMenuEntrySelected(object sender, PlayerIndexEventArgs e) {
-			Lobby gameServer = new Lobby();
+			GameLobby gameServer = new GameLobby();
 			gameServer.start();
 		}
 
