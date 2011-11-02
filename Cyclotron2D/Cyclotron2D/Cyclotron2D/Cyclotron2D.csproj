@@ -111,9 +111,10 @@
     <Compile Include="CKeyboard.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="Cycle.cs" />
+    <Compile Include="GameLobbyThread.cs" />
     <Compile Include="Grid.cs" />
     <Compile Include="Line.cs" />
-    <Compile Include="Lobby.cs" />
+    <Compile Include="GameLobby.cs" />
     <Compile Include="Messages.cs" />
     <Compile Include="NetworkClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

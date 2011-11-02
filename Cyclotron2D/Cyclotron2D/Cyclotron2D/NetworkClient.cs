@@ -18,7 +18,7 @@ namespace Cyclotron2D
 			try
 			{
 				client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-				client.Connect(IPAddress.Loopback, Lobby.GAME_PORT);
+				client.Connect(IPAddress.Loopback, GameLobby.GAME_PORT);
 			} catch (Exception ex)
 			{
 				Console.WriteLine(ex.StackTrace);
