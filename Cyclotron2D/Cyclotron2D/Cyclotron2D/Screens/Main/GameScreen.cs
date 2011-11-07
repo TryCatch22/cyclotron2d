@@ -4,7 +4,7 @@ using Cyclotron2D.Core.Players;
 using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
 
-namespace Cyclotron2D.Screens
+namespace Cyclotron2D.Screens.Main
 {
     /// <summary>
     /// Screen that runs the actual game
