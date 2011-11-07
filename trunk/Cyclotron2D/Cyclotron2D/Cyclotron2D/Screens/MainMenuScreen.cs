@@ -1,118 +1,117 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// MainMenuScreen.cs
-//
-// Microsoft XNA Community Game Platform
-// Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
-
-#region Using Statements
+﻿using System;
+using Cyclotron2D.Screens.Base;
+using Cyclotron2D.UIElements;
 using Microsoft.Xna.Framework;
-using Cyclotron2D;
-using System.Threading;
-#endregion
 
-namespace GameStateManagement
+namespace Cyclotron2D.Screens
 {
     /// <summary>
-    /// The main menu screen is the first thing displayed when the game starts up.
+    /// This is the Main menu Screen its the first screen you see  
+    /// it offers A menu that transitions you to other MainScreens
     /// </summary>
-    class MainMenuScreen : MenuScreen
+    public class MainMenuScreen : MainScreen
     {
-        #region Initialization
+        private Menu m_mainMenu;
 
+        #region Constructor
 
-        /// <summary>
-        /// Constructor fills in the menu contents.
-        /// </summary>
-        public MainMenuScreen()
-            : base("Main Menu")
+        public MainMenuScreen(Game game) : base(game, (int) GameState.MainMenu)
         {
-            // Create our menu entries.
-            MenuEntry startGameMenuEntry = new MenuEntry("Start Game");
-            MenuEntry joinGameMenuEntry = new MenuEntry("Join Game");
-			MenuEntry startServerGameMenuEntry = new MenuEntry("Start Server (local)");
-			MenuEntry joinServerGameMenuEntry = new MenuEntry("Join Server (local)");
-            MenuEntry exitMenuEntry = new MenuEntry("Exit");
-
-            // Hook up menu event handlers.
-            startGameMenuEntry.Selected += StartGameMenuEntrySelected;
-            joinGameMenuEntry.Selected += JoinGameMenuEntrySelected;
-			startServerGameMenuEntry.Selected += startServerMenuEntrySelected;
-			joinServerGameMenuEntry.Selected += joinServerMenuEntrySelected;
-            exitMenuEntry.Selected += OnCancel;
-
-            // Add entries to the menu.
-			MenuEntries.Add(startGameMenuEntry);
-			MenuEntries.Add(joinGameMenuEntry);
-			MenuEntries.Add(startServerGameMenuEntry);
-			MenuEntries.Add(joinServerGameMenuEntry);
-            MenuEntries.Add(exitMenuEntry);
-        }
-
-
-        #endregion
-
-        #region Handle Input
-
-
-        /// <summary>
-        /// Event handler for when the Play Game menu entry is selected.
-        /// </summary>
-        void StartGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-        {
-			var server = new Server(9876);
-			server.WaitForConnection();
-            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
-                               new GameplayScreen());
-        }
-
-
-        /// <summary>
-        /// Event handler for when the Options menu entry is selected.
-        /// </summary>
-        void JoinGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-        {
-			var client = new Client(9876);
-			client.Connect();
-        }
-
-		void startServerMenuEntrySelected(object sender, PlayerIndexEventArgs e) {
-			GameLobby gameServer = new GameLobby();
-			gameServer.start();
-		}
-
-		void joinServerMenuEntrySelected(object sender, PlayerIndexEventArgs e) {
-			NetworkClient client = new NetworkClient();
-			client.Receive();
-		}
-
-
-        /// <summary>
-        /// When the user cancels the main menu, ask if they want to exit the sample.
-        /// </summary>
-        protected override void OnCancel(PlayerIndex playerIndex)
-        {
-            const string message = "Are you sure you want to exit this sample?";
-
-            MessageBoxScreen confirmExitMessageBox = new MessageBoxScreen(message);
-
-            confirmExitMessageBox.Accepted += ConfirmExitMessageBoxAccepted;
-
-            ScreenManager.AddScreen(confirmExitMessageBox, playerIndex);
-        }
-
-
-        /// <summary>
-        /// Event handler for when the user selects ok on the "are you sure
-        /// you want to exit" message box.
-        /// </summary>
-        void ConfirmExitMessageBoxAccepted(object sender, PlayerIndexEventArgs e)
-        {
-            ScreenManager.Game.Exit();
+            m_mainMenu = new Menu(game, this);
+            LoadMenuItems();
+            SubscribeMenu();
         }
 
         #endregion
-	}
+
+        #region Subscribtion
+
+        private void SubscribeMenu()
+        {
+            m_mainMenu.SelectionChanged += OnMenuSelectionChanged;
+        }
+
+        private void UnsubscribeMenu()
+        {
+            m_mainMenu.SelectionChanged -= OnMenuSelectionChanged;
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+        private void OnMenuSelectionChanged(object sender, EventArgs e)
+        {
+            switch (m_mainMenu.SelectedIndex)
+            {
+                case 0:
+                    Game.ChangeState(GameState.PlayingSolo);
+                    break;
+                case 3:
+                    Game.Exit();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        protected override void OnEnabledChanged(object sender, EventArgs args)
+        {
+            base.OnEnabledChanged(sender, args);
+            if (Enabled)
+            {
+                m_mainMenu.Reset();
+            }
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            var rect = Game.GraphicsDevice.Viewport.Bounds;
+            m_mainMenu.Rect = new Rectangle(rect.Width/4, rect.Height/6, rect.Width/2, 2*rect.Height/3);
+            m_mainMenu.Reset();
+        }
+
+        public override void Draw(GameTime gameTime)
+        {
+            base.Draw(gameTime);
+            if (m_mainMenu.Visible)
+            {
+                m_mainMenu.Draw(gameTime);
+            }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void LoadMenuItems()
+        {
+            m_mainMenu.AddItem(new MenuItem(m_mainMenu, "Single Player")); //index 0
+            m_mainMenu.AddItem(new MenuItem(m_mainMenu, "Host Game")); //index 1 etc...
+            m_mainMenu.AddItem(new MenuItem(m_mainMenu, "Join Game"));
+            m_mainMenu.AddItem(new MenuItem(m_mainMenu, "RageQuit"));
+        }
+
+        #endregion
+
+        #region IDisposable
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && m_mainMenu != null)
+            {
+                UnsubscribeMenu();
+                m_mainMenu.Dispose();
+                m_mainMenu = null;
+            }
+            base.Dispose(disposing);
+        }
+
+        #endregion
+    }
 }
