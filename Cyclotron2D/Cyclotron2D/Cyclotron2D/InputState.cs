@@ -1,27 +1,78 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// InputState.cs
-//
-// Microsoft XNA Community Game Platform
-// Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
-
-#region Using Statements
+using Cyclotron2D.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
-#endregion
 
-namespace GameStateManagement
+namespace Cyclotron2D
 {
+    public class InputState : CyclotronComponent
+    {
+        #region Properties
+
+        public KeyboardState CurrentKeyState { get; private set; }
+        public KeyboardState PreviousKeyState { get; private set; }
+
+        public MouseState CurrentMouseState { get; private set; }
+        public MouseState PreviousMouseState { get; private set; }
+
+        public Point MousePosition { get { return new Point(CurrentMouseState.X, CurrentMouseState.Y); } }
+
+        public bool IsNewLeftClick { get { return CurrentMouseState.LeftButton == ButtonState.Pressed && PreviousMouseState.LeftButton == ButtonState.Released; } }
+
+        #endregion
+
+        public InputState(Game game) : base(game)
+        {
+            UpdateOrder = 0; //input device state change get updated before anything else
+
+            CurrentKeyState = PreviousKeyState = Keyboard.GetState();
+            CurrentMouseState = PreviousMouseState = Mouse.GetState();
+        }
+
+        #region Public Methods
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            PreviousKeyState = CurrentKeyState;
+            PreviousMouseState = CurrentMouseState;
+
+            CurrentKeyState = Keyboard.GetState();
+            CurrentMouseState = Mouse.GetState();
+        }
+
+
+        public bool IsKeyDown(Keys key)
+        {
+            return CurrentKeyState.IsKeyDown(key);
+        }
+
+        public bool IsKeyUp(Keys key)
+        {
+            return CurrentKeyState.IsKeyUp(key);
+        }
+
+        public bool IsNewKeyPress(Keys key)
+        {
+            return CurrentKeyState.IsKeyDown(key) && PreviousKeyState.IsKeyUp(key);
+        }
+
+        public bool IsNewKeyRelease(Keys key)
+        {
+            return CurrentKeyState.IsKeyUp(key) && PreviousKeyState.IsKeyDown(key);
+        }
+
+        #endregion
+    }
+
+
     /// <summary>
     /// Helper for reading input from keyboard, gamepad, and touch input. This class 
     /// tracks both the current and previous state of the input devices, and implements 
     /// query methods for high level input actions such as "move up through the menu"
     /// or "pause the game".
     /// </summary>
-    public class InputState
+    /*public class InputState
     {
         #region Fields
 
@@ -220,5 +271,5 @@ namespace GameStateManagement
 
 
         #endregion
-    }
+    }*/
 }
