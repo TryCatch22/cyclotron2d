@@ -3,7 +3,7 @@ using Cyclotron2D.Screens.Base;
 using Cyclotron2D.UIElements;
 using Microsoft.Xna.Framework;
 
-namespace Cyclotron2D.Screens
+namespace Cyclotron2D.Screens.Main
 {
     /// <summary>
     /// This is the Main menu Screen its the first screen you see  

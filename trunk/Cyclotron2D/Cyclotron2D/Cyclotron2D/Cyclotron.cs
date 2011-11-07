@@ -1,5 +1,6 @@
 using System;
 using Cyclotron2D.Screens;
+using Cyclotron2D.Screens.Main;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
