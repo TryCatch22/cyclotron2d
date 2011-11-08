@@ -2,6 +2,9 @@ using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Components
 {
+    /// <summary>
+    /// Base Class for all our non drawable Game components, don't forget dispose 
+    /// </summary>
     public abstract class CyclotronComponent : GameComponent
     {
         protected CyclotronComponent(Game game) : base(game)
@@ -22,6 +25,10 @@ namespace Cyclotron2D.Components
         }
     }
 
+
+    /// <summary>
+    /// Base Class for all our drawable Game components, don't forget dispose 
+    /// </summary>
     public abstract class DrawableCyclotronComponent : DrawableGameComponent
     {
         protected DrawableCyclotronComponent(Game game) : base(game)
