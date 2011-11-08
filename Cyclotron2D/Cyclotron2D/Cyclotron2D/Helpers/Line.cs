@@ -12,23 +12,29 @@ namespace Cyclotron2D.Helpers
 
     public class Line
     {
-        public Line(Vector2 start, Vector2 end)
+        public Line(Point start, Point end)
         {
             Start = start;
             End = end;
         }
 
-        public Vector2 Start { get; private set; }
-        public Vector2 End { get; private set; }
+        public Point Start { get; set; }
+        public Point End { get; set; }
+
+
+        public Line Clone()
+        {
+            return new Line(Start, End);
+        }
 
         public static IntersectionType FindIntersection(Line a, Line b, out Vector2? intersection)
         {
             intersection = null;
 
-            Vector2 point1 = a.Start, point2 = a.End, point3 = b.Start, point4 = b.End;
-            float ua = (point4.X - point3.X)*(point1.Y - point3.Y) - (point4.Y - point3.Y)*(point1.X - point3.X);
-            float ub = (point2.X - point1.X)*(point1.Y - point3.Y) - (point2.Y - point1.Y)*(point1.X - point3.X);
-            float denominator = (point4.Y - point3.Y)*(point2.X - point1.X) - (point4.X - point3.X)*(point2.Y - point1.Y);
+            Point point1 = a.Start, point2 = a.End, point3 = b.Start, point4 = b.End;
+            int ua = (point4.X - point3.X)*(point1.Y - point3.Y) - (point4.Y - point3.Y)*(point1.X - point3.X);
+            int ub = (point2.X - point1.X)*(point1.Y - point3.Y) - (point2.Y - point1.Y)*(point1.X - point3.X);
+            int denominator = (point4.Y - point3.Y)*(point2.X - point1.X) - (point4.X - point3.X)*(point2.Y - point1.Y);
 
             if (denominator == 0)
             {
@@ -38,15 +44,15 @@ namespace Cyclotron2D.Helpers
                 return IntersectionType.None;
             }
 
-            ua /= denominator;
-            ub /= denominator;
+            float fa = ua/(float)denominator;
+            float fb = ub / (float)denominator;
 
-            if (ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1)
+            if (fa >= 0 && fa <= 1 && fb >= 0 && fb <= 1)
             {
                 intersection = new Vector2
                                    {
-                                       X = point1.X + ua*(point2.X - point1.X),
-                                       Y = point1.Y + ua*(point2.Y - point1.Y)
+                                       X = point1.X + fa*(point2.X - point1.X),
+                                       Y = point1.Y + fa*(point2.Y - point1.Y)
                                    };
                 return IntersectionType.Point;
             }
@@ -55,15 +61,16 @@ namespace Cyclotron2D.Helpers
         }
 
 
+
         public static IntersectionType FindIntersection(Line a, Line b)
         {
             Vector2? intersection = null;
             return FindIntersection(a, b, out intersection);
         }
 
-        private static bool AreProjectionsIntersecting(Vector2 point1, Vector2 point2, Vector2 point3, Vector2 point4)
+        private static bool AreProjectionsIntersecting(Point point1, Point point2, Point point3, Point point4)
         {
-            float x1 = Math.Abs(point1.X), x2 = Math.Abs(point2.X), x3 = Math.Abs(point3.X), x4 = Math.Abs(point4.X);
+            int x1 = Math.Abs(point1.X), x2 = Math.Abs(point2.X), x3 = Math.Abs(point3.X), x4 = Math.Abs(point4.X);
             if (x1 == x2)
             {
                 // If the lines are perfectly along the Y-axis.
@@ -81,9 +88,9 @@ namespace Cyclotron2D.Helpers
             return ((x1 <= x3 && x2 >= x3) || (x1 <= x4 && x2 >= x4));
         }
 
-        private static void Swap(ref float a, ref float b)
+        private static void Swap(ref int a, ref int b)
         {
-            float temp = a;
+            int temp = a;
             a = b;
             b = temp;
         }

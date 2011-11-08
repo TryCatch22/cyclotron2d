@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Cyclotron2D.Components;
 using Cyclotron2D.Core.Players;
@@ -12,10 +13,10 @@ namespace Cyclotron2D.Core
 {
     public enum Direction
     {
-        Left = 1,
-        Right = -1,
-        Up = 2,
-        Down = -2
+        Left = -1,
+        Right = 1,
+        Up = -2,
+        Down = 2
     }
 
 
@@ -52,7 +53,7 @@ namespace Cyclotron2D.Core
         #region Fields
 
         // We only turn on grid lines, so if the input is received early, we have to keep track of it.
-        private Vector2? m_nextGridCrossing;
+        private Point? m_nextGridCrossing;
         private Player m_player;
         private Direction m_scheduledDirection;
 
@@ -60,9 +61,7 @@ namespace Cyclotron2D.Core
         /// The list of positions on the map at which we've made turns.
         /// This is used to draw our trail.
         /// </summary>
-        private List<Vector2> m_vertices;
-
-        private bool m_wasColliding;
+        private List<Point> m_vertices;
 
         #endregion
 
@@ -71,7 +70,7 @@ namespace Cyclotron2D.Core
         /// <summary>
         /// Screen position of Head in Pixels
         /// </summary>
-        public Vector2 Position { get; set; }
+        public Point Position { get; set; }
 
         public Color TrailColor { get; set; }
 
@@ -104,7 +103,7 @@ namespace Cyclotron2D.Core
         public Cycle(Game game, Screen screen, Grid grid, CycleInfo info, Player player)
             : base(game, screen)
         {
-            m_vertices = new List<Vector2>();
+            m_vertices = new List<Point>();
             TrailColor = info.Color;
             Grid = grid;
             Position = grid.ToWorldCoords(info.GridPosition);
@@ -130,18 +129,98 @@ namespace Cyclotron2D.Core
 
         #region Public Methods
 
+
+        public bool CheckWalls(Point position)
+        {
+            return position.X < 0 || position.Y < 0 || position.X > Game.GraphicsDevice.Viewport.Width || position.Y > Game.GraphicsDevice.Viewport.Height;
+        }
+
+        public bool CheckHeadLine(Line myline, out Player killer)
+        {
+            //hiding the class scope position Vector here caus this method can be used to check for future colisions.
+            var Position = myline.End;
+            bool hasCollision = false;
+
+            killer = null;
+
+            foreach (var cycle in Grid.Cycles)
+            {
+                var lines = cycle.GetLines();
+
+                if (lines.Count == 0) continue;
+
+                if (cycle != this)
+                {
+                    Debug.Assert(cycle.m_player.PlayerID != m_player.PlayerID, "Cycle to player association fuckup. Or PlayerID fuckup");
+                    
+                    //special case for comparing 2 head lines so only 1 player dies
+
+                    Line head = lines[lines.Count - 1];
+                    Vector2? intersection;
+                    var intersectType = Line.FindIntersection(head, myline, out intersection);
+
+                    if (intersectType == IntersectionType.Point)
+                    {
+                        float mydist = intersection.Value.Distance(Position);
+                        float hisdist = intersection.Value.Distance(cycle.Position);
+                        if (mydist <= hisdist)
+                        {
+                            hasCollision = true;
+                            killer = cycle.m_player;
+                            break;
+                        }
+                    }
+                    else if (intersectType == IntersectionType.Collinear)
+                    {
+                        float distheads = Position.Distance(cycle.Position);
+                        float distMe = Position.Distance(head.Start);
+                        float distHim = cycle.Position.Distance(myline.Start);
+
+                        if ((distheads <= distMe && distheads <= distHim) || distMe <= distHim)
+                        {
+                            hasCollision = true;
+                            killer = cycle.m_player;
+                            break;
+                        }
+                    }
+                    lines.RemoveAt(lines.Count - 1);
+                }
+                else
+                {
+                    //this is us we can remove the first 2 lines
+                    lines.RemoveAt(lines.Count - 1);
+                    if(lines.Count > 0)lines.RemoveAt(lines.Count - 1);
+                }
+
+
+                if (lines.Aggregate(false, (current, line) => current || Line.FindIntersection(line, myline) != IntersectionType.None))
+                {
+                    hasCollision = true;
+                    killer = cycle.m_player;
+
+                    if (cycle == this)
+                    {
+                        int i = 23;
+                        i++;
+                    }
+                    break;
+                }
+            }
+            return hasCollision;
+        }
+
         public List<Line> GetLines()
         {
             List<Line> lines = new List<Line>();
 
 
-            for (int i = 0; i < m_vertices.Count - 2; i++)
+            for (int i = 0; i < m_vertices.Count - 1; i++)
             {
                 lines.Add(new Line(m_vertices[i], m_vertices[i + 1]));
             }
             //this can happen if we have turned but not yet moved
             if(Position != m_vertices.Last())
-                lines.Add(new Line(Position, m_vertices.Last()));
+                lines.Add(new Line(m_vertices.Last(), Position));
 
             return lines;
         }
@@ -150,7 +229,7 @@ namespace Cyclotron2D.Core
         /// computes the next Grid crossing in current direction
         /// </summary>
         /// <returns>next Grid crossing in current direction in pixels</returns>
-        public Vector2 GetNextGridCrossing()
+        public Point GetNextGridCrossing()
         {
             Vector2 next;
 
@@ -180,14 +259,14 @@ namespace Cyclotron2D.Core
         /// </summary>
         /// <param name="direction">new cycle direction</param>
         /// <param name="gridCrossing">In World coordinates (Pixels)</param>
-        public void TurnAt(Direction direction, Vector2 gridCrossing)
+        public void TurnAt(Direction direction, Point gridCrossing)
         {
             if (direction == Direction)
                 return;
 
-            var v = Grid.ToGridCoords(gridCrossing).Round(); //making sure the value stored in m_next... is exactly a grid line.
+            //var v = Grid.ToGridCoords(gridCrossing).RoundToPoint(); //making sure the value stored in m_next... is exactly a grid line.
 
-            m_nextGridCrossing = Grid.ToWorldCoords(v);
+            m_nextGridCrossing = gridCrossing;
             m_scheduledDirection = direction;
         }
 
@@ -195,7 +274,7 @@ namespace Cyclotron2D.Core
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
-            Vector2? lastVertex = null;
+            Point? lastVertex = null;
             foreach (var vertex in m_vertices)
             {
                 if (lastVertex != null)
@@ -205,17 +284,21 @@ namespace Cyclotron2D.Core
 
             DrawLine(m_vertices.Last(), Position);
 
-            Game.SpriteBatch.Draw(Art.Circle, Position, null, CircleColor, 0, new Vector2(Art.Circle.Width/2, Art.Circle.Height/2), 1f, SpriteEffects.None, 0);
+            Game.SpriteBatch.Draw(Art.Circle, Position.ToVector(), null, CircleColor, 0, new Vector2(Art.Circle.Width/2, Art.Circle.Height/2), 1f, SpriteEffects.None, 0);
         }
 
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            Position += Velocity;
-
-            CheckScheduledTurn();
+            Position = new Point((int) (Position.X + Velocity.X), (int) (Position.Y + Velocity.Y));
             CheckForCollision();
+            if (Enabled)
+            {//could have been disabled during collision check
+                CheckScheduledTurn();
+            }
+            
+           
         }
 
         #endregion
@@ -297,80 +380,31 @@ namespace Cyclotron2D.Core
         /// </summary>
         private void CheckForCollision()
         {
-            var myline = new Line(Position, m_vertices.Last());
-            bool hasCollision = false;
+            var myline = new Line(m_vertices.Last(), Position);
 
-            if (Position.X < 0 || Position.Y < 0 || Position.X > Game.GraphicsDevice.Viewport.Width || Position.Y > Game.GraphicsDevice.Viewport.Height)
-            {
-                hasCollision = true;
-            }
+            Player killer = null;
 
-            foreach (var cycle in Grid.Cycles)
-            {
-                if (hasCollision)
-                    break;
-                
-
-                var lines = cycle.GetLines();
-
-                if (lines.Count == 0) continue;
-
-                if (cycle != this)
-                {
-                    //special case for comparing 2 head lines so only 1 player dies
-
-                    Line head = lines[lines.Count - 1];
-                    Vector2? intersection;
-                    var intersectType = Line.FindIntersection(head, myline, out intersection);
-
-                    if (intersectType == IntersectionType.Point)
-                    {
-                        float mydist = intersection.Value.Distance(Position);
-                        float hisdist = intersection.Value.Distance(cycle.Position);
-                        if (mydist <= hisdist)
-                        {
-                            hasCollision = true;
-                            break;
-                        }
-                    }
-                    else if (intersectType == IntersectionType.Collinear)
-                    {
-                        float distheads = Position.Distance(cycle.Position);
-                        float distMe = Position.Distance(head.Start);
-                        float distHim = cycle.Position.Distance(myline.Start);
-
-                        if ((distheads <= distMe && distheads <= distHim) || distMe <= distHim)
-                        {
-                            hasCollision = true;
-                            break;
-                        }
-                    }
-                }
-                //remove first line either weve checked or its our own
-                lines.RemoveAt(lines.Count - 1);
-
-                if (lines.Aggregate(false, (current, line) => current || Line.FindIntersection(line, myline) != IntersectionType.None))
-                {
-                    hasCollision = true;
-                    break;
-                }
-            }
+            bool hasCollision = CheckWalls(Position);
+            
+            if(!hasCollision)
+                hasCollision = CheckHeadLine(myline, out killer);
 
             if (hasCollision)
             {
-                DebugMessages.Add("Player " + m_player.PlayerID + " dies!");
+                string killerString = killer!=null?"Player "+killer.PlayerID:"the wall";
+                DebugMessages.Add("Player " + m_player.PlayerID + " Crashed into " + killerString);
                 InvokeCollided();
             }
         }
 
-        private void DrawLine(Vector2 start, Vector2 end)
+        private void DrawLine(Point start, Point end)
         {
             var smaller = start.LengthSquared() < end.LengthSquared() ? start : end;
             var isHorizontal = start.Y == end.Y;
 
-            var width = isHorizontal ? (int) Math.Abs((start - end).X) : 1;
-            var height = isHorizontal ? 1 : (int) Math.Abs((start - end).Y);
-            var rect = new Rectangle((int) smaller.X, (int) smaller.Y, width, height);
+            int width = isHorizontal ?  Math.Abs(start.X - end.X) : 1;
+            int height = isHorizontal ? 1 :  Math.Abs(start.Y - end.Y);
+            var rect = new Rectangle( smaller.X, smaller.Y, width, height);
             rect.Inflate(isHorizontal ? 0 : 1, isHorizontal ? 1 : 0);
 
             Game.SpriteBatch.Draw(Art.Pixel, rect, TrailColor);

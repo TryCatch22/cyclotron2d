@@ -37,7 +37,18 @@ namespace Cyclotron2D.Core.Players
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            bool turned = AvoidWalls();
+
+            if (CycleJustTurned())
+            {
+                return;
+            }
+
+            bool turned = LastMinuteSave();
+
+            if (!turned)
+            {
+                turned =  AvoidWalls();
+            }
 
             if(!turned)
             {
@@ -53,9 +64,91 @@ namespace Cyclotron2D.Core.Players
 
         #region Private Methods
 
+
+        private Direction getRandDir(Direction[] dirs)
+        {
+            if (dirs.Length == 0)
+            {
+                return Cycle.Direction;
+            }
+            return dirs[m_rand.Next(0, dirs.Length)];
+        }
+
+        private bool CycleJustTurned()
+        {
+            var lines = Cycle.GetLines();
+            if (lines.Count == 0) return false;
+
+            var headLine = lines[lines.Count - 1].Clone();
+
+            lines = null;
+            Direction lineDirection;
+            if (headLine.Start.X == headLine.End.X)
+            {
+                lineDirection = headLine.Start.Y > headLine.End.Y ? Direction.Up : Direction.Down;
+            }
+            else
+            {
+                lineDirection = headLine.Start.X > headLine.End.X ? Direction.Left : Direction.Right;
+            }
+            //we just turned but have not move forward yet. Lines are not compatible with heading.
+            if (lineDirection != Cycle.Direction)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool LastMinuteSave()
+        {
+            bool turned = false;
+
+            var lines = Cycle.GetLines();
+            if (lines.Count == 0) return false;
+
+            var headLine = lines[lines.Count - 1].Clone();
+
+            lines = null;
+
+            Direction[] dirs = new Direction[0];
+            switch (Cycle.Direction)
+            {
+                case Direction.Down:
+                    headLine.End = new Point(headLine.End.X, headLine.End.Y + 2*Grid.PixelsPerInterval);
+                    dirs = new []{Direction.Left, Direction.Right};
+                    break;
+                case Direction.Up:
+                    headLine.End = new Point(headLine.End.X, headLine.End.Y - 2 * Grid.PixelsPerInterval);
+                    dirs = new[] { Direction.Left, Direction.Right };
+                    break;
+                case Direction.Right:
+                    headLine.End = new Point(headLine.End.X + 2 * Grid.PixelsPerInterval, headLine.End.Y);
+                    dirs = new[] { Direction.Up, Direction.Down };
+                    break;
+                case Direction.Left:
+                    headLine.End = new Point(headLine.End.X - 2 * Grid.PixelsPerInterval, headLine.End.Y);
+                    dirs = new[] { Direction.Up, Direction.Down };
+                    break;
+            }
+
+
+
+            Player killer;
+            turned = Cycle.CheckHeadLine(headLine, out killer);
+
+
+            if (turned)
+            {
+                InvokeDirectionChange(new DirectionChangeEventArgs(getRandDir(dirs), Cycle.GetNextGridCrossing()));
+            }
+
+            return turned;
+        }
+
+
         private bool AvoidWalls()
         {
-            int safeLimit = 2;
+            int safeLimit = 5;
 
             int width = Game.GraphicsDevice.Viewport.Bounds.Width;
             int height = Game.GraphicsDevice.Viewport.Bounds.Height;
@@ -151,7 +244,7 @@ namespace Cyclotron2D.Core.Players
 
                 if (i < dirs.Length)
                 {
-                    InvokeDirectionChange(new DirectionChangeEventArgs(dirs[m_rand.Next(0, dirs.Length)], Cycle.GetNextGridCrossing()));
+                    InvokeDirectionChange(new DirectionChangeEventArgs(getRandDir(dirs), Cycle.GetNextGridCrossing()));
                 }
 
                 m_lastTurn = gameTime.TotalGameTime;
