@@ -9,7 +9,6 @@ namespace Cyclotron2D.UIElements
         {
             Menu = menu;
             Text = text;
-            Background = Color.GreenYellow;
         }
 
         public Menu Menu { get; private set; }
