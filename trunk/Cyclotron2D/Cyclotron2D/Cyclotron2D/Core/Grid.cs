@@ -20,7 +20,7 @@ namespace Cyclotron2D.Core
 
         public Vector2 Size { get; private set; }
 
-        public Vector2 GridSize { get { return new Vector2((int) Math.Ceiling(Size.X/PixelsPerInterval), (int) Math.Ceiling(Size.Y/PixelsPerInterval)); } }
+        public Point GridSize { get { return new Point((int) Math.Ceiling(Size.X/PixelsPerInterval), (int) Math.Ceiling(Size.Y/PixelsPerInterval)); } }
 
         public List<Cycle> Cycles { get; private set; }
 
@@ -35,21 +35,10 @@ namespace Cyclotron2D.Core
         /// </summary>
         /// <param name="gridCoords">Grid coordinates</param>
         /// <returns>Rounded Pixel Coordinates</returns>
-        public Vector2 ToWorldCoords(Vector2 gridCoords)
+        public Point ToWorldCoords(Vector2 gridCoords)
         {
-            return ToWorldCoords(gridCoords, true);
-        }
-
-        /// <summary>
-        /// Conversion from Grid coords to pixels
-        /// </summary>
-        /// <param name="gridCoords">Grid coordinates</param>
-        /// <param name="round">If the value should be rounded to the nearest pixel</param>
-        /// <returns>Pixel Coordinates</returns>
-        public Vector2 ToWorldCoords(Vector2 gridCoords, bool round)
-        {
-            var v = gridCoords*PixelsPerInterval;
-            return round ? v.Round() : v;
+            var v = gridCoords * PixelsPerInterval;
+            return v.RoundToPoint();
         }
 
         /// <summary>
@@ -57,9 +46,9 @@ namespace Cyclotron2D.Core
         /// </summary>
         /// <param name="worldCoords">Pixel coordinates</param>
         /// <returns></returns>
-        public Vector2 ToGridCoords(Vector2 worldCoords)
+        public Vector2 ToGridCoords(Point worldCoords)
         {
-            return new Vector2(worldCoords.X/PixelsPerInterval, worldCoords.Y/PixelsPerInterval);
+            return new Vector2(worldCoords.X/(float)PixelsPerInterval, worldCoords.Y/(float)PixelsPerInterval);
         }
 
         public override void Draw(GameTime gameTime)
