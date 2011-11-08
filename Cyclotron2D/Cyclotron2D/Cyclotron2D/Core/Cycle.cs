@@ -110,7 +110,7 @@ namespace Cyclotron2D.Core
             Position = grid.ToWorldCoords(info.GridPosition);
             Direction = info.Direction;
             m_player = player;
-
+            //add start position
             m_vertices.Add(Position);
         }
 
@@ -139,8 +139,9 @@ namespace Cyclotron2D.Core
             {
                 lines.Add(new Line(m_vertices[i], m_vertices[i + 1]));
             }
-
-            lines.Add(new Line(Position, m_vertices.Last()));
+            //this can happen if we have turned but not yet moved
+            if(Position != m_vertices.Last())
+                lines.Add(new Line(Position, m_vertices.Last()));
 
             return lines;
         }
@@ -311,6 +312,8 @@ namespace Cyclotron2D.Core
                 
 
                 var lines = cycle.GetLines();
+
+                if (lines.Count == 0) continue;
 
                 if (cycle != this)
                 {
