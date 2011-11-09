@@ -22,6 +22,7 @@ namespace Cyclotron2D.UIElements
             //default value
             TextColor = Color.Black;
             TextScale = 1f;
+            Text = "";
         }
 
         public string Text { get; set; }

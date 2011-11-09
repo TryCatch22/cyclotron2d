@@ -20,7 +20,7 @@ namespace Cyclotron2D
 
             using (Cyclotron game = new Cyclotron())
             {
-                game.Run();
+               game.Run();
             }
         }
     }

@@ -206,6 +206,13 @@ namespace Cyclotron2D.Core
                     break;
                 }
             }
+
+            if (hasCollision && killer == m_player)
+            {
+                int i = 23;
+                i++;
+            }
+
             return hasCollision;
         }
 
@@ -301,6 +308,31 @@ namespace Cyclotron2D.Core
            
         }
 
+        public bool CycleJustTurned()
+        {
+            var lines = GetLines();
+            if (lines.Count == 0) return false;
+
+            var headLine = lines[lines.Count - 1];
+
+            lines = null;
+            Direction lineDirection;
+            if (headLine.Start.X == headLine.End.X)
+            {
+                lineDirection = headLine.Start.Y > headLine.End.Y ? Direction.Up : Direction.Down;
+            }
+            else
+            {
+                lineDirection = headLine.Start.X > headLine.End.X ? Direction.Left : Direction.Right;
+            }
+            //we just turned but have not moved forward yet. Lines are not compatible with heading.
+            if (lineDirection != Direction)
+            {
+                return true;
+            }
+            return false;
+        }
+
         #endregion
 
         #region Private Methods
@@ -356,7 +388,7 @@ namespace Cyclotron2D.Core
             }
         }
 
-
+        
         // Turn now.
         private void Turn()
         {
@@ -366,6 +398,11 @@ namespace Cyclotron2D.Core
                 {
                     DebugMessages.Add("Player " + m_player.PlayerID + " Suicide");
                     InvokeCollided();
+                    return;
+                }
+                else if (CycleJustTurned() || m_vertices.Last() == m_nextGridCrossing)
+                {
+                    m_nextGridCrossing = null;
                     return;
                 }
 
