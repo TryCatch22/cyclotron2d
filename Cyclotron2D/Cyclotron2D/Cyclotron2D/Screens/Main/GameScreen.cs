@@ -81,7 +81,7 @@ namespace Cyclotron2D.Screens.Main
             {
                 //get players from network and then start game
             }
-            else if (e.NewState == GameState.PlayingAsClient && e.OldState == GameState.SearchingForHost)
+            else if (e.NewState == GameState.PlayingAsClient && e.OldState == GameState.JoiningGame)
             {
                 //get players from network and start game
             }

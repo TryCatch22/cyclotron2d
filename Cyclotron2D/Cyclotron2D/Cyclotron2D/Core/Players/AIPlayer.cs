@@ -24,6 +24,7 @@ namespace Cyclotron2D.Core.Players
             base.Initialize(cycle, id);
 
             m_rand = new Random(DateTime.Now.Millisecond / PlayerID);
+            SubscribeCycle();
 
         }
 
@@ -38,10 +39,10 @@ namespace Cyclotron2D.Core.Players
         {
             base.Update(gameTime);
 
-            if (CycleJustTurned())
-            {
-                return;
-            }
+//            if (CycleJustTurned())
+//            {
+//                return;
+//            }
 
             bool turned = LastMinuteSave();
 
@@ -74,30 +75,7 @@ namespace Cyclotron2D.Core.Players
             return dirs[m_rand.Next(0, dirs.Length)];
         }
 
-        private bool CycleJustTurned()
-        {
-            var lines = Cycle.GetLines();
-            if (lines.Count == 0) return false;
-
-            var headLine = lines[lines.Count - 1].Clone();
-
-            lines = null;
-            Direction lineDirection;
-            if (headLine.Start.X == headLine.End.X)
-            {
-                lineDirection = headLine.Start.Y > headLine.End.Y ? Direction.Up : Direction.Down;
-            }
-            else
-            {
-                lineDirection = headLine.Start.X > headLine.End.X ? Direction.Left : Direction.Right;
-            }
-            //we just turned but have not move forward yet. Lines are not compatible with heading.
-            if (lineDirection != Cycle.Direction)
-            {
-                return true;
-            }
-            return false;
-        }
+       
 
         private bool LastMinuteSave()
         {
@@ -249,6 +227,48 @@ namespace Cyclotron2D.Core.Players
 
                 m_lastTurn = gameTime.TotalGameTime;
             }
+        }
+
+        #endregion
+
+
+        #region Event Handlers
+
+        private void OnCycleEnabledChanged(object sender, EventArgs e)
+        {
+            if(!Cycle.Enabled)
+            {
+                Enabled = false;
+            }
+        }
+
+        #endregion
+
+        #region Subscription
+
+        private void SubscribeCycle()
+        {
+            Cycle.EnabledChanged += OnCycleEnabledChanged;
+        }
+
+
+        private void UnsubscribeCycle()
+        {
+            Cycle.EnabledChanged += OnCycleEnabledChanged;
+        }
+
+
+        #endregion
+
+        #region IDisposable
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && Cycle != null)
+            {
+                UnsubscribeCycle();
+            }
+            base.Dispose(disposing);
         }
 
         #endregion

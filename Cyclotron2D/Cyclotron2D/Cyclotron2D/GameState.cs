@@ -18,7 +18,7 @@ namespace Cyclotron2D
 
         WaitingForClients = 2,
 
-        SearchingForHost = 4,
+        JoiningGame = 4,
 
         Hosting = 8,
 

@@ -8,7 +8,7 @@ namespace Cyclotron2D
     {
         #region Constants
 
-        private const float DisplayTime = 10f;
+        private const float DisplayTime = 4f;
 
         #endregion
 

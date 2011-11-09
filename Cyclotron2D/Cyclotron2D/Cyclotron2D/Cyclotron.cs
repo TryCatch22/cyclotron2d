@@ -157,6 +157,7 @@ namespace Cyclotron2D
         {
             ScreenManager.AddScreen(new MainMenuScreen(this));
             ScreenManager.AddScreen(new GameScreen(this));
+            ScreenManager.AddScreen(new JoinGameScreen(this));
         }
 
         #endregion
