@@ -84,6 +84,12 @@ namespace Cyclotron2D.Screens.Main
 				if (text.Count(x => x == '.') < 3)
 					text += ".";
 			}
+			else if (text.Length >= 2 && text.Count(x => x == '.') < 3 && Regex.IsMatch(text, @"\d\d$"))
+			{
+				var value = Int32.Parse(text.Substring(text.Length - 2));
+				if (value >= 26 && value <= 99)
+					text += ".";
+			}
 
 			// Once it's valid, stop them from typing anything else.
 			var ipRegex = @"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$";
