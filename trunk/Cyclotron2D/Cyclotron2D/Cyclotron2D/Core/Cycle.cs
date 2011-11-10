@@ -42,7 +42,6 @@ namespace Cyclotron2D.Core
 
     public class Cycle : DrawableScreenComponent
     {
-
         #region Fields
 
         // We only turn on grid lines, so if the input is received early, we have to keep track of it.
@@ -122,10 +121,7 @@ namespace Cyclotron2D.Core
 
         #endregion
 
-
-
         #region Public Methods
-
 
         public bool CheckWalls(Point position)
         {
@@ -194,20 +190,8 @@ namespace Cyclotron2D.Core
                 {
                     hasCollision = true;
                     killer = cycle.m_player;
-
-                    if (cycle == this)
-                    {
-                        int i = 23;
-                        i++;
-                    }
                     break;
                 }
-            }
-
-            if (hasCollision && killer == m_player)
-            {
-                int i = 23;
-                i++;
             }
 
             return hasCollision;
@@ -217,11 +201,11 @@ namespace Cyclotron2D.Core
         {
             List<Line> lines = new List<Line>();
 
-
             for (int i = 0; i < m_vertices.Count - 1; i++)
             {
                 lines.Add(new Line(m_vertices[i], m_vertices[i + 1]));
             }
+
             //this can happen if we have turned but not yet moved
             if(Position != m_vertices.Last())
                 lines.Add(new Line(m_vertices.Last(), Position));
@@ -267,8 +251,6 @@ namespace Cyclotron2D.Core
         {
             if (direction == Direction)
                 return;
-
-            //var v = Grid.ToGridCoords(gridCrossing).RoundToPoint(); //making sure the value stored in m_next... is exactly a grid line.
 
             m_nextGridCrossing = gridCrossing;
             m_scheduledDirection = direction;

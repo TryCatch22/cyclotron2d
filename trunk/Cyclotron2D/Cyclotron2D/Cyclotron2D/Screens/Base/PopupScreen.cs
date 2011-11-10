@@ -39,6 +39,7 @@ namespace Cyclotron2D.Screens.Base
 
         public void Close()
         {
+            Enabled = Visible = false;
             Game.ScreenManager.RemoveScreen(this);
         }
 
