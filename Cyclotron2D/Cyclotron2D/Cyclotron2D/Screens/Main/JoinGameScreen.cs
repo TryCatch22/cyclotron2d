@@ -78,6 +78,7 @@ namespace Cyclotron2D.Screens.Main
 			if (text.Length >= 3 && Regex.IsMatch(text, @"\d\d\d$"))
 			{
 				var value = Int32.Parse(text.Substring(text.Length - 3));
+				// Stop those bastards from typing too-big numbers
 				if (value > 255)
 					return oldText;
 
@@ -86,6 +87,8 @@ namespace Cyclotron2D.Screens.Main
 			}
 			else if (text.Length >= 2 && text.Count(x => x == '.') < 3 && Regex.IsMatch(text, @"\d\d$"))
 			{
+				// 2-digit numbers between 26 and 99 are already going to be greater than 255 if
+				// allowed to add a third digit, so we'll add the period immediately.
 				var value = Int32.Parse(text.Substring(text.Length - 2));
 				if (value >= 26 && value <= 99)
 					text += ".";
