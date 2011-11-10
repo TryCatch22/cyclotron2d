@@ -42,14 +42,16 @@ namespace Cyclotron2D.Screens.Popup
             base.HandleInupt(gameTime);
             if (Game.InputState.IsNewKeyPress(Keys.Enter))
             {
-                OnOkClicked();
+				if (OnOkClicked != null)
+					OnOkClicked();
                 Close();
             }
         }
 
         private void OnOkBtnClicked(object sender, EventArgs e)
         {
-            OnOkClicked();
+			if (OnOkClicked != null)
+	            OnOkClicked();
             Close();
         }
 
