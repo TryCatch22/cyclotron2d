@@ -10,7 +10,7 @@ namespace Cyclotron2D.Core
 {
     public class Grid : DrawableScreenComponent
     {
-        public const int PixelsPerInterval = 5;
+        public int PixelsPerInterval { get { return Settings.Current.GridSize; }}
 
         public Grid(Game game, Screen screen, Vector2 size)
             : base(game, screen)

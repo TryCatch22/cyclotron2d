@@ -10,7 +10,19 @@ namespace Cyclotron2D.Network
     /// </summary>
     public class ConnectionManager
     {
-     //   public 
+
+
+
+        public void AcceptConnection()
+        {
+            
+        }
+
+
+        public void Connect()
+        {
+            
+        }
 
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using Cyclotron2D.Screens.Base;
-using Cyclotron2D.UIElements;
+using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Screens.Main
@@ -15,7 +15,7 @@ namespace Cyclotron2D.Screens.Main
 
         #region Constructor
 
-        public MainMenuScreen(Game game) : base(game, (int) GameState.MainMenu)
+        public MainMenuScreen(Game game) : base(game, GameState.MainMenu)
         {
             m_mainMenu = new Menu(game, this);
             LoadMenuItems();
@@ -51,6 +51,9 @@ namespace Cyclotron2D.Screens.Main
                     Game.ChangeState(GameState.JoiningGame);
                     break;
                 case 3:
+                    Game.ChangeState(GameState.ChangingSettings);
+                    break;
+                case 4:
                     Game.Exit();
                     break;
                 default:
@@ -94,10 +97,11 @@ namespace Cyclotron2D.Screens.Main
 
         private void LoadMenuItems()
         {
-            m_mainMenu.AddItem(new MenuItem(m_mainMenu, "Single Player")); //index 0
-            m_mainMenu.AddItem(new MenuItem(m_mainMenu, "Host Game")); //index 1 etc...
-            m_mainMenu.AddItem(new MenuItem(m_mainMenu, "Join Game"));
-            m_mainMenu.AddItem(new MenuItem(m_mainMenu, "RageQuit"));
+            m_mainMenu.AddItems(new MenuItem(m_mainMenu, "Single Player")); //index 0
+            m_mainMenu.AddItems(new MenuItem(m_mainMenu, "Host Game")); //index 1 etc...
+            m_mainMenu.AddItems(new MenuItem(m_mainMenu, "Join Game"));
+            m_mainMenu.AddItems(new MenuItem(m_mainMenu, "Settings"));
+            m_mainMenu.AddItems(new MenuItem(m_mainMenu, "RageQuit"));
         }
 
         #endregion

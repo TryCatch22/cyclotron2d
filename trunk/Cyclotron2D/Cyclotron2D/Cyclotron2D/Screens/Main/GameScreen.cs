@@ -16,12 +16,12 @@ namespace Cyclotron2D.Screens.Main
         private bool m_gameStarted;
 
         public GameScreen(Game game)
-            : base(game, (int) (GameState.Hosting | GameState.PlayingAsClient | GameState.PlayingSolo))
+            : base(game, GameState.Hosting | GameState.PlayingAsClient | GameState.PlayingSolo)
         {
             m_engine = new Engine(game, this);
         }
 
-        public void StartNewGame(List<Player> players)
+        private void StartNewGame(IEnumerable<Player> players)
         {
             if (m_engine != null)
             {

@@ -25,6 +25,8 @@ namespace Cyclotron2D
         PlayingAsClient = 16,
 
         PlayingSolo = 32,
+
+        ChangingSettings = 64,
     }
 
     public class StateChangedEventArgs : EventArgs

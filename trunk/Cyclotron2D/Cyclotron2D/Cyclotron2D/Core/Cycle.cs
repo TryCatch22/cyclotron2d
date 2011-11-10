@@ -42,13 +42,6 @@ namespace Cyclotron2D.Core
 
     public class Cycle : DrawableScreenComponent
     {
-        #region Constants
-
-        // Velocity is magnitude and direction.
-        // Speed is magnitude, Direction is direction.
-        public const float Speed = 2;
-
-        #endregion
 
         #region Fields
 
@@ -66,6 +59,8 @@ namespace Cyclotron2D.Core
         #endregion
 
         #region Properties
+
+        public float Speed { get { return Settings.Current.CycleSpeed; } }
 
         /// <summary>
         /// Screen position of Head in Pixels
@@ -337,7 +332,7 @@ namespace Cyclotron2D.Core
 
         #region Private Methods
 
-        private static Vector2 DirectionToVelocity(Direction direction)
+        private Vector2 DirectionToVelocity(Direction direction)
         {
             switch (direction)
             {

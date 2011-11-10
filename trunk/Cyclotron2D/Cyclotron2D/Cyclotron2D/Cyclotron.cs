@@ -1,5 +1,4 @@
 using System;
-using Cyclotron2D.Screens;
 using Cyclotron2D.Screens.Main;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -24,6 +23,8 @@ namespace Cyclotron2D
         #endregion
 
         #region Properties
+
+        public GameTime GameTime { get; private set; }
 
         public ScreenManager ScreenManager { get; private set; }
 
@@ -121,6 +122,8 @@ namespace Cyclotron2D
 
         protected override void Update(GameTime gameTime)
         {
+            //so that some random places that need it can always access it
+            GameTime = gameTime;
             //updates the rest of the game
             base.Update(gameTime);
 
@@ -158,6 +161,23 @@ namespace Cyclotron2D
             ScreenManager.AddScreen(new MainMenuScreen(this));
             ScreenManager.AddScreen(new GameScreen(this));
             ScreenManager.AddScreen(new JoinGameScreen(this));
+            ScreenManager.AddScreen(new SettingsScreen(this));
+        }
+
+        #endregion
+
+        #region IDisposable
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                ScreenManager.Dispose();
+                ScreenManager = null;
+                InputState.Dispose();
+                InputState = null;
+            }
+            base.Dispose(disposing);
         }
 
         #endregion

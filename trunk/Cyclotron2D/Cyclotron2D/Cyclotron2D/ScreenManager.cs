@@ -220,8 +220,5 @@ namespace Cyclotron2D
 
         #endregion
 
-        #region Private Methods
-
-        #endregion
     }
 }

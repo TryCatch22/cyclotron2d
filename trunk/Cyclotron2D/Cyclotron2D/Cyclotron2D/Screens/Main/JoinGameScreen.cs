@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Cyclotron2D.Screens.Base;
-using Cyclotron2D.UIElements;
+﻿using Cyclotron2D.Screens.Base;
+using Cyclotron2D.UI;
+using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Screens.Main
@@ -11,80 +8,58 @@ namespace Cyclotron2D.Screens.Main
     public class JoinGameScreen : MainScreen
     {
 
-        private TextBox m_hostIpBox;
-        private TextElement m_label;
-        private Button m_ok;
+        private LabelTextBox m_hostIp;
+        private CancelOk m_ok;
 
-        public JoinGameScreen(Game game) : base(game, (int)GameState.JoiningGame)
+        public JoinGameScreen(Game game) : base(game, GameState.JoiningGame)
         {
-            m_hostIpBox = new TextBox(game, this);
-            m_label = new TextElement(game, this);
-            m_ok = new Button(game, this);
 
-            SubscribeGame();
-        }
+            m_hostIp = new LabelTextBox(game, this);
+            m_ok = new CancelOk(game, this);
 
-        private void SubscribeGame()
-        {
-            Game.StateChanged += OnGameStateChanged;
-        }
-
-        private void UnsubscribeGame()
-        {
-            Game.StateChanged -= OnGameStateChanged;
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && Game != null)
+            if (disposing && m_hostIp != null)
             {
-                UnsubscribeGame();
+                m_hostIp.Dispose();
+                m_ok.Dispose();
+
+                m_hostIp = null;
+                m_ok = null;
             }
             base.Dispose(disposing);
         }
 
-        private void OnGameStateChanged(object sender, StateChangedEventArgs e)
-        {
-            if (IsValidState && !m_initialized)
-            {
-                InitializeUI();
-            }
-            
-        }
-
-        private bool m_initialized;
-
-        public void InitializeUI()
+        public override void Initialize()
         {
             var vp = Game.GraphicsDevice.Viewport.Bounds;
 
+            m_hostIp.Rect = new Rectangle(vp.Width * 1/5, vp.Height * 7/16, vp.Width* 3/5, vp.Height/8);
 
+            m_hostIp.LabelElement.TextColor = Color.White;
+            m_hostIp.LabelText = "Host Ip Adress:";
 
-            //text box
-            m_hostIpBox.Rect = new Rectangle(vp.Width*2/5, vp.Height*7/16,vp.Width/3,vp.Height/8);
-            //label
-            m_label.Text = "Host Ip Adress:";
-            m_label.Rect = new Rectangle((int) (m_hostIpBox.Rect.X - Art.Font.MeasureString(m_label.Text).X -3),
-                m_hostIpBox.Rect.Y, (int) (Art.Font.MeasureString(m_label.Text).X + 1), m_hostIpBox.Rect.Height);
-            m_label.TextColor = Color.White;
-
-
-            m_initialized = true;
+            m_ok.OkText = "Connect";
+            m_ok.Rect = new Rectangle((int) (vp.Width * 3.2/5), vp.Height * 5/6, (int) (vp.Width / 3.7), vp.Height /7);
+            m_ok.OnCancel = () => Game.ChangeState(GameState.MainMenu);
         }
 
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
-
-            if (m_hostIpBox.Visible)
+            if (m_hostIp.Visible)
             {
-                m_hostIpBox.Draw(gameTime);
+                m_hostIp.Draw(gameTime);
             }
 
-            if (m_label.Visible)
+            if (m_ok.Visible)
             {
-                m_label.Draw(gameTime);
+                m_ok.Draw(gameTime);
             }
+
+        
         }
     }
 }

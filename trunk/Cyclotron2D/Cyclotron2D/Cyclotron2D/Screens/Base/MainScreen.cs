@@ -10,7 +10,7 @@ namespace Cyclotron2D.Screens.Base
     /// </summary>
     public abstract class MainScreen : Screen
     {
-        protected MainScreen(Game game, int states) : base(game)
+        protected MainScreen(Game game, GameState states) : base(game)
         {
             States = states;
         }
@@ -19,11 +19,11 @@ namespace Cyclotron2D.Screens.Base
         /// The logical or of the States This Screen represents
         /// This Property need to be mutually exclusive among all MainScreens
         /// </summary>
-        public int States { get; private set; }
+        public GameState States { get; private set; }
 
         /// <summary>
         /// Indicates whether the current GameState is associated to this MainScreen
         /// </summary>
-        public bool IsValidState { get { return ((int) Game.State & States) == (int) Game.State; } }
+        public bool IsValidState { get { return (Game.State & States) == Game.State; } }
     }
 }
