@@ -6,7 +6,7 @@ namespace Cyclotron2D
 {
     public static class Art
     {
-        public static Texture2D Pixel, Circle;
+        public static Texture2D Pixel, Circle, Bike;
         public static SpriteFont Font;
 
         private static Cyclotron s_game;
@@ -23,8 +23,8 @@ namespace Cyclotron2D
             Pixel.SetData(new[] {Color.White});
 
             Circle = content.Load<Texture2D>("Circle");
-
-            Font = content.Load<SpriteFont>("Font");
+			Bike = content.Load<Texture2D>("Bike");
+			Font = content.Load<SpriteFont>("Font");
         }
 
 
