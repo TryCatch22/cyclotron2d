@@ -30,24 +30,7 @@ namespace Cyclotron2D
 
         #endregion
 
-        #region Sub Classes
 
-        private class Message
-        {
-            public Message(string text, float timeLeft)
-            {
-                Text = text;
-                TimeLeft = timeLeft;
-            }
-
-            public string Text { get; set; }
-
-            public float TimeLeft { get; set; }
-
-            public Vector2 Size { get { return Art.Font.MeasureString(Text); } }
-        }
-
-        #endregion
 
         #region Public Methods
 
@@ -90,5 +73,24 @@ namespace Cyclotron2D
         }
 
         #endregion
-    }
+    }        
+	
+	#region Sub Classes
+
+        public class Message
+        {
+            public Message(string text, float timeLeft)
+            {
+                Text = text;
+                TimeLeft = timeLeft;
+            }
+
+            public string Text { get; set; }
+
+            public float TimeLeft { get; set; }
+
+            public Vector2 Size { get { return Art.Font.MeasureString(Text); } }
+        }
+
+        #endregion
 }

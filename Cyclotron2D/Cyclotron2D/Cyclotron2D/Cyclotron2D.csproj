@@ -123,6 +123,7 @@
     <Compile Include="Screens\Base\PopupScreen.cs" />
     <Compile Include="Screens\Base\Screen.cs" />
     <Compile Include="ScreenManager.cs" />
+    <Compile Include="Screens\Main\GameLobbyScreen.cs" />
     <Compile Include="Screens\Main\GameScreen.cs" />
     <Compile Include="Screens\Main\JoinGameScreen.cs" />
     <Compile Include="Screens\Main\MainMenuScreen.cs" />

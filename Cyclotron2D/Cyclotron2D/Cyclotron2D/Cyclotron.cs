@@ -162,6 +162,7 @@ namespace Cyclotron2D
             ScreenManager.AddScreen(new GameScreen(this));
             ScreenManager.AddScreen(new JoinGameScreen(this));
             ScreenManager.AddScreen(new SettingsScreen(this));
+			ScreenManager.AddScreen(new GameLobbyScreen(this));
         }
 
         #endregion

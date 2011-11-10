@@ -4,6 +4,9 @@ using Cyclotron2D.Core.Players;
 using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
 
+//Temporary
+using Cyclotron2D.Network;
+
 namespace Cyclotron2D.Screens.Main
 {
     /// <summary>
@@ -16,7 +19,7 @@ namespace Cyclotron2D.Screens.Main
         private bool m_gameStarted;
 
         public GameScreen(Game game)
-            : base(game, GameState.Hosting | GameState.PlayingAsClient | GameState.PlayingSolo)
+            : base(game, GameState.PlayingAsClient | GameState.PlayingSolo)
         {
             m_engine = new Engine(game, this);
         }
