@@ -286,7 +286,7 @@ namespace Cyclotron2D.Core
 
             DrawLine(m_vertices.Last(), Position);
 
-            Game.SpriteBatch.Draw(Art.Circle, Position.ToVector(), null, CircleColor, 0, new Vector2(Art.Circle.Width/2, Art.Circle.Height/2), 1f, SpriteEffects.None, 0);
+			Game.SpriteBatch.Draw(Art.Bike, Position.ToVector(), null, CircleColor, Velocity.Orientation(), new Vector2(Art.Bike.Width / 2, Art.Bike.Height / 2), 1f, SpriteEffects.None, 0);
         }
 
 
