@@ -27,7 +27,7 @@ namespace Cyclotron2D.Core
                                                             new CycleInfo(new Vector2(30, 70), Direction.Up, Color.Yellow),
                                                             new CycleInfo(new Vector2(80, 28), Direction.Down, Color.Green),
                                                             new CycleInfo(new Vector2(120, 90), Direction.Left, Color.Purple),
-                                                            new CycleInfo(new Vector2(90, 28), Direction.Down, Color.DarkOrange),
+                                                            new CycleInfo(new Vector2(150, 50), Direction.Up, Color.DarkOrange),
                                                             new CycleInfo(new Vector2(120, 12), Direction.Left, Color.WhiteSmoke),
                                                         };
 

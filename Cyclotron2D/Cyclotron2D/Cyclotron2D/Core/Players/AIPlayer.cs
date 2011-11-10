@@ -39,11 +39,6 @@ namespace Cyclotron2D.Core.Players
         {
             base.Update(gameTime);
 
-//            if (CycleJustTurned())
-//            {
-//                return;
-//            }
-
             bool turned = LastMinuteSave();
 
             if (!turned)
@@ -81,6 +76,8 @@ namespace Cyclotron2D.Core.Players
         {
             bool turned = false;
 
+            int safeLimit = 3;
+
             var lines = Cycle.GetLines();
             if (lines.Count == 0) return false;
 
@@ -92,19 +89,19 @@ namespace Cyclotron2D.Core.Players
             switch (Cycle.Direction)
             {
                 case Direction.Down:
-                    headLine.End = new Point(headLine.End.X, headLine.End.Y + 2*Grid.PixelsPerInterval);
+                    headLine.End = new Point(headLine.End.X, headLine.End.Y + safeLimit*Cycle.Grid.PixelsPerInterval);
                     dirs = new []{Direction.Left, Direction.Right};
                     break;
                 case Direction.Up:
-                    headLine.End = new Point(headLine.End.X, headLine.End.Y - 2 * Grid.PixelsPerInterval);
+                    headLine.End = new Point(headLine.End.X, headLine.End.Y - safeLimit * Cycle.Grid.PixelsPerInterval);
                     dirs = new[] { Direction.Left, Direction.Right };
                     break;
                 case Direction.Right:
-                    headLine.End = new Point(headLine.End.X + 2 * Grid.PixelsPerInterval, headLine.End.Y);
+                    headLine.End = new Point(headLine.End.X + safeLimit * Cycle.Grid.PixelsPerInterval, headLine.End.Y);
                     dirs = new[] { Direction.Up, Direction.Down };
                     break;
                 case Direction.Left:
-                    headLine.End = new Point(headLine.End.X - 2 * Grid.PixelsPerInterval, headLine.End.Y);
+                    headLine.End = new Point(headLine.End.X - safeLimit * Cycle.Grid.PixelsPerInterval, headLine.End.Y);
                     dirs = new[] { Direction.Up, Direction.Down };
                     break;
             }
@@ -117,7 +114,8 @@ namespace Cyclotron2D.Core.Players
 
             if (turned)
             {
-                InvokeDirectionChange(new DirectionChangeEventArgs(getRandDir(dirs), Cycle.GetNextGridCrossing()));
+                CallTurn(getRandDir(dirs));
+                //InvokeDirectionChange(new DirectionChangeEventArgs(getRandDir(dirs), Cycle.GetNextGridCrossing()));
             }
 
             return turned;
@@ -126,58 +124,47 @@ namespace Cyclotron2D.Core.Players
 
         private bool AvoidWalls()
         {
-            int safeLimit = 5;
-
+            int safeLimit = 3*Cycle.Grid.PixelsPerInterval;
+            Direction? turn = null;
             int width = Game.GraphicsDevice.Viewport.Bounds.Width;
             int height = Game.GraphicsDevice.Viewport.Bounds.Height;
-            bool turned = false;
+
             switch (Cycle.Direction)
             {
                 case Direction.Up:
                     if (Cycle.Position.Y < safeLimit)
-                    {
-
-                        Direction turn = Cycle.Position.X > width / 2 ? Direction.Left : Direction.Right;
-
-                        InvokeDirectionChange(new DirectionChangeEventArgs(turn, Cycle.GetNextGridCrossing()));
-                        turned = true;
-                    }
+                        turn = Cycle.Position.X > width / 2 ? Direction.Left : Direction.Right;
                     break;
                 case Direction.Down:
                     if (Cycle.Position.Y > height-safeLimit)
-                    {
-
-                        Direction turn = Cycle.Position.X > width / 2 ? Direction.Left : Direction.Right;
-
-                        InvokeDirectionChange(new DirectionChangeEventArgs(turn, Cycle.GetNextGridCrossing()));
-                        turned = true;
-                    }
+                        turn = Cycle.Position.X > width / 2 ? Direction.Left : Direction.Right;
                     break;
                 case Direction.Left:
                     if (Cycle.Position.X < safeLimit)
-                    {
-
-                        Direction turn = Cycle.Position.Y > height / 2 ? Direction.Up : Direction.Down;
-
-                        InvokeDirectionChange(new DirectionChangeEventArgs(turn, Cycle.GetNextGridCrossing()));
-                        turned = true;
-                    }
+                        turn = Cycle.Position.Y > height / 2 ? Direction.Up : Direction.Down;
                     break;
                 case Direction.Right:
                     if (Cycle.Position.Y > width - safeLimit)
-                    {
-
-                        Direction turn = Cycle.Position.Y > height / 2 ? Direction.Up : Direction.Down;
-
-                        InvokeDirectionChange(new DirectionChangeEventArgs(turn, Cycle.GetNextGridCrossing()));
-                        turned = true;
-                    }
+                        turn = Cycle.Position.Y > height / 2 ? Direction.Up : Direction.Down;
                     break;
             }
 
-            return turned;
+            if (turn.HasValue)
+            {
+                CallTurn(turn.Value);
+                return true;
+            }
 
+            return false;
         }
+
+        private void CallTurn(Direction dir)
+        {
+            InvokeDirectionChange(new DirectionChangeEventArgs(dir, Cycle.GetNextGridCrossing()));
+            m_lastTurn = Game.GameTime.TotalGameTime;
+        }
+
+
 
         private void NonRetartedRandomTurn(GameTime gameTime)
         {
@@ -218,7 +205,7 @@ namespace Cyclotron2D.Core.Players
                     }
                 }
 
-                int i = m_rand.Next(0, dirs.Length * 3);
+                int i = m_rand.Next(0, dirs.Length * 5);
 
                 if (i < dirs.Length)
                 {

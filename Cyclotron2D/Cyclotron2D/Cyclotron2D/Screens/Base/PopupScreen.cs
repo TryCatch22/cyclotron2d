@@ -20,7 +20,9 @@ namespace Cyclotron2D.Screens.Base
             Background = Color.Transparent;
         }
 
-        /// <summary>
+
+
+    /// <summary>
         /// Space occupied by the popupScreen
         /// </summary>
         public Rectangle Rect { get; set; }
@@ -33,6 +35,11 @@ namespace Cyclotron2D.Screens.Base
         {
             base.Draw(gameTime);
             Game.SpriteBatch.Draw(Art.Pixel, Rect, Background);
+        }
+
+        public void Close()
+        {
+            Game.ScreenManager.RemoveScreen(this);
         }
 
         #region Subscribtion
