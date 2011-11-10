@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using Enumerable = System.Linq.Enumerable;
 
 namespace Cyclotron2D.Network
@@ -44,7 +46,7 @@ namespace Cyclotron2D.Network
         private string FilterReceivedBytes(byte[] bytes)
         {
             var printable = Art.Font.Characters;
-            return new string(Enumerable.ToArray<char>(Encoding.Unicode.GetChars(bytes).Where(x => printable.Contains(x))));
+            return new string(Encoding.Unicode.GetChars(bytes).Where(x => printable.Contains(x)).ToArray());
         }
     }
 }
