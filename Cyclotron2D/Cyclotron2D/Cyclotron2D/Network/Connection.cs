@@ -14,7 +14,7 @@ namespace Cyclotron2D.Network
     }
 
     /// <summary>
-    /// represents a connection between 2 players
+    /// represents a connection between 2 players, maybe not sure where this is going
     /// </summary>
     public class Connection
     {
