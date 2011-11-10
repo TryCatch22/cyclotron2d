@@ -14,9 +14,11 @@ namespace Cyclotron2D.Network
         private const int MAX_CLIENTS = 1;
         private const int CONNECTION_BACKLOG = 10;
 
-        private static ManualResetEvent waitHandle = new ManualResetEvent(false);
         private GameLobbyThread ClientAcceptThread; //Demo thread to accept clients without blocking the application
         private bool waitingForConnections;
+
+		public Socket GameLobbySocket { get; private set; }
+		public List<Socket> clients { get; private set; }
 
         /// <summary>
         /// Creates a new instance of the game lobby used to connect multiple clients.
@@ -30,11 +32,11 @@ namespace Cyclotron2D.Network
                 GameLobbySocket.Bind(localServer);
                 GameLobbySocket.Blocking = false;
                 GameLobbySocket.Listen(CONNECTION_BACKLOG);
-                Console.WriteLine("Game Lobby Server started on port " + GAME_PORT);
+                print("Game Lobby Server started on port " + GAME_PORT);
             }
             catch (ArgumentOutOfRangeException ex)
             {
-                Console.WriteLine("Invalid Port Number");
+                print("Invalid Port Number");
                 Console.WriteLine(ex.StackTrace);
             }
 
@@ -42,52 +44,57 @@ namespace Cyclotron2D.Network
             waitingForConnections = true;
         }
 
-        public Socket GameLobbySocket { get; private set; }
-        public List<Socket> clients { get; private set; }
+		/// <summary>
+		/// Temporary Debug Print Method
+		/// </summary>
+		/// <param name="msg"></param>
+		private void print(String msg) {
+			Console.WriteLine(msg);
+			DebugMessages.Add(msg);
+		}
 
         /// <summary>
         /// Accepts the next client connections to the lobby assuming the lobby isn't full.
         /// </summary>
         private void acceptClient()
         {
-            Console.WriteLine("Waiting for a connection ...");
-            //GameLobby.BeginAccept(new AsyncCallback(connectClient), GameLobby);
-            //Wait for a connection (blocks current thread)
+            print("Waiting for a connection ...");
             if (!isFull() && waitingForConnections)
             {
                 //Start a limited amount of threads from a thread pool.
                 //When lobby is full, kill all leftover threads
                 ClientAcceptThread = new GameLobbyThread(this);
                 ClientAcceptThread.start();
-                Console.WriteLine("Listening Thread Started");
+                print("Listening Thread Started");
             }
             else
             {
-                //Lobby Full
-                Console.WriteLine("Lobby is Full");
+                //Lobby is Full
+                print("Lobby is Full");
                 messageAllClients("Okay Lobby Closes. Game On");
             }
         }
 
         /// <summary>
+		/// DEPRECATED AND TO BE BURIED
         /// Once a client is found, this connects the client and gets the socket to communicate with it. 
         /// </summary>
         /// <param name="target"></param>
         public void connectClient(IAsyncResult target)
         {
-            Console.WriteLine("Accepting Connection ...");
+            print("Accepting Connection ...");
             if (!isFull())
             {
                 Socket lobby = (Socket) target.AsyncState;
                 Socket client = lobby.EndAccept(target);
                 //Add the client to the clients list
                 clients.Add(client);
-                Console.WriteLine("Accepted 1 Client");
+                print("Accepted 1 Client");
             }
             else
             {
                 //Not accepting the connection
-                Console.WriteLine("Connection Refused, Lobby Full");
+                print("Connection Refused, Lobby Full");
                 waitingForConnections = false;
             }
         }
