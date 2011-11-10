@@ -90,6 +90,9 @@ namespace Cyclotron2D.Core
         /// </summary>
         public Vector2 GridPosition { get { return Grid.ToGridCoords(Position); } }
 
+        /// <summary>
+        /// total length of tail at the moment
+        /// </summary>
         public int TailLength
         {
             get
@@ -103,6 +106,9 @@ namespace Cyclotron2D.Core
             }
         }
 
+        /// <summary>
+        /// max allowed tail length; set to 0 for unlimited tail length
+        /// </summary>
         public static int MaxTailLength { get; set; }
 
 
@@ -268,6 +274,13 @@ namespace Cyclotron2D.Core
         {
             if (direction == Direction)
                 return;
+            // makes sure bike can't turn back on itslef
+            else if ( (direction == Direction.Left && Direction == Direction.Right) 
+                    || (direction == Direction.Right && Direction == Direction.Left)
+                    || (direction == Direction.Up && Direction == Direction.Down)
+                    || (direction == Direction.Down && Direction == Direction.Up) )
+                return;
+
 
             m_nextGridCrossing = gridCrossing;
             m_scheduledDirection = direction;
@@ -289,54 +302,6 @@ namespace Cyclotron2D.Core
             DrawLine(m_vertices.Last(), Position);
 
 			Game.SpriteBatch.Draw(Art.Bike, Position.ToVector(), null, BikeColor, Velocity.Orientation(), new Vector2(Art.Bike.Width / 2, Art.Bike.Height / 2), 1f, SpriteEffects.None, 0);
-        }
-
-        // modifieds m_vertices to match be <= MaxTailLength
-        protected void LimitTailLength()
-        {
-            int difference;
-            Line firstLine;
-            Point nextVertice;
-
-            if (MaxTailLength > 0)
-            {
-                while (TailLength > MaxTailLength)
-                {
-                     difference = TailLength - MaxTailLength;
-
-                    //get first line
-                     if (m_vertices.Count > 1)
-                         nextVertice = m_vertices[1];
-                     else
-                         nextVertice = Position;
-
-                     firstLine = new Line(m_vertices[0], nextVertice);
-
-                    //if first line is longer than the difference, then just move the last vertice
-                    if (firstLine.Length >= difference)
-                    {
-                        //horizontal shift
-                        if (m_vertices[0].Y == nextVertice.Y)
-                        {
-                            if (nextVertice.X > m_vertices[0].X)
-                                m_vertices[0] = new Point(m_vertices[0].X + difference, m_vertices[0].Y);
-                            else
-                                m_vertices[0] = new Point(m_vertices[0].X - difference, m_vertices[0].Y);
-                        }
-                        //vertical shift
-                        else
-                        {
-                            if (nextVertice.Y > m_vertices[0].Y)
-                                m_vertices[0] = new Point(m_vertices[0].X, m_vertices[0].Y + difference);
-                            else
-                                m_vertices[0] = new Point(m_vertices[0].X, m_vertices[0].Y - difference);
-                        }
-                    }
-                    //otherwise just delete the last vertice
-                    else
-                        m_vertices.RemoveAt(0);
-                }
-            }            
         }
 
         public override void Update(GameTime gameTime)
@@ -493,6 +458,57 @@ namespace Cyclotron2D.Core
             rect.Inflate(isHorizontal ? 0 : 1, isHorizontal ? 1 : 0);
 
             Game.SpriteBatch.Draw(Art.Pixel, rect, TrailColor);
+        }
+
+        /// <summary>
+        /// modifieds m_vertices to make sure TailLength not longer than MaxTailLength
+        /// </summary>
+        private void LimitTailLength()
+        {
+            int difference;
+            Line firstLine;
+            Point nextVertice;
+
+            if (MaxTailLength > 0)
+            {
+                // deletes or shifts the first vertice until TailLength < MaxTailLength
+                while (TailLength > MaxTailLength)
+                {
+                    difference = TailLength - MaxTailLength;
+
+                    //get first line
+                    if (m_vertices.Count > 1)
+                        nextVertice = m_vertices[1];
+                    else
+                        nextVertice = Position;
+
+                    firstLine = new Line(m_vertices[0], nextVertice);
+
+                    //if first line is longer than the difference, then just move the last vertice
+                    if (firstLine.Length >= difference)
+                    {
+                        //horizontal shift
+                        if (m_vertices[0].Y == nextVertice.Y)
+                        {
+                            if (nextVertice.X > m_vertices[0].X)
+                                m_vertices[0] = new Point(m_vertices[0].X + difference, m_vertices[0].Y);
+                            else
+                                m_vertices[0] = new Point(m_vertices[0].X - difference, m_vertices[0].Y);
+                        }
+                        //vertical shift
+                        else
+                        {
+                            if (nextVertice.Y > m_vertices[0].Y)
+                                m_vertices[0] = new Point(m_vertices[0].X, m_vertices[0].Y + difference);
+                            else
+                                m_vertices[0] = new Point(m_vertices[0].X, m_vertices[0].Y - difference);
+                        }
+                    }
+                    //otherwise just delete the last vertice
+                    else
+                        m_vertices.RemoveAt(0);
+                }
+            }
         }
 
         #endregion
