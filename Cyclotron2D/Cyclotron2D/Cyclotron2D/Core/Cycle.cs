@@ -69,8 +69,8 @@ namespace Cyclotron2D.Core
 
         public Color TrailColor { get; set; }
 
-        public Color CircleColor { get { return new Color(255 - TrailColor.R, 255 - TrailColor.G, 255 - TrailColor.B, 190); } }
-
+       // public Color BikeColor { get { return new Color(255 - TrailColor.R, 255 - TrailColor.G, 255 - TrailColor.B, 190); } }
+        public Color BikeColor { get { return new Color(TrailColor.R, TrailColor.G, TrailColor.B, 100); } }
         /// <summary>
         /// Current heading
         /// </summary>
@@ -121,6 +121,8 @@ namespace Cyclotron2D.Core
         }
 
         #endregion
+
+
 
         #region Public Methods
 
@@ -286,7 +288,7 @@ namespace Cyclotron2D.Core
 
             DrawLine(m_vertices.Last(), Position);
 
-			Game.SpriteBatch.Draw(Art.Bike, Position.ToVector(), null, CircleColor, Velocity.Orientation(), new Vector2(Art.Bike.Width / 2, Art.Bike.Height / 2), 1f, SpriteEffects.None, 0);
+			Game.SpriteBatch.Draw(Art.Bike, Position.ToVector(), null, BikeColor, Velocity.Orientation(), new Vector2(Art.Bike.Width / 2, Art.Bike.Height / 2), 1f, SpriteEffects.None, 0);
         }
 
 
