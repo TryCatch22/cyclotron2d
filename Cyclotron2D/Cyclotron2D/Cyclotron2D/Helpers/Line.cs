@@ -20,7 +20,7 @@ namespace Cyclotron2D.Helpers
 
         public Point Start { get; set; }
         public Point End { get; set; }
-
+        public int Length { get { return (int)Start.Distance(End); } }
 
         public Line Clone()
         {
