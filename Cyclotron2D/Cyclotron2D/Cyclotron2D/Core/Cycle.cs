@@ -491,7 +491,7 @@ namespace Cyclotron2D.Core
                     firstLine = new Line(m_vertices[0], nextVertice);
 
                     //if first line is longer than the difference, then just move the last vertice
-                    if (firstLine.Length >= difference)
+                    if (firstLine.Length > difference)
                     {
                         //horizontal shift
                         if (m_vertices[0].Y == nextVertice.Y)
