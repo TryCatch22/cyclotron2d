@@ -231,8 +231,9 @@ namespace Cyclotron2D.Core
             }
 
             //this can happen if we have turned but not yet moved
-            if(Position != m_vertices.Last())
-                lines.Add(new Line(m_vertices.Last(), Position));
+            lines.Add(new Line(m_vertices.Last(), Position));
+
+            lines.RemoveAll(line => line.End == line.Start);
 
             return lines;
         }

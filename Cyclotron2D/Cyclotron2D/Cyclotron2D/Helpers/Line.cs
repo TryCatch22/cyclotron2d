@@ -31,6 +31,7 @@ namespace Cyclotron2D.Helpers
         {
             intersection = null;
 
+
             Point point1 = a.Start, point2 = a.End, point3 = b.Start, point4 = b.End;
             int ua = (point4.X - point3.X)*(point1.Y - point3.Y) - (point4.Y - point3.Y)*(point1.X - point3.X);
             int ub = (point2.X - point1.X)*(point1.Y - point3.Y) - (point2.Y - point1.Y)*(point1.X - point3.X);

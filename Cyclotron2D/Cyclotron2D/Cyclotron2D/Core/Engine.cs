@@ -24,12 +24,12 @@ namespace Cyclotron2D.Core
         //we might want to randomize this at some point but for now its plenty
         private readonly List<CycleInfo> m_startConditions = new List<CycleInfo>
                                                         {
-                                                            new CycleInfo(new Vector2(3, 3), Direction.Right, Color.Red),
-                                                            new CycleInfo(new Vector2(30, 70), Direction.Up, Color.Yellow),
-                                                            new CycleInfo(new Vector2(80, 28), Direction.Down, Color.Green),
-                                                            new CycleInfo(new Vector2(120, 90), Direction.Left, Color.Purple),
-                                                            new CycleInfo(new Vector2(150, 50), Direction.Up, Color.DarkOrange),
-                                                            new CycleInfo(new Vector2(120, 12), Direction.Left, Color.WhiteSmoke),
+                                                            new CycleInfo(new Vector2(3, 3), Direction.Right, Color.Red), //1
+                                                            new CycleInfo(new Vector2(30, 70), Direction.Up, Color.Yellow), //2
+                                                            new CycleInfo(new Vector2(80, 28), Direction.Down, Color.Green), //3
+                                                            new CycleInfo(new Vector2(120, 90), Direction.Left, Color.Purple), //4
+                                                            new CycleInfo(new Vector2(150, 50), Direction.Up, Color.DarkOrange), //5
+                                                            new CycleInfo(new Vector2(120, 12), Direction.Left, Color.WhiteSmoke), //6
                                                         };
 
         #endregion
