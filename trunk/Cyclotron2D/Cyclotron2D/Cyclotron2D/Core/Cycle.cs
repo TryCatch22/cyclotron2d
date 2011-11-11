@@ -61,6 +61,8 @@ namespace Cyclotron2D.Core
 
         public float Speed { get { return Settings.Current.CycleSpeed; } }
 
+        public bool AllowSuicide { get { return Settings.Current.AllowSuicide; } }
+
         /// <summary>
         /// Screen position of Head in Pixels
         /// </summary>
@@ -98,7 +100,7 @@ namespace Cyclotron2D.Core
             get
             {
                 int length = 0;
-                var lines = this.GetLines();
+                var lines = GetLines();
                 foreach (var line in lines)
                     length = length + line.Length;
 
@@ -109,7 +111,7 @@ namespace Cyclotron2D.Core
         /// <summary>
         /// max allowed tail length; set to 0 for unlimited tail length
         /// </summary>
-        public static int MaxTailLength { get; set; }
+        public static int MaxTailLength { get { return Settings.Current.MaxTailLength; } }
 
 
         #endregion
@@ -127,7 +129,6 @@ namespace Cyclotron2D.Core
             m_player = player;
             //add start position
             m_vertices.Add(Position);
-            MaxTailLength = 700;  // 0 means that its unlimitted
         }
 
         #endregion
@@ -274,12 +275,6 @@ namespace Cyclotron2D.Core
         {
             if (direction == Direction)
                 return;
-            // makes sure bike can't turn back on itslef
-            else if ( (direction == Direction.Left && Direction == Direction.Right) 
-                    || (direction == Direction.Right && Direction == Direction.Left)
-                    || (direction == Direction.Up && Direction == Direction.Down)
-                    || (direction == Direction.Down && Direction == Direction.Up) )
-                return;
 
 
             m_nextGridCrossing = gridCrossing;
@@ -409,8 +404,17 @@ namespace Cyclotron2D.Core
             {
                 if ((int) Direction == - (int) m_scheduledDirection)
                 {
-                    DebugMessages.Add("Player " + m_player.PlayerID + " Suicide");
-                    InvokeCollided();
+                    if (AllowSuicide)
+                    {
+                        DebugMessages.Add("Player " + m_player.PlayerID + " Suicide");
+                        InvokeCollided();
+                    }
+                    else
+                    {
+                        //cancel turn
+                        m_scheduledDirection = Direction;
+                        m_nextGridCrossing = null;
+                    }
                     return;
                 }
                 else if (CycleJustTurned() || m_vertices.Last() == m_nextGridCrossing)
@@ -442,6 +446,7 @@ namespace Cyclotron2D.Core
             if (hasCollision)
             {
                 string killerString = killer!=null?"Player "+killer.PlayerID:"the wall";
+
                 DebugMessages.Add("Player " + m_player.PlayerID + " Crashed into " + killerString);
                 InvokeCollided();
             }

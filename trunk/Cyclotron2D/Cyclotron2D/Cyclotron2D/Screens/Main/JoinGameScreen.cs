@@ -41,9 +41,9 @@ namespace Cyclotron2D.Screens.Main {
 
 			m_hostIp.Rect = new Rectangle(vp.Width * 1 / 5, vp.Height * 7 / 16, vp.Width * 3 / 5, vp.Height / 8);
 
-			m_hostIp.LabelElement.TextColor = Color.White;
+			m_hostIp.Label.TextColor = Color.White;
 			m_hostIp.LabelText = "Host Ip Adress:";
-			m_hostIp.BoxElement.ValueChanged += (obj, args) => m_hostIp.BoxText = AutoCompleteIP(m_hostIp.BoxText, ((ValueChangedEventArgs)args).OldValue);
+			m_hostIp.Element.ValueChanged += (obj, args) => m_hostIp.BoxText = AutoCompleteIP(m_hostIp.BoxText, ((ValueChangedEventArgs)args).OldValue);
 
 			m_ok.OkText = "Connect";
 			m_ok.Rect = new Rectangle((int)(vp.Width * 3.2 / 5), vp.Height * 5 / 6, (int)(vp.Width / 3.7), vp.Height / 7);
