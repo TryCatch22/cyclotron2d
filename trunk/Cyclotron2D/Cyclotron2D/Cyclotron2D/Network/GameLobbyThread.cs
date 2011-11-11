@@ -21,7 +21,7 @@ namespace Cyclotron2D.Network {
 			this.Clients = server.clients;
 			this.ServerSocket = server.GameLobbySocket;
 
-			ConnectionThread = new Thread(new ThreadStart(this.waitForClient));
+			ConnectionThread = new Thread(new ThreadStart(this.WaitForClient));
 			ConnectionThread.IsBackground = true;
 			ConnectionThread.Name = name;
 		}
@@ -38,9 +38,9 @@ namespace Cyclotron2D.Network {
 		/// <summary>
 		/// Starts accepting incoming connections
 		/// </summary>
-		public void waitForClient() {
+		public void WaitForClient() {
 			WaitHandle.Reset();
-			ServerSocket.BeginAccept(new AsyncCallback(connectClientCallback), ServerSocket);
+			ServerSocket.BeginAccept(new AsyncCallback(ConnectClientCallback), ServerSocket);
 			//Wait for a connection (blocks current thread)
 			WaitHandle.WaitOne();
 		}
@@ -49,7 +49,7 @@ namespace Cyclotron2D.Network {
 		/// Once a client is trying to connect, this connects it and gets the socket to communicate with it. 
 		/// </summary>
 		/// <param name="target"></param>
-		public void connectClientCallback(IAsyncResult target) {
+		public void ConnectClientCallback(IAsyncResult target) {
 			//Unlocks current thread
 			WaitHandle.Set();
 			
@@ -62,11 +62,11 @@ namespace Cyclotron2D.Network {
 			Server.messageAllClients("We got 1 more player");
 		}
 
-		public void start() {
+		public void Start() {
 			ConnectionThread.Start();
 		}
 
-		public void stop() {
+		public void Stop() {
 			ConnectionThread.Abort();
 		}
 

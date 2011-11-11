@@ -118,8 +118,7 @@ namespace Cyclotron2D.Screens.Main {
 			//    DebugMessages.Add("Invalid IP Address, fool!");
 			//}
 
-			Client.Receive();
-
+			Client.startReceive();
 		}
 
 		public override void Draw(GameTime gameTime) {

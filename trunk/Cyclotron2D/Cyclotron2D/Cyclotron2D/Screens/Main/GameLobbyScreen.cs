@@ -22,11 +22,11 @@ namespace Cyclotron2D.Screens.Main {
 			: base(game, GameState.Hosting) {
 
 				spamButton = new Button(game, this);
-				spamButton.Click += onSpamButtonClicked;
+				spamButton.Click += OnSpamButtonClicked;
 				spamButton.Text = "Send Spam";
 		}
 
-		private void onSpamButtonClicked(Object sender, EventArgs e){
+		private void OnSpamButtonClicked(Object sender, EventArgs e){
 			Lobby.messageAllClients("Hello All Clients");
 		}
 
