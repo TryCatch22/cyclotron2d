@@ -7,6 +7,7 @@ namespace Cyclotron2D
 
         public static Settings Current { get; set; }
 
+
         static Settings()
         {
             Default = new Settings();
@@ -20,10 +21,16 @@ namespace Cyclotron2D
 
         public float CycleSpeed { get; set; }
 
+        public int MaxTailLength { get; set; }
+
+        public bool AllowSuicide { get; set; }
+
         public Settings()
         {
             GridSize = 5;
             CycleSpeed = 2;
+            MaxTailLength = 0;
+            AllowSuicide = false;
         }
 
     }

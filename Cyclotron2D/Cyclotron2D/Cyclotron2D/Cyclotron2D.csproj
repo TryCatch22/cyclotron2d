@@ -132,8 +132,11 @@
     <Compile Include="Screens\Popup\OkPopup.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="UI\CancelOk.cs" />
+    <Compile Include="UI\LabelCheckBox.cs" />
     <Compile Include="UI\UIElements\Button.cs" />
-    <Compile Include="UI\UIElements\LabelTextBox.cs" />
+    <Compile Include="UI\UIElements\CheckBox.cs" />
+    <Compile Include="UI\LabelTextBox.cs" />
+    <Compile Include="UI\UIElements\LabeledElement.cs" />
     <Compile Include="UI\UIElements\Panel.cs" />
     <Compile Include="UI\UIElements\StretchPanel.cs" />
     <Compile Include="UI\UIElements\TextBox.cs" />
