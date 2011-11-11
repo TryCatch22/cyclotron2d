@@ -16,6 +16,8 @@ namespace Cyclotron2D.Screens.Main
     {
         private Engine m_engine;
 
+        public Settings GameSettings { get; set; }
+
         private bool m_gameStarted;
 
         public GameScreen(Game game)
@@ -79,6 +81,7 @@ namespace Cyclotron2D.Screens.Main
                                   new AIPlayer(Game, this),
                                   new AIPlayer(Game, this),
                               };
+                GameSettings = Settings.Current;
             }
             else if (e.NewState == GameState.Hosting && e.OldState == GameState.WaitingForClients)
             {
@@ -86,7 +89,7 @@ namespace Cyclotron2D.Screens.Main
             }
             else if (e.NewState == GameState.PlayingAsClient && e.OldState == GameState.JoiningGame)
             {
-                //get players from network and start game
+                //get players and settings from network and start game
             }
 
 

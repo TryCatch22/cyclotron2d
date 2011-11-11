@@ -13,8 +13,7 @@ namespace Cyclotron2D.Core
     /// The Game Engine handles events from Player objects in order to simulate the game. It has no concept of the difference
     /// between a local and remote player.
     /// </summary>
-    internal class 
-        Engine : DrawableScreenComponent
+    internal class Engine : DrawableScreenComponent
     {
         #region Fields
 
