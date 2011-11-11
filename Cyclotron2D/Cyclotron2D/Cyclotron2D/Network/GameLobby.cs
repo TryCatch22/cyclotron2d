@@ -11,7 +11,7 @@ namespace Cyclotron2D.Network
     {
         //Randomly chosen port number for game lobby
         public const int GAME_PORT = 9081;
-        private const int MAX_CLIENTS = 1;
+        private const int MAX_CLIENTS = 5;
         private const int CONNECTION_BACKLOG = 10;
 
         private GameLobbyThread ClientAcceptThread; //Demo thread to accept clients without blocking the application
@@ -56,15 +56,15 @@ namespace Cyclotron2D.Network
         /// <summary>
         /// Accepts the next client connections to the lobby assuming the lobby isn't full.
         /// </summary>
-        private void acceptClient()
+        private void acceptClient(String threadName)
         {
             print("Waiting for a connection ...");
             if (!isFull() && waitingForConnections)
             {
                 //Start a limited amount of threads from a thread pool.
                 //When lobby is full, kill all leftover threads
-                ClientAcceptThread = new GameLobbyThread(this);
-                ClientAcceptThread.start();
+                ClientAcceptThread = new GameLobbyThread(this, threadName);
+                ClientAcceptThread.Start();
                 print("Listening Thread Started");
             }
             else
@@ -72,30 +72,6 @@ namespace Cyclotron2D.Network
                 //Lobby is Full
                 print("Lobby is Full");
                 messageAllClients("Okay Lobby Closes. Game On");
-            }
-        }
-
-        /// <summary>
-		/// DEPRECATED AND TO BE BURIED
-        /// Once a client is found, this connects the client and gets the socket to communicate with it. 
-        /// </summary>
-        /// <param name="target"></param>
-        public void connectClient(IAsyncResult target)
-        {
-            print("Accepting Connection ...");
-            if (!isFull())
-            {
-                Socket lobby = (Socket) target.AsyncState;
-                Socket client = lobby.EndAccept(target);
-                //Add the client to the clients list
-                clients.Add(client);
-                print("Accepted 1 Client");
-            }
-            else
-            {
-                //Not accepting the connection
-                print("Connection Refused, Lobby Full");
-                waitingForConnections = false;
             }
         }
 
@@ -124,12 +100,13 @@ namespace Cyclotron2D.Network
         /// </summary>
         public void start()
         {
-            acceptClient();
+            acceptClient("Listener1");
+			acceptClient("Listener2");
 
-            if (isFull())
-            {
-                waitingForConnections = false;
-            }
+			//if (isFull())
+			//{
+			//    waitingForConnections = false;
+			//}
         }
     }
 }

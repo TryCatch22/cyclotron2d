@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace Cyclotron2D.Network
 {
@@ -11,7 +12,8 @@ namespace Cyclotron2D.Network
 	{
 
 		public const int MAX_BUFFER_SIZE = 1024;
-		Socket client;
+		private Socket Client;
+		private NetworkClientThread ReceiveThread;
 
 		/// <summary>
 		/// Creates a network client object representing a player trying to connect to a game lobby.
@@ -20,7 +22,7 @@ namespace Cyclotron2D.Network
 		{
 			try
 			{
-				client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+				Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			} catch (Exception ex)
 			{
 				Console.WriteLine(ex.StackTrace);
@@ -31,7 +33,7 @@ namespace Cyclotron2D.Network
 		/// Temporary Debug Print Method
 		/// </summary>
 		/// <param name="msg"></param>
-		private void print(String msg) {
+		private static void Print(String msg) {
 			Console.WriteLine(msg);
 			DebugMessages.Add(msg);
 		}
@@ -41,36 +43,62 @@ namespace Cyclotron2D.Network
 		/// </summary>
 		public void ConnectToServer() {
 			try {
-				client.Connect(IPAddress.Loopback, GameLobby.GAME_PORT);
-				print("Client Connected");
+				Client.Connect(IPAddress.Loopback, GameLobby.GAME_PORT);
+				Print("Client Connected");
+				
 			} catch (Exception ex) {
 				Console.WriteLine(ex.StackTrace);
 			}
 		}
 
-		/// <summary>
-		/// When connected to a game lobby, listens to messages sent by the lobby.
-		/// </summary>
-		public void Receive(){
-			Byte[] buffer = new Byte[MAX_BUFFER_SIZE];
-			String msg;
-			print("Client Receiving: ");
-			//Wait for messages
-			DateTime startRcv = DateTime.UtcNow;
-			while (client.Available == 0) {
-				if (DateTime.UtcNow.Subtract(startRcv).Seconds > 4) {
-					print("Client Receive Timeout");
-					return;
+		public void startReceive() {
+			ReceiveThread = new NetworkClientThread(Client);
+		}
+
+		class NetworkClientThread {
+
+			private Socket ClientSocket;
+			private Thread ReceivingThread;
+
+			public NetworkClientThread(Socket clientSocket) {
+				ClientSocket = clientSocket;
+				ReceivingThread = new Thread(new ThreadStart(this.Receive));
+				ReceivingThread.IsBackground = true;
+				ReceivingThread.Start();
+			}
+
+
+			/// <summary>
+			/// When connected to a game lobby, listens to messages sent by the lobby.
+			/// Runs infinitely.
+			/// </summary>
+			public void Receive() {
+				Byte[] buffer = new Byte[MAX_BUFFER_SIZE];
+				String msg;
+				while(ReceivingThread.IsAlive) {
+					Console.WriteLine("Client Receiving: ");
+					//Wait for messages
+					DateTime startRcv = DateTime.UtcNow;
+					while (ClientSocket.Available == 0) ;
+					while (ClientSocket.Available > 0) {
+						ClientSocket.Receive(buffer);
+						msg = Encoding.Unicode.GetString(buffer).TrimEnd(new[] { '\0' });
+						Print(msg);
+					}
+					Console.WriteLine("Client Done Receiving");
+					Array.Clear(buffer, 0, MAX_BUFFER_SIZE);
 				}
 			}
-			while(client.Available > 0) {
-				client.Receive(buffer);
-				msg = Encoding.Unicode.GetString(buffer).TrimEnd(new [] {'\0'});
-				print(msg);
+
+			/// <summary>
+			/// Kills the running thread.
+			/// </summary>
+			public void Kill() {
+				ReceivingThread.Abort();
 			}
-			print("Client Done Receiving");
 
 		}
+
 
 	}
 }
