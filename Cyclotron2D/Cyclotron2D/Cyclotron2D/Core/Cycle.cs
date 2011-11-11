@@ -6,6 +6,7 @@ using Cyclotron2D.Components;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Screens.Base;
+using Cyclotron2D.Screens.Main;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -59,9 +60,9 @@ namespace Cyclotron2D.Core
 
         #region Properties
 
-        public float Speed { get { return Settings.Current.CycleSpeed; } }
+        public float Speed { get { return (Screen as GameScreen).GameSettings.CycleSpeed; } }
 
-        public bool AllowSuicide { get { return Settings.Current.AllowSuicide; } }
+        public bool AllowSuicide { get { return (Screen as GameScreen).GameSettings.AllowSuicide; } }
 
         /// <summary>
         /// Screen position of Head in Pixels
@@ -99,19 +100,14 @@ namespace Cyclotron2D.Core
         {
             get
             {
-                int length = 0;
-                var lines = GetLines();
-                foreach (var line in lines)
-                    length = length + line.Length;
-
-                return length;
+                return GetLines().Aggregate(0, (current, line) => current + line.Length);
             }
         }
 
         /// <summary>
         /// max allowed tail length; set to 0 for unlimited tail length
         /// </summary>
-        public static int MaxTailLength { get { return Settings.Current.MaxTailLength; } }
+        public int MaxTailLength { get { return (Screen as GameScreen).GameSettings.MaxTailLength; } }
 
 
         #endregion

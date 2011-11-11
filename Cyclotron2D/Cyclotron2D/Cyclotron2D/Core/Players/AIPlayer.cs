@@ -218,7 +218,6 @@ namespace Cyclotron2D.Core.Players
 
         #endregion
 
-
         #region Event Handlers
 
         private void OnCycleEnabledChanged(object sender, EventArgs e)

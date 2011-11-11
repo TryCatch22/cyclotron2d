@@ -4,13 +4,14 @@ using System.Linq;
 using Cyclotron2D.Components;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Screens.Base;
+using Cyclotron2D.Screens.Main;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Core
 {
     public class Grid : DrawableScreenComponent
     {
-        public int PixelsPerInterval { get { return Settings.Current.GridSize; }}
+        public int PixelsPerInterval { get { return (Screen as GameScreen).GameSettings.GridSize; } }
 
         public Grid(Game game, Screen screen, Vector2 size)
             : base(game, screen)
