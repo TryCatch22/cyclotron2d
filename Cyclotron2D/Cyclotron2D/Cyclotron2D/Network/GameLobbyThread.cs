@@ -36,37 +36,27 @@ namespace Cyclotron2D.Network {
 		}
 
 		/// <summary>
-		/// Starts accepting incoming connections
+		/// Starts accepting incoming connections.
+		/// This will block the thread until a connection is found.
 		/// </summary>
 		public void WaitForClient() {
-			WaitHandle.Reset();
-			ServerSocket.BeginAccept(new AsyncCallback(ConnectClientCallback), ServerSocket);
-			//Wait for a connection (blocks current thread)
-			WaitHandle.WaitOne();
-		}
+			try {
+				Socket client = ServerSocket.Accept();
+				print("Accepting Connection ...");
+				Clients.Add(client);
+				print("Accepted 1 Client");
+			} catch (SocketException ex) {
+				Console.WriteLine(ex.StackTrace);
+			}
 
-		/// <summary>
-		/// Once a client is trying to connect, this connects it and gets the socket to communicate with it. 
-		/// </summary>
-		/// <param name="target"></param>
-		public void ConnectClientCallback(IAsyncResult target) {
-			//Unlocks current thread
-			WaitHandle.Set();
-			
-			print("Accepting Connection ...");
-			Socket lobby = (Socket)target.AsyncState;
-			Socket client = lobby.EndAccept(target);
-			//Add the client to the clients list
-			Clients.Add(client);
-			print("Accepted 1 Client");
-			Server.messageAllClients("We got 1 more player");
 		}
 
 		public void Start() {
 			ConnectionThread.Start();
+			print("Listening Thread Started");
 		}
 
-		public void Stop() {
+		public void Kill() {
 			ConnectionThread.Abort();
 		}
 
