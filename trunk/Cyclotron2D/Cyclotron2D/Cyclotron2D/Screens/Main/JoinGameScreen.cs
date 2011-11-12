@@ -47,7 +47,7 @@ namespace Cyclotron2D.Screens.Main {
 
 			m_ok.OkText = "Connect";
 			m_ok.Rect = new Rectangle((int)(vp.Width * 3.2 / 5), vp.Height * 5 / 6, (int)(vp.Width / 3.7), vp.Height / 7);
-			m_ok.OnCancel = () => Game.ChangeState(GameState.MainMenu);
+			m_ok.OnCancel = CancelConnection;
 			m_ok.OnOk = TryConnect;
 		}
 
@@ -118,7 +118,13 @@ namespace Cyclotron2D.Screens.Main {
 			//    DebugMessages.Add("Invalid IP Address, fool!");
 			//}
 
-			Client.startReceive();
+			Client.Disconnect();
+			Client.ConnectToServer();
+		}
+
+		private void CancelConnection() {
+			Client.Disconnect();
+			Game.ChangeState(GameState.MainMenu);
 		}
 
 		public override void Draw(GameTime gameTime) {

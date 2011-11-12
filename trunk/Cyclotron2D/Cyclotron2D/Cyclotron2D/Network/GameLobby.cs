@@ -100,7 +100,10 @@ namespace Cyclotron2D.Network {
 		/// Starts the game lobby by accepting clients until stopped or full.
 		/// Messages all clients with a message when the lobby becomes locked.
 		/// </summary>
-		public void start() {
+		public void Start() {
+			//TEMPORARY: Only accepts 2 clients
+			//Use Socket.Select(Clients) to check for clients status regularly
+			//This determines if we spawn more listening threads or if we have enough already
 			acceptClient("Listener1");
 			acceptClient("Listener2");
 
@@ -108,6 +111,20 @@ namespace Cyclotron2D.Network {
 			//{
 			//    waitingForConnections = false;
 			//}
+		}
+
+		/// <summary>
+		/// Disconnects all clients and stops all waiting threads.
+		/// </summary>
+		public void Kill() {
+			waitingForConnections = false;
+			foreach(Socket client in clients){
+				client.Close();
+			}
+			foreach(GameLobbyThread thread in AcceptThreads){
+				thread.Kill();
+			}
+			GameLobbySocket.Close();
 		}
 	}
 }

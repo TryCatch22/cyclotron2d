@@ -20,13 +20,7 @@ namespace Cyclotron2D.Network
 		/// </summary>
 		public NetworkClient()
 		{
-			try
-			{
-				Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-			} catch (Exception ex)
-			{
-				Console.WriteLine(ex.StackTrace);
-			}
+			//Does nothing now
 		}
 
 		/// <summary>
@@ -42,31 +36,60 @@ namespace Cyclotron2D.Network
 		/// Attempts to connect to the game lobby server.
 		/// </summary>
 		public void ConnectToServer() {
+			if (Client != null && Client.Connected) {
+				//Closes the open socket and creates a new one
+				Client.Close();
+			}
+
 			try {
+				Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 				Client.Connect(IPAddress.Loopback, GameLobby.GAME_PORT);
 				Print("Client Connected");
-				
+				StartReceive();
 			} catch (Exception ex) {
-				Console.WriteLine(ex.StackTrace);
+				Console.WriteLine(ex);
 			}
 		}
 
-		public void startReceive() {
+		public void StartReceive() {
 			ReceiveThread = new NetworkClientThread(Client);
 		}
 
+		public void Disconnect() {
+			if (ReceiveThread != null) {
+				ReceiveThread.Kill();
+			}
+			Client.Close();
+		}
+
+
+		/// <summary>
+		/// Creates a new receiving thread to read from the socket without blocking the main thread.
+		/// </summary>
 		class NetworkClientThread {
 
 			private Socket ClientSocket;
 			private Thread ReceivingThread;
+			private bool StayAlive;
 
 			public NetworkClientThread(Socket clientSocket) {
 				ClientSocket = clientSocket;
 				ReceivingThread = new Thread(new ThreadStart(this.Receive));
 				ReceivingThread.IsBackground = true;
+				StayAlive = true;
+				ClearReceiveBuffer();
 				ReceivingThread.Start();
 			}
 
+			/// <summary>
+			/// Clears the receive of the socket.
+			/// </summary>
+			public void ClearReceiveBuffer() {
+				if (ClientSocket.Available > 0) {
+					Byte[] throwaway = new Byte[ClientSocket.Available];
+					ClientSocket.Receive(throwaway);
+				}
+			}
 
 			/// <summary>
 			/// When connected to a game lobby, listens to messages sent by the lobby.
@@ -79,7 +102,7 @@ namespace Cyclotron2D.Network
 					Console.WriteLine("Client Receiving: ");
 					//Wait for messages
 					DateTime startRcv = DateTime.UtcNow;
-					while (ClientSocket.Available == 0) ;
+					while (ClientSocket.Available == 0 && StayAlive) ;
 					while (ClientSocket.Available > 0) {
 						ClientSocket.Receive(buffer);
 						msg = Encoding.Unicode.GetString(buffer).TrimEnd(new[] { '\0' });
@@ -94,6 +117,7 @@ namespace Cyclotron2D.Network
 			/// Kills the running thread.
 			/// </summary>
 			public void Kill() {
+				StayAlive = false;
 				ReceivingThread.Abort();
 			}
 
