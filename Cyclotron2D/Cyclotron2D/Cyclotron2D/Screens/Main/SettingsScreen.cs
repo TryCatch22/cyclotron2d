@@ -104,6 +104,8 @@ namespace Cyclotron2D.Screens.Main
                 Settings.Current.DrawGrid.TrySetValue(m_drawGrid.IsChecked);
                 Settings.Current.PlayerName.TrySetValue(m_playerName.BoxText);
                 
+                Settings.Current.WriteToFile();
+
                 Game.ChangeState(GameState.MainMenu);
             }
             catch (InvalidValueException)

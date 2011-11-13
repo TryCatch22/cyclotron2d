@@ -403,7 +403,7 @@ namespace Cyclotron2D.Core
                 {
                     if (AllowSuicide)
                     {
-                        DebugMessages.Add("Player " + m_player.PlayerID + " Suicide");
+                        DebugMessages.Add(m_player +"committed suicide");
                         InvokeCollided();
                     }
                     else
@@ -442,9 +442,9 @@ namespace Cyclotron2D.Core
 
             if (hasCollision)
             {
-                string killerString = killer!=null?"Player "+killer.PlayerID:"the wall";
+                string killerString = killer!=null?killer.ToString():"the wall";
 
-                DebugMessages.Add("Player " + m_player.PlayerID + " Crashed into " + killerString);
+                DebugMessages.Add(m_player + " Crashed into " + killerString);
                 InvokeCollided();
             }
         }

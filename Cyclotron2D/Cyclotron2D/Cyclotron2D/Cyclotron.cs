@@ -1,4 +1,5 @@
 using System;
+using Cyclotron2D.Mod;
 using Cyclotron2D.Screens.Main;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -94,6 +95,7 @@ namespace Cyclotron2D
             IsMouseVisible = true;
             Art.Initalize(this);
             LoadScreens();
+            Settings.Current.LoadFromFile();
 
             ChangeState(GameState.MainMenu);
             base.Initialize();
