@@ -15,6 +15,7 @@ namespace Cyclotron2D.Screens.Main {
 
 		Button SpamButton;
 		Button CancelButton;
+		Button CloseButton;
 		LabelTextBox SpamTextBox;
 
 		GameLobby Lobby;
@@ -29,6 +30,10 @@ namespace Cyclotron2D.Screens.Main {
 			CancelButton = new Button(game, this);
 			CancelButton.Click += OnCancelButtonClicked;
 			CancelButton.Text = "Cancel";
+
+			CloseButton = new Button(game, this);
+			CloseButton.Click += OnCloseButtonClick;
+			CloseButton.Text = "Start";
 
 			SpamTextBox = new LabelTextBox(game, this);
 			SpamTextBox.Label.Background = Color.Black;
@@ -51,6 +56,16 @@ namespace Cyclotron2D.Screens.Main {
 			}
 		}
 
+		private void OnCloseButtonClick(Object sender, EventArgs e) {
+			Lobby.CloseGameLobby();
+		}
+
+		/// <summary>
+		///  Starts the GameLobby instance and spawns threads to accept connections accordingly.
+		/// 
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		protected override void OnStateChanged(object sender, StateChangedEventArgs e) {
 			base.OnStateChanged(sender, e);
 
@@ -59,7 +74,8 @@ namespace Cyclotron2D.Screens.Main {
 
 				SpamTextBox.Rect = new Rectangle(50, 150, (int)(win.Width * 0.7), (int)(win.Height * 0.2));
 				SpamButton.Rect = new Rectangle(200, SpamTextBox.Rect.Bottom + 10, (int)(win.Width*0.5), (int)(win.Height*0.2));
-				CancelButton.Rect = RectangleBuilder.BottomRight(GraphicsDevice.Viewport.Bounds, new Vector2(0.15f, 0.15f), new Point(20, 10));
+				CancelButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.15f), new Point(20, 10));
+				CloseButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.15f), new Point(25 + CancelButton.Rect.Width, 10)); 
 
 				Lobby = new GameLobby();
 				Lobby.Start();
@@ -69,6 +85,7 @@ namespace Cyclotron2D.Screens.Main {
 
 		public override void Draw(GameTime gameTime) {
 			CancelButton.Draw(gameTime);
+			CloseButton.Draw(gameTime);
 			SpamButton.Draw(gameTime);
 			SpamTextBox.Draw(gameTime);
 		}
