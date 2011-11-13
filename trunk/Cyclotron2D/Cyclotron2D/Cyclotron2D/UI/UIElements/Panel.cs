@@ -13,7 +13,8 @@ namespace Cyclotron2D.UI.UIElements
         protected Panel(Game game, Screen screen) : base(game, screen)
         {
             Items = new List<UIElement>();
-            ItemSpacing = 2; //default value
+            ItemSpacing = 2; //default val
+            UpdateOrder = 250;//generally after other UI elements.
         }
 
         public virtual void AddItems(params UIElement[] item)
@@ -21,10 +22,13 @@ namespace Cyclotron2D.UI.UIElements
             Items.AddRange(item);
         }
 
-        public virtual void RemoveItem(MenuItem item)
+        public virtual void RemoveItem(params UIElement[] items)
         {
-            Items.Remove(item);
-            item.Dispose();
+            foreach (var item in items)
+            {
+                Items.Remove(item);
+            }   
+
         }
 
         #region IDisposable

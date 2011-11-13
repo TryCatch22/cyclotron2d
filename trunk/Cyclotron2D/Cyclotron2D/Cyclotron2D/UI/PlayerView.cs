@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.UI
 {
-    public class LobbyPlayerView : UIElement
+    public class PlayerView : UIElement
     {
         public Player Player { get; set; }
 
@@ -13,7 +13,7 @@ namespace Cyclotron2D.UI
 
         private TextElement NameAndId { get; set; }
 
-        public LobbyPlayerView(Game game, Screen screen) : base(game, screen)
+        public PlayerView(Game game, Screen screen) : base(game, screen)
         {
             NameAndId = new TextElement(game, screen);
         }
@@ -23,6 +23,19 @@ namespace Cyclotron2D.UI
             NameAndId.Text = Player.Name + " (" + Player.PlayerID + ")";
             PlayerColorRect = new Rectangle(Rect.X + 2, Rect.Y + 2, Rect.Height-4, Rect.Height-4);
             NameAndId.Rect = new Rectangle(Rect.X + PlayerColorRect.Width + 2, Rect.Y, Rect.Width - PlayerColorRect.Width - 2, Rect.Height);
+        }
+
+        public override void Draw(GameTime gameTime)
+        {
+            base.Draw(gameTime);
+
+            Game.SpriteBatch.Draw(Art.Pixel, PlayerColorRect, Player.Cycle.TrailColor);
+
+            if (NameAndId.Visible)
+            {
+                NameAndId.Draw(gameTime);
+            }
+
         }
 
 

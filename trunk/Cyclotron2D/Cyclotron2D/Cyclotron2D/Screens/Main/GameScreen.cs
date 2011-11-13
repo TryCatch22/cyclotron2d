@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Cyclotron2D.Core;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Mod;
@@ -17,13 +18,18 @@ namespace Cyclotron2D.Screens.Main
     {
         private Engine m_engine;
 
+        public List<Player> ActivePlayers { get { return m_engine.Players; } }
+
         public Settings GameSettings { get; set; }
+
+        public TimeSpan GameStartTime { get { return m_engine.GameStart; } }
 
         private bool m_gameStarted;
 
         public GameScreen(Game game)
             : base(game, GameState.PlayingAsClient | GameState.PlayingSolo)
         {
+            GameSettings = Settings.Current;
             m_engine = new Engine(game, this);
         }
 

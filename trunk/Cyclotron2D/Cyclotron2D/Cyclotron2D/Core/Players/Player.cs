@@ -1,6 +1,7 @@
 using System;
 using Cyclotron2D.Components;
 using Cyclotron2D.Screens.Base;
+using Cyclotron2D.Screens.Main;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Core.Players
@@ -27,6 +28,8 @@ namespace Cyclotron2D.Core.Players
 
         public bool Winner { get; set; }
 
+        public TimeSpan SurvivalTime { get; set; }
+
         #region Events
 
         public event EventHandler<DirectionChangeEventArgs> DirectionChange;
@@ -49,7 +52,39 @@ namespace Cyclotron2D.Core.Players
         {
             Winner = false;
             Cycle = cycle;
+
+            SubscribeCycle();
             PlayerID = id;
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+            if(Cycle.Enabled)SurvivalTime = gameTime.TotalGameTime - (Screen as GameScreen).GameStartTime;
+
+        }
+
+        protected virtual void OnCycleEnabledChanged(object sender, EventArgs e)
+        {
+        }
+
+        protected void SubscribeCycle()
+        {
+            Cycle.EnabledChanged += OnCycleEnabledChanged;
+        }
+
+        private void UnsubscribeCycle()
+        {
+            Cycle.EnabledChanged += OnCycleEnabledChanged;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && Cycle != null)
+            {
+                UnsubscribeCycle();
+            }
+            base.Dispose(disposing);
         }
     }
 }

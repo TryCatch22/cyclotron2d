@@ -21,6 +21,7 @@ namespace Cyclotron2D.UI.UIElements
         {
             base.HandleInupt(gameTime);
             IsMouseOver = Rect.Contains(Game.InputState.MousePosition);
+            UpdateOrder = 200; //generally update ui after the rest
         }
 
         public override void Draw(GameTime gameTime)

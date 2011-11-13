@@ -46,7 +46,7 @@ namespace Cyclotron2D.Core.Players
 
             if(!LastMinuteSave())
             {
-                SemiSmartRandomTurn(gameTime, 0.2f);
+                SemiSmartRandomTurn(gameTime, 0.5f);
             }
         }
 
@@ -102,6 +102,15 @@ namespace Cyclotron2D.Core.Players
                return new[] { Direction.Left, Direction.Right };
            }
            return new[] { Direction.Up, Direction.Down };
+       }
+
+       private static Direction[] NotBack(Direction dir)
+       {
+           if (dir == Direction.Up || dir == Direction.Down)
+           {
+               return new[] { Direction.Left, Direction.Right, dir };
+           }
+           return new[] { Direction.Up, Direction.Down, dir };
        }
 
         private bool LastMinuteSave()
@@ -190,7 +199,7 @@ namespace Cyclotron2D.Core.Players
 
                 if (m_rand.Next(0, (int)(1/turnOdds)) == 0)
                 {
-                    CallTurn(GetSafestDirection(Perpendicular(Cycle.Direction)));
+                    CallTurn(GetSafestDirection(NotBack(Cycle.Direction)));
                 }
                 m_lastTurn = gameTime.TotalGameTime;
             }
@@ -198,45 +207,12 @@ namespace Cyclotron2D.Core.Players
 
         #endregion
 
-        #region Event Handlers
-
-        private void OnCycleEnabledChanged(object sender, EventArgs e)
+        protected override void OnCycleEnabledChanged(object sender, EventArgs e)
         {
-            if(!Cycle.Enabled)
+            if (!Cycle.Enabled)
             {
                 Enabled = false;
             }
         }
-
-        #endregion
-
-        #region Subscription
-
-        private void SubscribeCycle()
-        {
-            Cycle.EnabledChanged += OnCycleEnabledChanged;
-        }
-
-
-        private void UnsubscribeCycle()
-        {
-            Cycle.EnabledChanged += OnCycleEnabledChanged;
-        }
-
-
-        #endregion
-
-        #region IDisposable
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && Cycle != null)
-            {
-                UnsubscribeCycle();
-            }
-            base.Dispose(disposing);
-        }
-
-        #endregion
     }
 }
