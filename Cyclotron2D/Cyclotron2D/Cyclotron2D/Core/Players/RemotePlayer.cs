@@ -1,4 +1,5 @@
-﻿using Cyclotron2D.Screens.Base;
+﻿using System;
+using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Core.Players
@@ -11,5 +12,7 @@ namespace Cyclotron2D.Core.Players
         public RemotePlayer(Game game, Screen screen) : base(game, screen)
         {
         }
+
+        public override string Name { get { throw new NotImplementedException(); } set { throw new NotImplementedException(); } }
     }
 }

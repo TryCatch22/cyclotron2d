@@ -15,7 +15,9 @@ namespace Cyclotron2D.Core.Players
         {
         }
 
-        protected Cycle Cycle { get; set; }
+        public abstract string Name { get; set; }
+
+        public Cycle Cycle { get; protected set; }
 
         /// <summary>
         /// Unique player ID.

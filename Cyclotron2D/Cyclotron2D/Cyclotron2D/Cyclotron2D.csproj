@@ -130,9 +130,12 @@
     <Compile Include="Screens\Main\SettingsScreen.cs" />
     <Compile Include="Screens\Popup\EndGamePopup.cs" />
     <Compile Include="Screens\Popup\OkPopup.cs" />
-    <Compile Include="Settings.cs" />
+    <Compile Include="Mod\InvalidValueException.cs" />
+    <Compile Include="Mod\Setting.cs" />
+    <Compile Include="Mod\Settings.cs" />
     <Compile Include="UI\CancelOk.cs" />
     <Compile Include="UI\LabelCheckBox.cs" />
+    <Compile Include="UI\LobbyPlayerView.cs" />
     <Compile Include="UI\UIElements\Button.cs" />
     <Compile Include="UI\UIElements\CheckBox.cs" />
     <Compile Include="UI\LabelTextBox.cs" />

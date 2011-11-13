@@ -11,7 +11,7 @@ namespace Cyclotron2D.Core
 {
     public class Grid : DrawableScreenComponent
     {
-        public int PixelsPerInterval { get { return (Screen as GameScreen).GameSettings.GridSize; } }
+        public int PixelsPerInterval { get { return (Screen as GameScreen).GameSettings.GridSize.Value; } }
 
         public Grid(Game game, Screen screen, Vector2 size)
             : base(game, screen)
@@ -54,7 +54,13 @@ namespace Cyclotron2D.Core
 
         public override void Draw(GameTime gameTime)
         {
+            if (!(Screen as GameScreen).GameSettings.DrawGrid.Value)
+                return;
+            
             base.Draw(gameTime);
+
+
+
             for (int i = 0; i < Size.X; i += PixelsPerInterval)
                 Game.SpriteBatch.Draw(Art.Pixel, new Rectangle(i, 0, 1, (int) Size.Y), Color.SteelBlue);
             for (int i = 0; i < Size.X; i += PixelsPerInterval)
