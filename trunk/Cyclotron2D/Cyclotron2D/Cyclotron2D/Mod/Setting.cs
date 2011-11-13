@@ -2,11 +2,17 @@
 
 namespace Cyclotron2D.Mod
 {
-    public class Setting<T>
-    {
-        public string Name { get; private set; }
 
-        public T Value { get; private set; }
+    public class Setting
+    {
+        public string Name { get; protected set; }
+
+        public object Value { get; protected set; }
+    }
+
+    public class Setting<T> : Setting
+    {
+        public new T Value { get { return (T)base.Value; } private set { base.Value = value; } }
 
         public T DefaultValue { get; private set; }
 
@@ -36,6 +42,11 @@ namespace Cyclotron2D.Mod
         public override string ToString()
         {
             return Name;
+        }
+
+        public string ToFileString()
+        {
+            return Name + "=" + Value;
         }
 
     }

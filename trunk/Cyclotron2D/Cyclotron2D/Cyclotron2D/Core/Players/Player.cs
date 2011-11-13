@@ -39,6 +39,12 @@ namespace Cyclotron2D.Core.Players
 
         #endregion
 
+
+        public override string ToString()
+        {
+            return Name + "(" + PlayerID + ")";
+        }
+
         public virtual void Initialize(Cycle cycle, int id)
         {
             Winner = false;
