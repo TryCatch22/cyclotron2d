@@ -9,9 +9,10 @@ namespace Cyclotron2D.Network {
 	internal class GameLobby {
 		//Randomly chosen port number for game lobby
 		public const int GAME_PORT = 9081;
-		private const int MAX_CLIENTS = 5;
+		private const int MAX_CLIENTS = 3;
 		private const int CONNECTION_BACKLOG = 10;
-
+		
+		private int ThreadNumber;
 		private List<GameLobbyThread> AcceptThreads;
 		private bool waitingForConnections;
 
@@ -28,9 +29,10 @@ namespace Cyclotron2D.Network {
 				GameLobbySocket.Bind(localServer);
 				GameLobbySocket.Blocking = true;
 				GameLobbySocket.Listen(CONNECTION_BACKLOG);
+				ThreadNumber = 0;
 				print("Game Lobby Server started on port " + GAME_PORT);
 			} catch (ArgumentOutOfRangeException ex) {
-				print("Invalid Port Number");
+				print("Invalid Port Number " + GAME_PORT);
 				Console.WriteLine(ex.StackTrace);
 			}
 
@@ -51,12 +53,12 @@ namespace Cyclotron2D.Network {
 		/// <summary>
 		/// Accepts the next client connections to the lobby assuming the lobby isn't full.
 		/// </summary>
-		private void acceptClient(String threadName) {
-			print("Waiting for a connection ...");
+		private void acceptClient() {
 			if (!isFull() && waitingForConnections) {
-				//Start a limited amount of threads from a thread pool.
+				//Start a limited amount of threads
 				//When lobby is full, kill all leftover threads
-				GameLobbyThread AcceptThread = new GameLobbyThread(this, threadName);
+				GameLobbyThread AcceptThread = new GameLobbyThread(this, "Listener" + ThreadNumber);
+				ThreadNumber++;
 				AcceptThread.Start();
 				AcceptThreads.Add(AcceptThread);
 			} else {
@@ -90,7 +92,7 @@ namespace Cyclotron2D.Network {
 					disconnected.Add(client);
 				}
 			}
-
+			//Remove all disabled clients
 			foreach (Socket removed in disconnected) {
 				clients.Remove(removed);
 			}
@@ -98,19 +100,55 @@ namespace Cyclotron2D.Network {
 
 		/// <summary>
 		/// Starts the game lobby by accepting clients until stopped or full.
-		/// Messages all clients with a message when the lobby becomes locked.
+		/// Messages all clients with a message when the lobby becomes closed.
 		/// </summary>
 		public void Start() {
-			//TEMPORARY: Only accepts 2 clients
-			//Use Socket.Select(Clients) to check for clients status regularly
-			//This determines if we spawn more listening threads or if we have enough already
-			acceptClient("Listener1");
-			acceptClient("Listener2");
+			Thread listenerSpawner = new Thread(new ThreadStart(this.SpawnConnectionThreads));
+			listenerSpawner.Name = "ListenerSpawningThread";
+			listenerSpawner.Start();
 
-			//if (isFull())
-			//{
-			//    waitingForConnections = false;
-			//}
+		}
+
+		/// <summary>
+		/// Creates multiple conncetion threads to wait for incoming clients and verifies if clients have disconnected.
+		/// Maintains this number of listening threads until the lobby is closed.
+		/// </summary>
+		public void SpawnConnectionThreads() {
+
+			while (waitingForConnections) {
+				if (!isFull() && AcceptThreads.Count < MAX_CLIENTS) {
+					acceptClient();
+				}
+				//Poll all connected clients to see if someone disconnected
+				if (clients.Count > 0) {
+					Socket.Select(null, clients, null, 1000);
+				}
+				List<GameLobbyThread> removed = new List<GameLobbyThread>();
+				foreach (GameLobbyThread t in AcceptThreads) {
+					if (!t.IsAlive) {
+						removed.Add(t);
+					}
+				}
+				if (removed.Count > 0) {
+					foreach (GameLobbyThread t in removed) {
+						AcceptThreads.Remove(t);
+					}
+				}
+				Thread.Sleep(50);
+			}
+
+		}
+
+		/// <summary>
+		/// Stops accepting connections.
+		/// </summary>
+		public void CloseGameLobby() {
+			waitingForConnections = false;
+			GameLobbySocket.Close();
+			foreach (GameLobbyThread t in AcceptThreads) {
+				t.Kill();
+			}
+			print("Closed Lobby");
 		}
 
 		/// <summary>

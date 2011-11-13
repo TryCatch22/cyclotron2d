@@ -13,7 +13,8 @@ namespace Cyclotron2D.Network {
 		List<Socket> Clients;
 		GameLobby Server;
 		Socket ServerSocket;
-		Thread ConnectionThread;
+		private Thread ConnectionThread;
+		public bool IsAlive { get {return ConnectionThread.IsAlive;} }
 
 		public GameLobbyThread(GameLobby server, String name = "Unnamed") {
 			WaitHandle = new ManualResetEvent(false);
@@ -46,9 +47,11 @@ namespace Cyclotron2D.Network {
 				Clients.Add(client);
 				print("Accepted 1 Client");
 			} catch (SocketException ex) {
-				Console.WriteLine(ex.StackTrace);
+				Console.WriteLine(ex);
+			} catch (ThreadAbortException) {
+				print("Listener Killed");
 			}
-
+				
 		}
 
 		public void Start() {

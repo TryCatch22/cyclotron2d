@@ -6,10 +6,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace Cyclotron2D.Network
-{
-	class NetworkClient
-	{
+namespace Cyclotron2D.Network {
+	class NetworkClient {
 
 		public const int MAX_BUFFER_SIZE = 1024;
 		private Socket Client;
@@ -18,9 +16,8 @@ namespace Cyclotron2D.Network
 		/// <summary>
 		/// Creates a network client object representing a player trying to connect to a game lobby.
 		/// </summary>
-		public NetworkClient()
-		{
-			//Does nothing now
+		public NetworkClient() {
+			//Does nothing for now
 		}
 
 		/// <summary>
@@ -45,13 +42,15 @@ namespace Cyclotron2D.Network
 				Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 				Client.Connect(IPAddress.Loopback, GameLobby.GAME_PORT);
 				Print("Client Connected");
-				StartReceive();
+				StartReceiving();
 			} catch (Exception ex) {
 				Console.WriteLine(ex);
+
+				Print(ex.Message);
 			}
 		}
 
-		public void StartReceive() {
+		public void StartReceiving() {
 			ReceiveThread = new NetworkClientThread(Client);
 		}
 
@@ -71,18 +70,21 @@ namespace Cyclotron2D.Network
 			private Socket ClientSocket;
 			private Thread ReceivingThread;
 			private bool StayAlive;
+			private Byte[] buffer;
+			private String msg;
 
 			public NetworkClientThread(Socket clientSocket) {
 				ClientSocket = clientSocket;
 				ReceivingThread = new Thread(new ThreadStart(this.Receive));
 				ReceivingThread.IsBackground = true;
 				StayAlive = true;
+				buffer = new Byte[MAX_BUFFER_SIZE];
 				ClearReceiveBuffer();
 				ReceivingThread.Start();
 			}
 
 			/// <summary>
-			/// Clears the receive of the socket.
+			/// Clears the receive buffer of the socket.
 			/// </summary>
 			public void ClearReceiveBuffer() {
 				if (ClientSocket.Available > 0) {
@@ -93,12 +95,10 @@ namespace Cyclotron2D.Network
 
 			/// <summary>
 			/// When connected to a game lobby, listens to messages sent by the lobby.
-			/// Runs infinitely.
+			/// Runs until the thread dies.
 			/// </summary>
 			public void Receive() {
-				Byte[] buffer = new Byte[MAX_BUFFER_SIZE];
-				String msg;
-				while(ReceivingThread.IsAlive) {
+				while (ReceivingThread.IsAlive) {
 					Console.WriteLine("Client Receiving: ");
 					//Wait for messages
 					DateTime startRcv = DateTime.UtcNow;
@@ -108,7 +108,6 @@ namespace Cyclotron2D.Network
 						msg = Encoding.Unicode.GetString(buffer).TrimEnd(new[] { '\0' });
 						Print(msg);
 					}
-					Console.WriteLine("Client Done Receiving");
 					Array.Clear(buffer, 0, MAX_BUFFER_SIZE);
 				}
 			}
