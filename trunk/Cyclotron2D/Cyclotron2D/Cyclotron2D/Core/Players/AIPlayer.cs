@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Cyclotron2D.Helpers;
 using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
 
@@ -41,20 +44,9 @@ namespace Cyclotron2D.Core.Players
         {
             base.Update(gameTime);
 
-            bool turned = LastMinuteSave();
-
-            if (!turned)
+            if(!LastMinuteSave())
             {
-                turned =  AvoidWalls();
-            }
-
-            if(!turned)
-            {
-                NonRetartedRandomTurn(gameTime);
-            }
-            else
-            {
-                m_lastTurn = gameTime.TotalGameTime;
+                SemiSmartRandomTurn(gameTime, 0.2f);
             }
         }
 
@@ -64,97 +56,59 @@ namespace Cyclotron2D.Core.Players
         #region Private Methods
 
 
-        private Direction getRandDir(Direction[] dirs)
+        private Direction GetSafestDirection(Direction[] dirs)
         {
             if (dirs.Length == 0)
             {
                 return Cycle.Direction;
             }
-            return dirs[m_rand.Next(0, dirs.Length)];
+
+            dirs = safestHelper(dirs.ToList(), 1);
+
+            if (dirs.Length > 0)
+            {
+                return dirs[m_rand.Next(0, dirs.Length)];
+            }
+
+            //you are probably about to die
+            return Cycle.Direction;
+            
+
+            
         }
 
-       
+        private Direction[] safestHelper(List<Direction> dirs, int depth)
+        {
+            int maxdepth = Cycle.Grid.GridSize.X*2/3;
+
+            var newDirs = dirs.Where(direction => IsSafe(direction, depth)).ToList();
+
+            if (newDirs.Count == 1)
+            {
+                return newDirs.ToArray();
+            }
+
+            if (newDirs.Count > 1 && depth <= maxdepth)
+            {
+                return safestHelper(newDirs, depth*2);
+            }
+            return dirs.ToArray();
+        }
+
+       private static Direction[] Perpendicular(Direction dir)
+       {
+           if (dir == Direction.Up || dir == Direction.Down)
+           {
+               return new[] { Direction.Left, Direction.Right };
+           }
+           return new[] { Direction.Up, Direction.Down };
+       }
 
         private bool LastMinuteSave()
         {
-            bool turned = false;
-
-            int safeLimit = 3;
-
-            var lines = Cycle.GetLines();
-            if (lines.Count == 0) return false;
-
-            var headLine = lines[lines.Count - 1].Clone();
-
-            lines = null;
-
-            Direction[] dirs = new Direction[0];
-            switch (Cycle.Direction)
+            if (!IsSafe(Cycle.Direction, 3))
             {
-                case Direction.Down:
-                    headLine.End = new Point(headLine.End.X, headLine.End.Y + safeLimit*Cycle.Grid.PixelsPerInterval);
-                    dirs = new []{Direction.Left, Direction.Right};
-                    break;
-                case Direction.Up:
-                    headLine.End = new Point(headLine.End.X, headLine.End.Y - safeLimit * Cycle.Grid.PixelsPerInterval);
-                    dirs = new[] { Direction.Left, Direction.Right };
-                    break;
-                case Direction.Right:
-                    headLine.End = new Point(headLine.End.X + safeLimit * Cycle.Grid.PixelsPerInterval, headLine.End.Y);
-                    dirs = new[] { Direction.Up, Direction.Down };
-                    break;
-                case Direction.Left:
-                    headLine.End = new Point(headLine.End.X - safeLimit * Cycle.Grid.PixelsPerInterval, headLine.End.Y);
-                    dirs = new[] { Direction.Up, Direction.Down };
-                    break;
-            }
-
-
-
-            Player killer;
-            turned = Cycle.CheckHeadLine(headLine, out killer);
-
-
-            if (turned)
-            {
-                CallTurn(getRandDir(dirs));
-                //InvokeDirectionChange(new DirectionChangeEventArgs(getRandDir(dirs), Cycle.GetNextGridCrossing()));
-            }
-
-            return turned;
-        }
-
-
-        private bool AvoidWalls()
-        {
-            int safeLimit = 3*Cycle.Grid.PixelsPerInterval;
-            Direction? turn = null;
-            int width = Game.GraphicsDevice.Viewport.Bounds.Width;
-            int height = Game.GraphicsDevice.Viewport.Bounds.Height;
-
-            switch (Cycle.Direction)
-            {
-                case Direction.Up:
-                    if (Cycle.Position.Y < safeLimit)
-                        turn = Cycle.Position.X > width / 2 ? Direction.Left : Direction.Right;
-                    break;
-                case Direction.Down:
-                    if (Cycle.Position.Y > height-safeLimit)
-                        turn = Cycle.Position.X > width / 2 ? Direction.Left : Direction.Right;
-                    break;
-                case Direction.Left:
-                    if (Cycle.Position.X < safeLimit)
-                        turn = Cycle.Position.Y > height / 2 ? Direction.Up : Direction.Down;
-                    break;
-                case Direction.Right:
-                    if (Cycle.Position.Y > width - safeLimit)
-                        turn = Cycle.Position.Y > height / 2 ? Direction.Up : Direction.Down;
-                    break;
-            }
-
-            if (turn.HasValue)
-            {
-                CallTurn(turn.Value);
+                CallTurn(GetSafestDirection(Perpendicular(Cycle.Direction)));
                 return true;
             }
 
@@ -167,54 +121,77 @@ namespace Cyclotron2D.Core.Players
             m_lastTurn = Game.GameTime.TotalGameTime;
         }
 
-
-
-        private void NonRetartedRandomTurn(GameTime gameTime)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dir">direction to head in</param>
+        /// <param name="distance">distance in grid coordinates</param>
+        /// <returns></returns>
+        private bool IsSafe(Direction dir, int distance)
         {
-            var dirs = new[] { Direction.Left, Direction.Up, Direction.Down, Direction.Right };
+            distance *= Cycle.Grid.PixelsPerInterval;
+            var lines = Cycle.GetLines();
+
+            if (lines.Count == 0) return true;
+
+            var headLine = lines[lines.Count - 1];
+            if (dir == Cycle.Direction)
+            {
+                switch (Cycle.Direction)
+                {
+                    case Direction.Down:
+                        headLine.End = new Point(headLine.End.X, headLine.End.Y + distance);
+                        break;
+                    case Direction.Up:
+                        headLine.End = new Point(headLine.End.X, headLine.End.Y - distance);
+                        break;
+                    case Direction.Right:
+                        headLine.End = new Point(headLine.End.X + distance, headLine.End.Y);
+                        break;
+                    case Direction.Left:
+                        headLine.End = new Point(headLine.End.X - distance, headLine.End.Y);
+                        break;
+                }
+            }
+            else
+            {
+                switch (dir)
+                {
+                    case Direction.Up:
+                        headLine = new Line(Cycle.Position, new Point(Cycle.Position.X, Cycle.Position.Y - distance));
+                        break;
+                    case Direction.Down:
+                        headLine = new Line(Cycle.Position, new Point(Cycle.Position.X, Cycle.Position.Y + distance));
+                        break;
+                    case Direction.Left:
+                        headLine = new Line(Cycle.Position, new Point(Cycle.Position.X - distance, Cycle.Position.Y));
+                        break;
+                    case Direction.Right:
+                        headLine = new Line(Cycle.Position, new Point(Cycle.Position.X + distance, Cycle.Position.Y));
+                        break;
+                }
+            }
+            Player killer;
+
+            return !(Cycle.IsOutsideGrid(headLine.End) || Cycle.CheckHeadLine(headLine, out killer));
+        }
+
+
+
+        private void SemiSmartRandomTurn(GameTime gameTime, float turnOdds)
+        {
+            turnOdds = MathHelper.Clamp(0, turnOdds, 1);
 
             if (m_lastTurn == new TimeSpan(0))
                 m_lastTurn = gameTime.TotalGameTime;
 
             if (gameTime.TotalGameTime - m_lastTurn > new TimeSpan(0, 0, 0, 0, 500))
             {
-                if (Cycle.Direction == Direction.Up || Cycle.Direction == Direction.Down)
-                {
-                    if (Cycle.Position.X < 10)
-                    {
-                        dirs = new []{Direction.Right};
-                    }else if (Cycle.Position.X > Game.GraphicsDevice.Viewport.Bounds.Width-10)
-                    {
-                        dirs = new [] { Direction.Left };
-                    }
-                    else
-                    {
-                        dirs = new [] { Direction.Right, Direction.Left };
-                    }
-                }
-                else
-                {
-                    if (Cycle.Position.Y < 10)
-                    {
-                        dirs = new[] { Direction.Down };
-                    }
-                    else if (Cycle.Position.Y > Game.GraphicsDevice.Viewport.Bounds.Height - 10)
-                    {
-                        dirs = new[] { Direction.Up };
-                    }
-                    else
-                    {
-                        dirs = new[] { Direction.Down, Direction.Up };
-                    }
-                }
 
-                int i = m_rand.Next(0, dirs.Length * 5);
-
-                if (i < dirs.Length)
+                if (m_rand.Next(0, (int)(1/turnOdds)) == 0)
                 {
-                    InvokeDirectionChange(new DirectionChangeEventArgs(getRandDir(dirs), Cycle.GetNextGridCrossing()));
+                    CallTurn(GetSafestDirection(Perpendicular(Cycle.Direction)));
                 }
-
                 m_lastTurn = gameTime.TotalGameTime;
             }
         }

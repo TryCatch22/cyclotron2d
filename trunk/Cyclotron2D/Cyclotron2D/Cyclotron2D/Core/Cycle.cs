@@ -46,7 +46,7 @@ namespace Cyclotron2D.Core
         #region Fields
 
         // We only turn on grid lines, so if the input is received early, we have to keep track of it.
-        private Point? m_nextGridCrossing;
+        private Point? m_nextTurnIntersection;
         private Player m_player;
         private Direction m_scheduledDirection;
 
@@ -143,7 +143,7 @@ namespace Cyclotron2D.Core
 
         #region Public Methods
 
-        public bool CheckWalls(Point position)
+        public bool IsOutsideGrid(Point position)
         {
             return position.X < 0 || position.Y < 0 || position.X > Game.GraphicsDevice.Viewport.Width || position.Y > Game.GraphicsDevice.Viewport.Height;
         }
@@ -200,9 +200,16 @@ namespace Cyclotron2D.Core
                 }
                 else
                 {
-                    //this is us we can remove the first 2 lines
-                    lines.RemoveAt(lines.Count - 1);
-                    if(lines.Count > 0)lines.RemoveAt(lines.Count - 1);
+                    //this is us we can remove the first 3 lines
+
+
+                    /*it could be that this is the AI checking a future line, if that is the case it could be an extension
+                     or a line at an angle if it is at an angle it is not in lines so it does not need to be removed*/
+                    if (lines[lines.Count - 1].Orientation == myline.Orientation) lines.RemoveAt(lines.Count-1);
+                    // 
+
+                     if(lines.Count > 0)lines.RemoveAt(lines.Count - 1);
+                     if (lines.Count > 0) lines.RemoveAt(lines.Count - 1);
                 }
 
 
@@ -225,10 +232,9 @@ namespace Cyclotron2D.Core
             {
                 lines.Add(new Line(m_vertices[i], m_vertices[i + 1]));
             }
-
-            //this can happen if we have turned but not yet moved
             lines.Add(new Line(m_vertices.Last(), Position));
-
+            
+            //can happen if not careful elsewhere
             lines.RemoveAll(line => line.End == line.Start);
 
             return lines;
@@ -274,7 +280,7 @@ namespace Cyclotron2D.Core
                 return;
 
 
-            m_nextGridCrossing = gridCrossing;
+            m_nextTurnIntersection = gridCrossing;
             m_scheduledDirection = direction;
         }
 
@@ -293,7 +299,7 @@ namespace Cyclotron2D.Core
 
             DrawLine(m_vertices.Last(), Position);
 
-			Game.SpriteBatch.Draw(Art.Bike, Position.ToVector(), null, BikeColor, Velocity.Orientation(), new Vector2(Art.Bike.Width / 2, Art.Bike.Height / 2), 1f, SpriteEffects.None, 0);
+			Game.SpriteBatch.Draw(Art.Bike, Position.ToVector(), null, BikeColor, (float)Math.PI + Velocity.Orientation(), new Vector2(Art.Bike.Width / 2, Art.Bike.Height / 2), 1f, SpriteEffects.None, 0);
         }
 
         public override void Update(GameTime gameTime)
@@ -361,26 +367,26 @@ namespace Cyclotron2D.Core
 
         private void CheckScheduledTurn()
         {
-            if (m_nextGridCrossing == null)
+            if (m_nextTurnIntersection == null)
                 return;
 
             bool turn = false;
             switch (Direction)
             {
                 case Direction.Down:
-                    if (Position.Y >= m_nextGridCrossing.Value.Y)
+                    if (Position.Y >= m_nextTurnIntersection.Value.Y)
                         turn = true;
                     break;
                 case Direction.Up:
-                    if (Position.Y <= m_nextGridCrossing.Value.Y)
+                    if (Position.Y <= m_nextTurnIntersection.Value.Y)
                         turn = true;
                     break;
                 case Direction.Right:
-                    if (Position.X >= m_nextGridCrossing.Value.X)
+                    if (Position.X >= m_nextTurnIntersection.Value.X)
                         turn = true;
                     break;
                 case Direction.Left:
-                    if (Position.X <= m_nextGridCrossing.Value.X)
+                    if (Position.X <= m_nextTurnIntersection.Value.X)
                         turn = true;
                     break;
                 default:
@@ -389,15 +395,16 @@ namespace Cyclotron2D.Core
             if (turn)
             {
                 Turn();
-                m_nextGridCrossing = null;
+                m_nextTurnIntersection = null;
             }
         }
+
 
         
         // Turn now.
         private void Turn()
         {
-            if (m_nextGridCrossing.HasValue)
+            if (m_nextTurnIntersection.HasValue)
             {
                 if ((int) Direction == - (int) m_scheduledDirection)
                 {
@@ -410,19 +417,29 @@ namespace Cyclotron2D.Core
                     {
                         //cancel turn
                         m_scheduledDirection = Direction;
-                        m_nextGridCrossing = null;
+                        m_nextTurnIntersection = null;
                     }
                     return;
                 }
-                else if (CycleJustTurned() || m_vertices.Last() == m_nextGridCrossing)
+                else if (CycleJustTurned() || m_vertices.Last() == m_nextTurnIntersection)
                 {
-                    m_nextGridCrossing = null;
+                    m_nextTurnIntersection = null;
                     return;
                 }
 
+                int elapsedDistance = (int)Position.Distance(m_nextTurnIntersection.Value);
+
                 Direction = m_scheduledDirection;
-                Position = m_nextGridCrossing.Value;
+
+                if (elapsedDistance > 0)
+                {
+                    m_vertices.Add(m_nextTurnIntersection.Value);
+                }
+
+                Position = m_nextTurnIntersection.Value.AddOffset(m_scheduledDirection, elapsedDistance);
                 m_vertices.Add(Position);
+
+                
             }
         }
 
@@ -435,7 +452,7 @@ namespace Cyclotron2D.Core
 
             Player killer = null;
 
-            bool hasCollision = CheckWalls(Position);
+            bool hasCollision = IsOutsideGrid(Position);
             
             if(!hasCollision)
                 hasCollision = CheckHeadLine(myline, out killer);
@@ -515,4 +532,28 @@ namespace Cyclotron2D.Core
 
         #endregion
     }
+
+
+    public static class PointOffset
+    {
+
+
+        public static Point AddOffset(this Point p, Direction dir, int dist)
+        {
+            switch (dir)
+            {
+                case Direction.Up:
+                    return new Point(p.X, p.Y - dist);
+                case Direction.Down:
+                    return new Point(p.X, p.Y + dist);
+                case Direction.Left:
+                    return new Point(p.X - dist, p.Y);
+                case Direction.Right:
+                    return new Point(p.X + dist, p.Y);
+                default:
+                    throw new Exception("Is there a 5th direction?");
+            }
+        }
+    }
+
 }

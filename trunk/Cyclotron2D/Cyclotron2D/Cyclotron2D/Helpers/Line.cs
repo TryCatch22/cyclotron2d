@@ -1,4 +1,5 @@
 ﻿using System;
+using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Helpers
@@ -16,7 +17,10 @@ namespace Cyclotron2D.Helpers
         {
             Start = start;
             End = end;
+
         }
+
+        public Orientation Orientation { get { return Start.X == End.X ? Orientation.Vertical : Orientation.Horizontal; }}
 
         public Point Start { get; set; }
         public Point End { get; set; }
@@ -87,6 +91,16 @@ namespace Cyclotron2D.Helpers
                 Swap(ref x3, ref x4);
 
             return ((x1 <= x3 && x2 >= x3) || (x1 <= x4 && x2 >= x4));
+        }
+
+        public override bool Equals(object obj)
+        {
+            var line = obj as Line;
+            if (line != null)
+            {
+                return line.Start == Start && line.End == End;
+            }
+            return false;
         }
 
         private static void Swap(ref int a, ref int b)
