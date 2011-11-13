@@ -19,6 +19,8 @@ namespace Cyclotron2D.Core.Players
 
         #region Public Methods
 
+        public override string Name { get { return "AIPlayer"; } set { } }
+
         public override void Initialize(Cycle cycle, int id)
         {
             base.Initialize(cycle, id);

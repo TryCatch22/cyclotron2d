@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
 using Cyclotron2D.Network;

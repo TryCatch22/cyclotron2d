@@ -60,9 +60,9 @@ namespace Cyclotron2D.Core
 
         #region Properties
 
-        public float Speed { get { return (Screen as GameScreen).GameSettings.CycleSpeed; } }
+        public float Speed { get { return (Screen as GameScreen).GameSettings.CycleSpeed.Value; } }
 
-        public bool AllowSuicide { get { return (Screen as GameScreen).GameSettings.AllowSuicide; } }
+        public bool AllowSuicide { get { return (Screen as GameScreen).GameSettings.AllowSuicide.Value; } }
 
         /// <summary>
         /// Screen position of Head in Pixels
@@ -107,7 +107,7 @@ namespace Cyclotron2D.Core
         /// <summary>
         /// max allowed tail length; set to 0 for unlimited tail length
         /// </summary>
-        public int MaxTailLength { get { return (Screen as GameScreen).GameSettings.MaxTailLength; } }
+        public int MaxTailLength { get { return (Screen as GameScreen).GameSettings.MaxTailLength.Value; } }
 
 
         #endregion

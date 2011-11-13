@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using Cyclotron2D.Screens.Base;
+using Cyclotron2D.Screens.Main;
 using Cyclotron2D.Screens.Popup;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -18,6 +19,8 @@ namespace Cyclotron2D.Core.Players
         public LocalPlayer(Game game, Screen screen) : base(game, screen)
         {
         }
+
+        public override string Name { get { return (Screen as GameScreen).GameSettings.PlayerName.Value; } set { } }
 
         public override void Initialize(Cycle cycle, int id)
         {
