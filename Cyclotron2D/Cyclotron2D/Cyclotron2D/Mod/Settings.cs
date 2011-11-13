@@ -65,7 +65,6 @@ namespace Cyclotron2D.Mod
                 string s = Encoding.Default.GetString(buf);
 
                 var lines = s.Split('\n').Where(line => !string.IsNullOrEmpty(line));
-
                 return lines.Select(line => line.Split('=')).ToDictionary(kvp => kvp[0], kvp => kvp[1]);
             }
 
@@ -85,16 +84,21 @@ namespace Cyclotron2D.Mod
                                      PlayerName.ToFileString()
                                  };
 
+            if (File.Exists(s_fileName))
+            {
+                File.Delete(s_fileName);
+            }
+            
 
-                using (var fileStream = File.OpenWrite(s_fileName))
+            using (var fileStream = File.OpenWrite(s_fileName))
+            {
+                foreach (var line in lines)
                 {
-                    foreach (var line in lines)
-                    {
-                        byte[] buf = Encoding.Default.GetBytes(line + "\n");
-                        fileStream.Write(buf,0, buf.Length);
-                    }
-                    fileStream.Close();
+                    byte[] buf = Encoding.Default.GetBytes(line + "\n");
+                    fileStream.Write(buf,0, buf.Length);
                 }
+                fileStream.Close();
+            }
         }
 
         public void LoadFromFile()

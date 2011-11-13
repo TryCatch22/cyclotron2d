@@ -17,6 +17,7 @@ namespace Cyclotron2D.Core
             : base(game, screen)
         {
             Size = size;
+            Visible = (Screen as GameScreen).GameSettings.DrawGrid.Value;
         }
 
         /// <summary>
@@ -55,14 +56,16 @@ namespace Cyclotron2D.Core
             return new Vector2(worldCoords.X/(float)PixelsPerInterval, worldCoords.Y/(float)PixelsPerInterval);
         }
 
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+            Visible = (Screen as GameScreen).GameSettings.DrawGrid.Value;
+            
+        }
+
         public override void Draw(GameTime gameTime)
         {
-            if (!(Screen as GameScreen).GameSettings.DrawGrid.Value)
-                return;
-            
             base.Draw(gameTime);
-
-
 
             for (int i = 0; i < Size.X; i += PixelsPerInterval)
                 Game.SpriteBatch.Draw(Art.Pixel, new Rectangle(i, 0, 1, (int) Size.Y), Color.SteelBlue);

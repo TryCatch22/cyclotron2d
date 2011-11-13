@@ -56,8 +56,12 @@ namespace Cyclotron2D.UI.UIElements
         /// <summary>
         /// so that you cant add any old UIElement to a Menu
         /// </summary>
-        /// <param name="item"></param>
-        private new void AddItems(params UIElement[] item)
+        /// <param name="items"></param>
+        private new void AddItems(params UIElement[] items)
+        {
+        }
+
+        private new void RemoveItem(params UIElement[] items)
         {
         }
 
@@ -66,7 +70,7 @@ namespace Cyclotron2D.UI.UIElements
             base.AddItems(item);
         }
 
-        public override void RemoveItem(MenuItem item)
+        public void RemoveItem(MenuItem item)
         {
             if (SelectedItem == item)
             {

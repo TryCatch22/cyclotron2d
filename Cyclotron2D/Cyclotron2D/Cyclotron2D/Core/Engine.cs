@@ -17,6 +17,8 @@ namespace Cyclotron2D.Core
     {
         #region Fields
 
+        public List<Player> Players { get { return m_playerMap.Keys.ToList(); } }
+
         private Grid m_grid;
         private Dictionary<Player, Cycle> m_playerMap;
 
@@ -32,6 +34,8 @@ namespace Cyclotron2D.Core
                                                         };
 
         #endregion
+
+        public TimeSpan GameStart { get; set; }
 
         #region Constructor
 
@@ -85,7 +89,7 @@ namespace Cyclotron2D.Core
             }
 
             m_grid.Initialize(m_playerMap.Values);
-
+            GameStart = Game.GameTime.TotalGameTime;
             SubscribePlayers();
             SubscribeCycles();
         }
@@ -94,8 +98,11 @@ namespace Cyclotron2D.Core
         {
             base.Draw(gameTime);
 
-            m_grid.Draw(gameTime);
-
+            if (m_grid.Visible)
+            {
+                m_grid.Draw(gameTime);
+            }
+            
             foreach (var cycle in m_playerMap.Values.Where(cycle => cycle.Visible))
             {
                 cycle.Draw(gameTime);
