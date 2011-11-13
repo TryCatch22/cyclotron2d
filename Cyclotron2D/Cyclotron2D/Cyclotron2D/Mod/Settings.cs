@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -102,20 +103,28 @@ namespace Cyclotron2D.Mod
 
             if (dict != null)
             {
-                GridSize.TrySetValue(dict[GridSize.Name]);
-                MaxTailLength.TrySetValue(dict[MaxTailLength.Name]);
-                CycleSpeed.TrySetValue(dict[CycleSpeed.Name]);
-                PlayerName.TrySetValue(dict[PlayerName.Name]);
+                try
+                {
+                    GridSize.TrySetValue(dict[GridSize.Name]);
+                    MaxTailLength.TrySetValue(dict[MaxTailLength.Name]);
+                    CycleSpeed.TrySetValue(dict[CycleSpeed.Name]);
+                    PlayerName.TrySetValue(dict[PlayerName.Name]);
 
-                bool b;
-                if(bool.TryParse(dict[AllowSuicide.Name], out b))
-                {
-                    AllowSuicide.TrySetValue(b);
+                    bool b;
+                    if (bool.TryParse(dict[AllowSuicide.Name], out b))
+                    {
+                        AllowSuicide.TrySetValue(b);
+                    }
+                    if (bool.TryParse(dict[DrawGrid.Name], out b))
+                    {
+                        DrawGrid.TrySetValue(b);
+                    }
                 }
-                if (bool.TryParse(dict[DrawGrid.Name], out b))
+                catch (InvalidValueException)
                 {
-                    DrawGrid.TrySetValue(b);
+                    DebugMessages.Add("Failed to load Settings from file");
                 }
+               
                 
             }
         }
