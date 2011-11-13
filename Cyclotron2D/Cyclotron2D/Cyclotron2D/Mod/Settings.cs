@@ -56,9 +56,9 @@ namespace Cyclotron2D.Mod
                 byte[] buf;
                 using(var fileStream = File.OpenRead(s_fileName))
                 {
-                      buf = new byte[fileStream.Length];
+                    buf = new byte[fileStream.Length];
 
-                      fileStream.Read(buf, 0, buf.Length);
+                    fileStream.Read(buf, 0, buf.Length);
                     fileStream.Close();
                 }
 

@@ -19,6 +19,9 @@ namespace Cyclotron2D.Core
             Size = size;
         }
 
+        /// <summary>
+        /// in Pixels
+        /// </summary>
         public Vector2 Size { get; private set; }
 
         public Point GridSize { get { return new Point((int) Math.Ceiling(Size.X/PixelsPerInterval), (int) Math.Ceiling(Size.Y/PixelsPerInterval)); } }
