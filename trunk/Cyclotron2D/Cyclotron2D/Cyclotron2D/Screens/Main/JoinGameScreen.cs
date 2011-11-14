@@ -43,7 +43,7 @@ namespace Cyclotron2D.Screens.Main {
 
 			m_hostIp.Label.TextColor = Color.White;
 			m_hostIp.LabelText = "Host Ip Adress:";
-			m_hostIp.Element.ValueChanged += (obj, args) => m_hostIp.BoxText = AutoCompleteIP(m_hostIp.BoxText, ((ValueChangedEventArgs)args).OldValue);
+			m_hostIp.Element.ValueChanged += (obj, args) => m_hostIp.BoxText = AutoCompleteIP(m_hostIp.BoxText, args.OldValue);
 
 			m_ok.OkText = "Connect";
 			m_ok.Rect = new Rectangle((int)(vp.Width * 3.2 / 5), vp.Height * 5 / 6, (int)(vp.Width / 3.7), vp.Height / 7);
@@ -93,14 +93,6 @@ namespace Cyclotron2D.Screens.Main {
 				return oldText;
 
 			return text;
-		}
-
-		protected override void OnStateChanged(object sender, StateChangedEventArgs e) {
-			base.OnStateChanged(sender, e);
-
-			if (IsValidState) {
-				Client.ConnectToServer();
-			}
 		}
 
 		private void TryConnect() {

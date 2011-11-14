@@ -7,7 +7,13 @@ namespace Cyclotron2D.UI.UIElements
 {
     public class TextBox :TextElement
     {
-		public event EventHandler ValueChanged;
+		public event EventHandler<ValueChangedEventArgs> ValueChanged;
+
+        public void InvokeValueChanged(ValueChangedEventArgs e)
+        {
+            EventHandler<ValueChangedEventArgs> handler = ValueChanged;
+            if (handler != null) handler(this, e);
+        }
 
         private bool m_readingText;
 
@@ -45,8 +51,8 @@ namespace Cyclotron2D.UI.UIElements
                 }
             }
 
-			if (oldText != Text && ValueChanged != null)
-				ValueChanged(this, new ValueChangedEventArgs(oldText));
+			if (oldText != Text)
+                InvokeValueChanged(new ValueChangedEventArgs(oldText));
         }
 
         protected override void HandleInupt(GameTime gameTime)
