@@ -36,6 +36,8 @@ namespace Cyclotron2D.Mod
 
         public Setting<bool> DrawGrid { get; set; }
 
+        public Setting<bool> PlasmaGrid { get; set; }
+
         public Setting<string> PlayerName { get; set; }
 
         public Settings()
@@ -45,6 +47,7 @@ namespace Cyclotron2D.Mod
             MaxTailLength = new RangedIntegerSetting("Max Tail Length", 0) { MinValue = 0, MaxValue = 3000 };
             AllowSuicide = new Setting<bool>("Allow Suicide", false) {Validate = val => true };
             DrawGrid = new Setting<bool>("Draw Grid", true) { Validate = val => true };
+            PlasmaGrid = new Setting<bool>("Plasma Grid", false) { Validate = val => true };
             PlayerName = new Setting<string>("Player Name", "You") { Validate = val => !string.IsNullOrWhiteSpace(val) }; 
         }
 
@@ -81,6 +84,7 @@ namespace Cyclotron2D.Mod
                                      MaxTailLength.ToFileString(),
                                      AllowSuicide.ToFileString(),
                                      DrawGrid.ToFileString(),
+                                     PlasmaGrid.ToFileString(),
                                      PlayerName.ToFileString()
                                  };
 
@@ -123,8 +127,12 @@ namespace Cyclotron2D.Mod
                     {
                         DrawGrid.TrySetValue(b);
                     }
+                    if (bool.TryParse(dict[PlasmaGrid.Name], out b))
+                    {
+                        PlasmaGrid.TrySetValue(b);
+                    }
                 }
-                catch (InvalidValueException)
+                catch (Exception)
                 {
                     DebugMessages.Add("Failed to load Settings from file");
                 }
