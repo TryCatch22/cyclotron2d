@@ -46,6 +46,9 @@ namespace Cyclotron2D
             m_graphics = new GraphicsDeviceManager(this);
             ScreenManager = new ScreenManager(this);
             InputState = new InputState(this);
+
+            m_graphics.PreferredBackBufferHeight = 800;
+            m_graphics.PreferredBackBufferWidth = 1280;
         }
 
         #endregion
