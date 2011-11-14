@@ -81,7 +81,7 @@ namespace Cyclotron2D.Core
                 case 4:
                     return new []{Direction.Up, Direction.Left, Direction.Right};
                 default:
-                    return new []{Direction.Up, Direction.Right};
+                    return new []{Direction.Up, Direction.Left};
             }
 
         }
