@@ -57,7 +57,7 @@ namespace Cyclotron2D.Core
         {
             Cycles = cycles.ToList();
 
-            GridColor = Color.Maroon;
+            GridColor = Color.SteelBlue;
         }
 
         /// <summary>
