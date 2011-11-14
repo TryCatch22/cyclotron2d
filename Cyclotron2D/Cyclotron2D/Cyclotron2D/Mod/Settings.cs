@@ -42,7 +42,7 @@ namespace Cyclotron2D.Mod
         {
             GridSize = new RangedIntegerSetting("Grid Size",5){MinValue = 2, MaxValue = 15};
             CycleSpeed = new RangedFloatSetting("Cycle Speed", 3) { MinValue = 1, MaxValue = 5 };
-            MaxTailLength = new RangedIntegerSetting("Max Tail Length", 0) { MinValue = 0, MaxValue = 1500 };
+            MaxTailLength = new RangedIntegerSetting("Max Tail Length", 0) { MinValue = 0, MaxValue = 3000 };
             AllowSuicide = new Setting<bool>("Allow Suicide", false) {Validate = val => true };
             DrawGrid = new Setting<bool>("Draw Grid", true) { Validate = val => true };
             PlayerName = new Setting<string>("Player Name", "You") { Validate = val => !string.IsNullOrWhiteSpace(val) }; 
