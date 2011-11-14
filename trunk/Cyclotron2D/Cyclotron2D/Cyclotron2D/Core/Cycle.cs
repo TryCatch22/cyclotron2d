@@ -21,7 +21,7 @@ namespace Cyclotron2D.Core
     }
 
 
-    public struct CycleInfo
+    public class CycleInfo
     {
         public Color Color;
         public Direction Direction;

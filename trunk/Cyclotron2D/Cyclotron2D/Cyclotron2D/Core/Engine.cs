@@ -22,6 +22,8 @@ namespace Cyclotron2D.Core
         private Grid m_grid;
         private Dictionary<Player, Cycle> m_playerMap;
 
+        private StartRandomizer starter;
+
         //we might want to randomize this at some point but for now its plenty
         private readonly List<CycleInfo> m_startConditions = new List<CycleInfo>
                                                         {
@@ -43,6 +45,7 @@ namespace Cyclotron2D.Core
             : base(game, screen)
         {
             m_playerMap = new Dictionary<Player, Cycle>();
+            starter = new StartRandomizer(game);
 
             m_grid = new Grid(Game, Screen, Game.GraphicsDevice.Viewport.Bounds.Size());
         }
@@ -80,6 +83,7 @@ namespace Cyclotron2D.Core
 
         public void StartGame(IEnumerable<Player> players)
         {
+            RandomizeStart();
             int i = 0;
             foreach (var player in players)
             {
@@ -106,6 +110,22 @@ namespace Cyclotron2D.Core
             foreach (var cycle in m_playerMap.Values.Where(cycle => cycle.Visible))
             {
                 cycle.Draw(gameTime);
+            }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void RandomizeStart()
+        {
+            var values = starter.Randomize(6, m_grid.PixelsPerInterval);
+
+            for (int i = 0; i < 6; i++)
+            {
+                m_startConditions[i].Direction = values[i].Dir;
+                m_startConditions[i].GridPosition = values[i].Position;
+
             }
         }
 

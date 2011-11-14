@@ -6,9 +6,6 @@ using Cyclotron2D.Mod;
 using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
 
-//Temporary
-using Cyclotron2D.Network;
-
 namespace Cyclotron2D.Screens.Main
 {
     /// <summary>
@@ -97,6 +94,7 @@ namespace Cyclotron2D.Screens.Main
             else if (e.NewState == GameState.PlayingAsClient && e.OldState == GameState.JoiningGame)
             {
                 //get players and settings from network and start game
+                GameSettings = Settings.Default;
             }
 
 

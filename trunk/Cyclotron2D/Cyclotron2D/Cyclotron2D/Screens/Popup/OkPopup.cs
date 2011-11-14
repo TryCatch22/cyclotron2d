@@ -23,7 +23,7 @@ namespace Cyclotron2D.Screens.Popup
         public OkPopup(Game game, MainScreen parent) : base(game, parent)
         {
             Rectangle vp = Game.GraphicsDevice.Viewport.Bounds;
-            Rect = new Rectangle(vp.Width / 7, vp.Height / 4, vp.Width * 5 / 7, vp.Height / 2);
+            Rect = new Rectangle(vp.Width / 7, vp.Height / 5, vp.Width * 5 / 7, vp.Height / 2);
             Background = new Color(0, 0, 0, 230);
             OkButton = new Button(game, this);
             Message = new TextElement(game, this){TextColor = Color.White};
@@ -33,7 +33,7 @@ namespace Cyclotron2D.Screens.Popup
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            OkButton.Rect = RectangleBuilder.BottomRight(Rect, new Vector2(0.3f, 0.15f), new Point(5, 5));
+            OkButton.Rect = RectangleBuilder.BottomRight(Rect, new Vector2(0.3f, 0.1f), new Point(5, 5));
             Message.Rect = RectangleBuilder.Centered(Rect, new Vector2(0.6f, 0.6f));
         }
 
