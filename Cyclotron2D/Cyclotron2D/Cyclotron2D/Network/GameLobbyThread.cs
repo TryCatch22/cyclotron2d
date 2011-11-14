@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Net.Sockets;
 
@@ -22,9 +20,7 @@ namespace Cyclotron2D.Network {
 			this.Clients = server.clients;
 			this.ServerSocket = server.GameLobbySocket;
 
-			ConnectionThread = new Thread(new ThreadStart(this.WaitForClient));
-			ConnectionThread.IsBackground = true;
-			ConnectionThread.Name = name;
+			ConnectionThread = new Thread(WaitForClient) {IsBackground = true, Name = name};
 		}
 
 		/// <summary>
