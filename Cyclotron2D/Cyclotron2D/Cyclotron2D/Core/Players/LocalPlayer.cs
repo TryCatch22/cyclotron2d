@@ -25,7 +25,7 @@ namespace Cyclotron2D.Core.Players
         public override void Initialize(Cycle cycle, int id)
         {
             base.Initialize(cycle, id);
-            SubscribeCycle();
+            SubscribeCycleCollision();
         }
 
         protected override void HandleInupt(GameTime gameTime)
@@ -68,12 +68,12 @@ namespace Cyclotron2D.Core.Players
 
         #region Subscription
 
-        private void SubscribeCycle()
+        private void SubscribeCycleCollision()
         {
             Cycle.Collided += OnCollision;
         }
 
-        private void UnsubscribeCycle()
+        private void UnsubscribeCycleCollision()
         {
             Cycle.Collided -= OnCollision;
         }
@@ -100,7 +100,7 @@ namespace Cyclotron2D.Core.Players
         {
             if (disposing && Cycle != null)
             {
-                UnsubscribeCycle();
+                UnsubscribeCycleCollision();
             }
             base.Dispose(disposing);
         }

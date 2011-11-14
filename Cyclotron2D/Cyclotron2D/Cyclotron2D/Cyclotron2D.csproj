@@ -111,6 +111,7 @@
     <Compile Include="Core\Players\AIPlayer.cs" />
     <Compile Include="Core\Players\LocalPlayer.cs" />
     <Compile Include="Core\Players\RemotePlayer.cs" />
+    <Compile Include="Core\StartRandomizer.cs" />
     <Compile Include="Helpers\RectangleBuilder.cs" />
     <Compile Include="Helpers\Sorter.cs" />
     <Compile Include="Helpers\Vector2Extention.cs" />

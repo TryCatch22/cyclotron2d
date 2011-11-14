@@ -15,9 +15,9 @@ namespace Cyclotron2D.Screens.Popup
             m_table = new PlayerTable(game, this);
 
             Rectangle vp = Game.GraphicsDevice.Viewport.Bounds;
-            Rect = new Rectangle(vp.Width / 7, vp.Height / 6, vp.Width * 5 / 7, vp.Height * 2 /3);
+            Rect = new Rectangle(vp.Width / 7, vp.Height / 6, vp.Width * 5 / 7, vp.Height * 3 /4);
 
-            m_table.Rect = new Rectangle(Rect.X + Rect.Width/8, Rect.Y, Rect.Width * 6/8, Rect.Height * 5/6);
+            m_table.Rect = new Rectangle(Rect.X + Rect.Width/8, Rect.Y + Rect.Height/40, Rect.Width * 6/8, Rect.Height * 5/6);
             m_table.Initialize((parent as GameScreen).ActivePlayers);
 
             OnOkClicked = Quit;
