@@ -21,6 +21,7 @@ namespace Cyclotron2D.Screens.Main
         private LabelTextBox m_maxTailLength;
         private LabelCheckBox m_suicide;
         private LabelCheckBox m_drawGrid;
+        private LabelCheckBox m_plasmaGrid;
         private LabelTextBox m_playerName;
 
 
@@ -33,6 +34,7 @@ namespace Cyclotron2D.Screens.Main
         {
 
             m_drawGrid = new LabelCheckBox(game, this);
+            m_plasmaGrid = new LabelCheckBox(game, this);
             m_OptionsPanel = new StretchPanel(game, this);
             m_gridSize = new LabelTextBox(game, this);
             m_cycleSpeed = new LabelTextBox(game, this);
@@ -40,7 +42,7 @@ namespace Cyclotron2D.Screens.Main
             m_suicide = new LabelCheckBox(game, this);
             m_playerName = new LabelTextBox(game, this);
 
-            m_OptionsPanel.AddItems(m_gridSize, m_cycleSpeed, m_maxTailLength, m_suicide, m_drawGrid, m_playerName);
+            m_OptionsPanel.AddItems(m_gridSize, m_cycleSpeed, m_maxTailLength, m_suicide, m_drawGrid, m_plasmaGrid, m_playerName);
 
           
         }
@@ -55,6 +57,7 @@ namespace Cyclotron2D.Screens.Main
             m_suicide.LabelText = Settings.Current.AllowSuicide.ToString();
             m_drawGrid.LabelText = Settings.Current.DrawGrid.ToString();
             m_playerName.LabelText = Settings.Current.PlayerName.ToString();
+            m_plasmaGrid.LabelText = Settings.Current.PlasmaGrid.ToString();
 
 
             m_cycleSpeed.Label.TextColor = Color.White;
@@ -63,6 +66,7 @@ namespace Cyclotron2D.Screens.Main
             m_suicide.Label.TextColor = Color.White;
             m_drawGrid.Label.TextColor = Color.White;
             m_playerName.Label.TextColor = Color.White;
+            m_plasmaGrid.Label.TextColor = Color.White;
 
             var vp = GraphicsDevice.Viewport.Bounds;
 
@@ -88,6 +92,7 @@ namespace Cyclotron2D.Screens.Main
                 m_suicide.IsChecked = Settings.Current.AllowSuicide.Value;
                 m_drawGrid.IsChecked = Settings.Current.DrawGrid.Value;
                 m_playerName.BoxText = Settings.Current.PlayerName.Value;
+                m_plasmaGrid.IsChecked = Settings.Current.PlasmaGrid.Value;
             }
         }
 
@@ -103,6 +108,7 @@ namespace Cyclotron2D.Screens.Main
                 Settings.Current.AllowSuicide.TrySetValue(m_suicide.IsChecked);
                 Settings.Current.DrawGrid.TrySetValue(m_drawGrid.IsChecked);
                 Settings.Current.PlayerName.TrySetValue(m_playerName.BoxText);
+                Settings.Current.PlasmaGrid.TrySetValue(m_plasmaGrid.IsChecked);
                 
                 Settings.Current.WriteToFile();
 

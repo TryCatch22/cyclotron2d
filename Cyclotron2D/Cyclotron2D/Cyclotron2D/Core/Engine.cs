@@ -24,20 +24,24 @@ namespace Cyclotron2D.Core
 
         private StartRandomizer starter;
 
-        //we might want to randomize this at some point but for now its plenty
+        //these values are overwritten, except for colors
         private readonly List<CycleInfo> m_startConditions = new List<CycleInfo>
                                                         {
                                                             new CycleInfo(new Vector2(3, 3), Direction.Right, Color.Red), //1
                                                             new CycleInfo(new Vector2(30, 70), Direction.Up, Color.Yellow), //2
                                                             new CycleInfo(new Vector2(80, 28), Direction.Down, Color.Green), //3
-                                                            new CycleInfo(new Vector2(120, 90), Direction.Left, Color.Purple), //4
+                                                            new CycleInfo(new Vector2(120, 90), Direction.Left, Color.Teal), //4
                                                             new CycleInfo(new Vector2(150, 50), Direction.Up, Color.DarkOrange), //5
                                                             new CycleInfo(new Vector2(120, 12), Direction.Left, Color.WhiteSmoke), //6
                                                         };
 
         #endregion
 
+        #region Properties
+
         public TimeSpan GameStart { get; set; }
+
+        #endregion
 
         #region Constructor
 
