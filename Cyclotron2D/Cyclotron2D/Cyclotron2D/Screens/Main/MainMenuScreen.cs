@@ -48,7 +48,7 @@ namespace Cyclotron2D.Screens.Main
                     Game.ChangeState(GameState.PlayingSolo);
                     break;
 				case 1:
-					Game.ChangeState(GameState.Hosting);
+					Game.ChangeState(GameState.GameLobbyHost);
 					break;
                 case 2:
                     Game.ChangeState(GameState.JoiningGame);

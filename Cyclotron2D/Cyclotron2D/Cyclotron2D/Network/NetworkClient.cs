@@ -34,8 +34,8 @@ namespace Cyclotron2D.Network {
 		/// </summary>
 		public void ConnectToServer() {
 			if (Client != null && Client.Connected) {
-				//Closes the open socket and creates a new one
-				Client.Close();
+				//full disconnect or the listener thread crashes when the socked is closed -AL
+                Disconnect();
 			}
 
 			try {
@@ -58,7 +58,7 @@ namespace Cyclotron2D.Network {
 			if (ReceiveThread != null) {
 				ReceiveThread.Kill();
 			}
-			Client.Close();
+			if(Client != null)Client.Close();
 		}
 
 
@@ -75,9 +75,8 @@ namespace Cyclotron2D.Network {
 
 			public NetworkClientThread(Socket clientSocket) {
 				ClientSocket = clientSocket;
-				ReceivingThread = new Thread(new ThreadStart(this.Receive));
-				ReceivingThread.IsBackground = true;
-				StayAlive = true;
+				ReceivingThread = new Thread(Receive) {IsBackground = true};
+			    StayAlive = true;
 				buffer = new Byte[MAX_BUFFER_SIZE];
 				ClearReceiveBuffer();
 				ReceivingThread.Start();
@@ -86,7 +85,7 @@ namespace Cyclotron2D.Network {
 			/// <summary>
 			/// Clears the receive buffer of the socket.
 			/// </summary>
-			public void ClearReceiveBuffer() {
+			private void ClearReceiveBuffer() {
 				if (ClientSocket.Available > 0) {
 					Byte[] throwaway = new Byte[ClientSocket.Available];
 					ClientSocket.Receive(throwaway);
@@ -97,11 +96,10 @@ namespace Cyclotron2D.Network {
 			/// When connected to a game lobby, listens to messages sent by the lobby.
 			/// Runs until the thread dies.
 			/// </summary>
-			public void Receive() {
+			private void Receive() {
 				while (ReceivingThread.IsAlive) {
 					Console.WriteLine("Client Receiving: ");
 					//Wait for messages
-					DateTime startRcv = DateTime.UtcNow;
 					while (ClientSocket.Available == 0 && StayAlive) ;
 					while (ClientSocket.Available > 0) {
 						ClientSocket.Receive(buffer);

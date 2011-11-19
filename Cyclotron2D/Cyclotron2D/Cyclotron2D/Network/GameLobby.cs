@@ -103,9 +103,8 @@ namespace Cyclotron2D.Network {
 		/// Messages all clients with a message when the lobby becomes closed.
 		/// </summary>
 		public void Start() {
-			Thread listenerSpawner = new Thread(new ThreadStart(this.SpawnConnectionThreads));
-			listenerSpawner.Name = "ListenerSpawningThread";
-			listenerSpawner.Start();
+			Thread listenerSpawner = new Thread(SpawnConnectionThreads) {Name = "ListenerSpawningThread"};
+		    listenerSpawner.Start();
 
 		}
 

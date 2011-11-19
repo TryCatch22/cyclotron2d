@@ -21,7 +21,7 @@ namespace Cyclotron2D.Screens.Main {
 		GameLobby Lobby;
 
 		public GameLobbyScreen(Game game)
-			: base(game, GameState.Hosting) {
+			: base(game, GameState.GameLobbyHost | GameState.GameLobbyClient) {
 
 			SpamButton = new Button(game, this);
 			SpamButton.Click += OnSpamButtonClicked;
@@ -33,7 +33,7 @@ namespace Cyclotron2D.Screens.Main {
 
 			CloseButton = new Button(game, this);
 			CloseButton.Click += OnCloseButtonClick;
-			CloseButton.Text = "Start";
+			CloseButton.Text = "Close";
 
 			SpamTextBox = new LabelTextBox(game, this);
 			SpamTextBox.Label.Background = Color.Black;
@@ -42,6 +42,18 @@ namespace Cyclotron2D.Screens.Main {
 			SpamTextBox.BoxText = "GLHF";
 			SpamTextBox.Background = Color.Gray;
 		}
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            Rectangle win = GraphicsDevice.Viewport.Bounds;
+
+            SpamTextBox.Rect = new Rectangle(50, 150, (int)(win.Width * 0.7), (int)(win.Height * 0.2));
+            SpamButton.Rect = new Rectangle(200, SpamTextBox.Rect.Bottom + 10, (int)(win.Width * 0.5), (int)(win.Height * 0.2));
+            CancelButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.15f), new Point(20, 10));
+            CloseButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.15f), new Point(25 + CancelButton.Rect.Width, 10)); 
+
+        }
 
 		private void OnSpamButtonClicked(Object sender, EventArgs e) {
 			if (this.HasFocus) {
@@ -70,13 +82,6 @@ namespace Cyclotron2D.Screens.Main {
 			base.OnStateChanged(sender, e);
 
 			if (IsValidState) {
-				Rectangle win = GraphicsDevice.Viewport.Bounds;
-
-				SpamTextBox.Rect = new Rectangle(50, 150, (int)(win.Width * 0.7), (int)(win.Height * 0.2));
-				SpamButton.Rect = new Rectangle(200, SpamTextBox.Rect.Bottom + 10, (int)(win.Width*0.5), (int)(win.Height*0.2));
-				CancelButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.15f), new Point(20, 10));
-				CloseButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.15f), new Point(25 + CancelButton.Rect.Width, 10)); 
-
 				Lobby = new GameLobby();
 				Lobby.Start();
 			}

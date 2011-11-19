@@ -41,7 +41,7 @@ namespace Cyclotron2D.Network {
 				Socket client = ServerSocket.Accept();
 				print("Accepting Connection ...");
 				Clients.Add(client);
-				print("Accepted 1 Client");
+			    print("Accepted Client #" + Clients.Count);
 			} catch (SocketException ex) {
 				Console.WriteLine(ex);
 			} catch (ThreadAbortException) {
