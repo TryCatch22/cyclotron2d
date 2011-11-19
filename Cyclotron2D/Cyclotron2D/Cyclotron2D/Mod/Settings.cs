@@ -53,7 +53,6 @@ namespace Cyclotron2D.Mod
 
         private static Dictionary<string, string> ReadSettings()
         {
-            //Dictionary<string, string> dict = new Dictionary<string, string>();
             if (File.Exists(s_fileName))
             {
                 byte[] buf;
@@ -74,8 +73,12 @@ namespace Cyclotron2D.Mod
             return null;
         }
 
-
         public void WriteToFile()
+        {
+            WriteToFile(s_fileName);
+        }
+
+        public void WriteToFile(string fileName)
         {
             string[] lines = new[]
                                  {
@@ -88,13 +91,13 @@ namespace Cyclotron2D.Mod
                                      PlayerName.ToFileString()
                                  };
 
-            if (File.Exists(s_fileName))
+            if (File.Exists(fileName))
             {
-                File.Delete(s_fileName);
+                File.Delete(fileName);
             }
             
 
-            using (var fileStream = File.OpenWrite(s_fileName))
+            using (var fileStream = File.OpenWrite(fileName))
             {
                 foreach (var line in lines)
                 {
