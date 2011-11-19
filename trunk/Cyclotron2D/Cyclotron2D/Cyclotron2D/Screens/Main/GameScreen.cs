@@ -24,7 +24,7 @@ namespace Cyclotron2D.Screens.Main
         private bool m_gameStarted;
 
         public GameScreen(Game game)
-            : base(game, GameState.PlayingAsClient | GameState.PlayingSolo)
+            : base(game, GameState.PlayingAsClient | GameState.PlayingSolo | GameState.PlayingAsHost)
         {
             GameSettings = Settings.Current;
             m_engine = new Engine(game, this);
@@ -87,14 +87,14 @@ namespace Cyclotron2D.Screens.Main
                               };
                 GameSettings = Settings.Current;
             }
-            else if (e.NewState == GameState.Hosting && e.OldState == GameState.WaitingForClients)
+            else if (e.NewState == GameState.PlayingAsHost && e.OldState == GameState.GameLobbyHost)
             {
                 //get players from network and then start game
             }
-            else if (e.NewState == GameState.PlayingAsClient && e.OldState == GameState.JoiningGame)
+            else if (e.NewState == GameState.PlayingAsClient && e.OldState == GameState.GameLobbyClient)
             {
                 //get players and settings from network and start game
-                GameSettings = Settings.Default;
+              
             }
 
 

@@ -138,7 +138,7 @@
     <Compile Include="UI\CancelOk.cs" />
     <Compile Include="UI\LabelCheckBox.cs" />
     <Compile Include="UI\PlayerView.cs" />
-    <Compile Include="UI\PlayerTable.cs" />
+    <Compile Include="UI\EndGameTable.cs" />
     <Compile Include="UI\UIElements\Button.cs" />
     <Compile Include="UI\UIElements\CheckBox.cs" />
     <Compile Include="UI\LabelTextBox.cs" />

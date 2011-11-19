@@ -8,11 +8,11 @@ namespace Cyclotron2D.Screens.Popup
 {
     class EndGamePopup : OkPopup
     {
-        private PlayerTable m_table;
+        private EndGameTable m_table;
 
         public EndGamePopup(Game game, MainScreen parent, string text) : base(game, parent)
         {
-            m_table = new PlayerTable(game, this);
+            m_table = new EndGameTable(game, this);
 
             Rectangle vp = Game.GraphicsDevice.Viewport.Bounds;
             Rect = new Rectangle(vp.Width / 7, vp.Height / 6, vp.Width * 5 / 7, vp.Height * 3 /4);

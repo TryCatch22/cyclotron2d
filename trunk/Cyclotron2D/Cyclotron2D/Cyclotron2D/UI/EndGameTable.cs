@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.UI
 {
-    public class PlayerTable : UIElement, IComparer<PlayerView>
+    public class EndGameTable : UIElement, IComparer<PlayerView>
     {
         private StretchPanel m_playerPanel;
         private List<PlayerView> m_playerViews;
@@ -23,7 +23,7 @@ namespace Cyclotron2D.UI
 
         public List<Player> Players { get; private set; }
 
-        public PlayerTable(Game game, Screen screen) : base(game, screen)
+        public EndGameTable(Game game, Screen screen) : base(game, screen)
         {
             m_playerViews = new List<PlayerView>();
             m_lifetimes = new List<TextElement>();

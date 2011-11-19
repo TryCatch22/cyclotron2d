@@ -16,17 +16,19 @@ namespace Cyclotron2D
     {
         MainMenu = 1,
 
-        WaitingForClients = 2,
+        PlayingSolo = 2,
 
-        JoiningGame = 4,
+        GameLobbyHost = 4,
 
-        Hosting = 8,
+        JoiningGame = 8,
 
-        PlayingAsClient = 16,
+        GameLobbyClient = 16,
 
-        PlayingSolo = 32,
+        PlayingAsClient = 32,
 
-        ChangingSettings = 64,
+        PlayingAsHost = 64,
+
+        ChangingSettings = 128,
     }
 
     public class StateChangedEventArgs : EventArgs

@@ -181,7 +181,7 @@ namespace Cyclotron2D
             // make sure focus is properly allocated
             foreach (MainScreen screen in Screens.Keys)
             {
-                screen.HasFocus = screen == ActiveScreen;
+                screen.HasFocus = screen == ActiveScreen && Game.IsActive;
 
                 bool popupFound = false;
                 //tranverse popup list in reverse order

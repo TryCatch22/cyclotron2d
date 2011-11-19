@@ -110,7 +110,7 @@ namespace Cyclotron2D.Screens.Main {
 			//    DebugMessages.Add("Invalid IP Address, fool!");
 			//}
 
-			Client.Disconnect();
+			//Client.Disconnect();
 			Client.ConnectToServer();
 		}
 
