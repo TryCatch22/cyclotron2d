@@ -1,4 +1,6 @@
-﻿using Cyclotron2D.Mod;
+﻿using System;
+using System.Net;
+using Cyclotron2D.Mod;
 using Cyclotron2D.Screens.Base;
 using Cyclotron2D.UI;
 using Cyclotron2D.UI.UIElements;
@@ -17,7 +19,7 @@ namespace Cyclotron2D.Screens.Main {
 	    private StretchPanel m_panel;
 
 		private CancelOk m_ok;
-		private NetworkClient Client;
+		private NetworkConnection Client;
 
 		public JoinGameScreen(Game game)
 			: base(game, GameState.JoiningGame) {
@@ -26,7 +28,7 @@ namespace Cyclotron2D.Screens.Main {
             m_playerName = new LabelTextBox(game, this);
             m_hostIp = new IpTextBox(game, this);
 			m_ok = new CancelOk(game, this);
-			Client = new NetworkClient();
+			Client = new NetworkConnection();
 
             m_panel.AddItems(m_playerName, m_hostIp);
 		}
@@ -42,6 +44,16 @@ namespace Cyclotron2D.Screens.Main {
 			base.Dispose(disposing);
 		}
 
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+            if (!Client.IsConnected && Client.Socket!= null && Client.Socket.Connected)
+            {
+                Client.Disconnect();
+                DebugMessages.Add("Connection Lost");
+            }
+        }
+
 		public override void Initialize() {
 			var vp = Game.GraphicsDevice.Viewport.Bounds;
 
@@ -55,6 +67,7 @@ namespace Cyclotron2D.Screens.Main {
 
 			m_hostIp.Label.TextColor = Color.White;
 			m_hostIp.LabelText = "Host Ip Adress:";
+		    m_hostIp.BoxText = "127.0.0.1";
 
 			m_ok.OkText = "Connect";
 			m_ok.Rect = new Rectangle((int)(vp.Width * 3.2 / 5), vp.Height * 5 / 6, (int)(vp.Width / 3.7), vp.Height / 7);
@@ -63,22 +76,19 @@ namespace Cyclotron2D.Screens.Main {
 		}
 
 		private void TryConnect() {
-			//try
-			//{
-			//    var ip = IPAddress.Parse(m_hostIp.BoxText);
-			//    Game.ScreenManager.AddScreen(new OkPopup(Game, this)
-			//    {
-			//        MessageText = "Connecting...",
-			//        OkText = "Cancel"
-			//    });
-			//}
-			//catch (FormatException e)
-			//{
-			//    DebugMessages.Add("Invalid IP Address, fool!");
-			//}
-
-			//Client.Disconnect();
-			Client.ConnectToServer();
+			try
+			{
+			    var ip = IPAddress.Parse(m_hostIp.BoxText);
+                Client.ConnectTo(ip);
+			}
+			catch (FormatException)
+			{
+			    DebugMessages.Add("Invalid IP Address, fool!");
+			}
+            catch(AlreadyConnectedException e)
+		    {
+                DebugMessages.Add(e.Message);
+		    }
 		}
 
 		private void CancelConnection() {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Cyclotron2D.Core.Players;
 using Cyclotron2D.Screens.Base;
 using Cyclotron2D.UI;
 using Microsoft.Xna.Framework;
@@ -29,17 +30,19 @@ namespace Cyclotron2D.Screens.Main {
             /*m_playerViews = new List<PlayerView>();
             m_playersPanel = new StretchPanel(game, this);*/
 
+           
+
 			SpamButton = new Button(game, this);
 			SpamButton.Click += OnSpamButtonClicked;
 			SpamButton.Text = "Send Spam";
 
 			CancelButton = new Button(game, this);
 			CancelButton.Click += OnCancelButtonClicked;
-			CancelButton.Text = "Cancel";
+			CancelButton.Text = "Main Menu";
 
 			CloseButton = new Button(game, this);
 			CloseButton.Click += OnCloseButtonClick;
-			CloseButton.Text = "Close";
+			CloseButton.Text = "Close Lobby";
 
 			SpamTextBox = new LabelTextBox(game, this);
 			SpamTextBox.Label.Background = Color.Black;
@@ -49,7 +52,8 @@ namespace Cyclotron2D.Screens.Main {
 			SpamTextBox.Background = Color.Gray;
 		}
 
-        public override void Initialize()
+
+	    public override void Initialize()
         {
             base.Initialize();
             Rectangle win = GraphicsDevice.Viewport.Bounds;
@@ -61,8 +65,11 @@ namespace Cyclotron2D.Screens.Main {
 
         }
 
-		private void OnSpamButtonClicked(Object sender, EventArgs e) {
-				Lobby.messageAllClients(new NetworkMessage(MessageType.Debug, SpamTextBox.BoxText));
+        #region Event Handlers
+
+        private void OnSpamButtonClicked(Object sender, EventArgs e) 
+        {
+            Game.Communicator.SendDebugMessage(SpamTextBox.BoxText);
 		}
 
 		private void OnCancelButtonClicked(Object sender, EventArgs e) {
@@ -74,7 +81,25 @@ namespace Cyclotron2D.Screens.Main {
 			Lobby.CloseGameLobby();
 		}
 
-		/// <summary>
+        private void SubscribeLobby()
+        {
+            Lobby.NewConnection += OnNewConnection;
+        }
+
+        #endregion
+
+
+        private void OnNewConnection(object sender, ConnectionEventArgs e)
+        {
+            var gameScreen = Game.ScreenManager.GameScreen;
+            var rem = new RemotePlayer(Game, gameScreen);
+ 
+            Game.Communicator.Add(rem, e.Socket);
+            gameScreen.AddRemotePlayer(rem);
+
+        }
+
+        /// <summary>
 		///  Starts the GameLobby instance and spawns threads to accept connections accordingly.
 		/// 
 		/// </summary>
@@ -83,10 +108,23 @@ namespace Cyclotron2D.Screens.Main {
 		protected override void OnStateChanged(object sender, StateChangedEventArgs e) {
 			base.OnStateChanged(sender, e);
 
-			if (IsValidState) {
-				Lobby = new GameLobby();
-				Lobby.Start();
-			}
+
+            switch (Game.State)
+            {
+                case GameState.GameLobbyHost:
+                    if (Lobby == null)
+                    {
+                        Lobby = new GameLobby(Game);
+                        SubscribeLobby();
+                    }
+                    Lobby.Start();
+                    break;
+                case GameState.GameLobbyClient:
+                    break;
+                default:
+                    return;
+            }
+
 		}
 
 

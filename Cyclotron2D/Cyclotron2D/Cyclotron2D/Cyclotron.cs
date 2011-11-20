@@ -1,5 +1,6 @@
 using System;
 using Cyclotron2D.Mod;
+using Cyclotron2D.Network;
 using Cyclotron2D.Screens.Main;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -35,6 +36,8 @@ namespace Cyclotron2D
 
         public SpriteBatch SpriteBatch { get; private set; }
 
+        public NetworkCommunicator Communicator { get; private set; }
+
         #endregion
 
         #region Constructor
@@ -46,6 +49,7 @@ namespace Cyclotron2D
             m_graphics = new GraphicsDeviceManager(this);
             ScreenManager = new ScreenManager(this);
             InputState = new InputState(this);
+            Communicator = new NetworkCommunicator(this);
 
             m_graphics.PreferredBackBufferHeight = 700;
             m_graphics.PreferredBackBufferWidth = 1150;

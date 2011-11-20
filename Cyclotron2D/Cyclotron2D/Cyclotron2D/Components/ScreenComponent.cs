@@ -113,7 +113,8 @@ namespace Cyclotron2D.Components
             : base(game)
         {
             Screen = screen;
-            m_oldEnabled = Enabled;
+            Enabled = Screen.Enabled;
+            m_oldEnabled = true;
             SubscribeScreen();
         }
 

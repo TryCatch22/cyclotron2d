@@ -7,11 +7,22 @@ namespace Cyclotron2D.Network
     {
         public NetworkMessage Message { get; private set; }
 
-        public Socket Socket { get; set; }
-
         public MessageEventArgs(NetworkMessage message)
         {
             Message = message;
         }
+    }
+
+    public class ConnectionEventArgs: EventArgs
+    {
+
+        public Socket Socket { get; private set; }
+
+        public ConnectionEventArgs(Socket socket)
+        {
+            Socket = socket;
+        }
+   
+
     }
 }

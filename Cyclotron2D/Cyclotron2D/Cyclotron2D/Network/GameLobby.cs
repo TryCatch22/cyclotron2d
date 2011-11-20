@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
+using Cyclotron2D.Components;
+using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Network {
 
-	public class GameLobby
+    /// <summary>
+    /// The Lobby runs on the Host machine and waits for incomming connections.
+    /// Throws an Event when a new connection arrives.
+    /// 
+    /// </summary>
+	public class GameLobby : CyclotronComponent
     {
         #region Constants
 
@@ -16,7 +23,7 @@ namespace Cyclotron2D.Network {
         /// </summary>
 		public const int GAME_PORT = 9081;
 
-		private const int MAX_CLIENTS = 3;
+		private const int MAX_CLIENTS = 5;
 
 		private const int CONNECTION_BACKLOG = 10;
 
@@ -24,11 +31,9 @@ namespace Cyclotron2D.Network {
 
         #region Fields
 
-        private int ThreadNumber;
+		private readonly List<Thread> m_acceptThreads;
 
-		private List<GameLobbyThread> AcceptThreads;
-
-		private bool waitingForConnections;
+		private bool m_waitingForConnections;
 
         #endregion
 
@@ -38,6 +43,12 @@ namespace Cyclotron2D.Network {
 
 		public List<Socket> Clients { get; private set; }
 
+        /// <summary>
+        /// Verifies if the game lobby has reached the maximum number of clients.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsFull { get { return Clients.Count >= MAX_CLIENTS; } }
+
         #endregion
 
         #region Constructor
@@ -45,34 +56,21 @@ namespace Cyclotron2D.Network {
         /// <summary>
 		/// Creates a new instance of the game lobby used to connect multiple clients.
 		/// </summary>
-		public GameLobby() {
-			try {
-				GameLobbySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-				IPEndPoint localServer = new IPEndPoint(IPAddress.Loopback, GAME_PORT);
-				GameLobbySocket.Bind(localServer);
-				GameLobbySocket.Blocking = true;
-				GameLobbySocket.Listen(CONNECTION_BACKLOG);
-				ThreadNumber = 0;
-				print("Game Lobby Server started on port " + GAME_PORT);
-			} catch (ArgumentOutOfRangeException ex) {
-				print("Invalid Port Number " + GAME_PORT);
-				Console.WriteLine(ex.StackTrace);
-			}
-
-			Clients = new List<Socket>();
-			AcceptThreads = new List<GameLobbyThread>();
-			waitingForConnections = true;
+		public GameLobby(Game game) : base(game)
+        {
+            Clients = new List<Socket>();
+            m_acceptThreads = new List<Thread>();			
 		}
 
         #endregion
 
         #region Events
 
-	    public event EventHandler<MessageEventArgs> MessageReceived;
+	    public event EventHandler<ConnectionEventArgs> NewConnection;
 
-	    private void InvokeMessageReceived(MessageEventArgs e)
+        private void InvokeNewConnection(ConnectionEventArgs e)
 	    {
-	        EventHandler<MessageEventArgs> handler = MessageReceived;
+            EventHandler<ConnectionEventArgs> handler = NewConnection;
 	        if (handler != null) handler(this, e);
 	    }
 
@@ -90,134 +88,163 @@ namespace Cyclotron2D.Network {
             DebugMessages.Add(msg);
         }
 
+        /// <summary>
+        /// Creates multiple conncetion threads to wait for incoming clients and verifies if clients have disconnected.
+        /// Maintains this number of listening threads until the lobby is closed.
+        /// </summary>
+        private void SpawnConnectionThreads()
+        {
 
+            while (m_waitingForConnections)
+            {
+                if (!IsFull && m_acceptThreads.Count < MAX_CLIENTS)
+                {
+                    SpawnThread();
+                }
+                //Poll all connected clients to see if someone disconnected
+                if (Clients.Count > 0)
+                {
+                    Socket.Select(null, Clients, null, 1000);
+                }
+
+                m_acceptThreads.RemoveAll(t => !t.IsAlive);
+
+                Thread.Sleep(50);
+            }
+
+        }
 
         /// <summary>
         /// Accepts the next client connections to the lobby assuming the lobby isn't full.
         /// </summary>
-        private void acceptClient()
+        private void SpawnThread()
         {
-            if (!isFull() && waitingForConnections)
-            {
-                //Start a limited amount of threads
-                //When lobby is full, kill all leftover threads
-                GameLobbyThread AcceptThread = new GameLobbyThread(this, "Listener" + ThreadNumber);
-                ThreadNumber++;
-                AcceptThread.Start();
-                AcceptThreads.Add(AcceptThread);
-            }
-            else
-            {
-                //Lobby is Full
-                print("Lobby is Full");
-                
-                messageAllClients(new NetworkMessage(MessageType.Debug, "Okay Lobby Closes. Game On"));
-            }
+            if (IsFull || !m_waitingForConnections) return;
+
+            var thread = new Thread(WaitForClient) {IsBackground = true, Name = "Connection Listener"}; 
+            thread.Start();
+            print("Listening Thread Started");
+            m_acceptThreads.Add(thread);
+
         }
 
         #endregion
 
         #region Public Methods
 
-        /// <summary>
-		/// Verifies if the game lobby has reached the maximum number of clients.
-		/// </summary>
-		/// <returns></returns>
-		public bool isFull() {
-			return Clients.Count >= MAX_CLIENTS;
-		}
 
-		/// <summary>
-		/// Sends a message to all connected clients.  Removes all clients that are found disconnected
-		/// </summary>
-		/// <param name="msg"></param>
-		public void messageAllClients(NetworkMessage msg) {
-			//Byte[] msgData = Encoding.Unicode.GetBytes(msg);
-			List<Socket> disconnected = new List<Socket>();
-			foreach (Socket client in Clients) {
-				try {
-					client.Send(msg.Data);
-				} catch (SocketException) {
-					//Client disconnected -> remove client
-					disconnected.Add(client);
-				}
-			}
-			//Remove all disabled clients
-			foreach (Socket removed in disconnected) {
-				Clients.Remove(removed);
-			}
-		}
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+
+            foreach (var client in Clients)
+            {
+                if (!SocketProbe.IsConnected(client))
+                {
+                    DebugMessages.Add("Client Disconnected");
+                }
+            }
+
+            Clients.RemoveAll(socket => !SocketProbe.IsConnected(socket));
+        }
 
 
 		/// <summary>
 		/// Starts the game lobby by accepting clients until stopped or full.
 		/// Messages all clients with a message when the lobby becomes closed.
 		/// </summary>
-		public void Start() {
+		public void Start()
+		{
+		    m_waitingForConnections = true;
+
+            try
+            {
+                GameLobbySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                IPEndPoint localServer = new IPEndPoint(IPAddress.Loopback, GAME_PORT);
+                GameLobbySocket.Bind(localServer);
+                GameLobbySocket.Blocking = true;
+                GameLobbySocket.Listen(CONNECTION_BACKLOG);
+                print("Game Lobby Server started on port " + GAME_PORT);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                print("Invalid Port Number " + GAME_PORT);
+                Console.WriteLine(ex.StackTrace);
+            }
+
+
+
 			Thread listenerSpawner = new Thread(SpawnConnectionThreads) {Name = "ListenerSpawningThread"};
 		    listenerSpawner.Start();
 
 		}
 
-		/// <summary>
-		/// Creates multiple conncetion threads to wait for incoming clients and verifies if clients have disconnected.
-		/// Maintains this number of listening threads until the lobby is closed.
-		/// </summary>
-		public void SpawnConnectionThreads() {
 
-			while (waitingForConnections) {
-				if (!isFull() && AcceptThreads.Count < MAX_CLIENTS) {
-					acceptClient();
-				}
-				//Poll all connected clients to see if someone disconnected
-				if (Clients.Count > 0) {
-					Socket.Select(null, Clients, null, 1000);
-				}
-				List<GameLobbyThread> removed = new List<GameLobbyThread>();
-				foreach (GameLobbyThread t in AcceptThreads) {
-					if (!t.IsAlive) {
-						removed.Add(t);
-					}
-				}
-				if (removed.Count > 0) {
-					foreach (GameLobbyThread t in removed) {
-						AcceptThreads.Remove(t);
-					}
-				}
-				Thread.Sleep(50);
-			}
-
-		}
 
 		/// <summary>
 		/// Stops accepting connections.
 		/// </summary>
 		public void CloseGameLobby() {
-			waitingForConnections = false;
+			m_waitingForConnections = false;
 			GameLobbySocket.Close();
-			foreach (GameLobbyThread t in AcceptThreads) {
-				t.Kill();
+			foreach (var t in m_acceptThreads) {
+				t.Abort();
 			}
+		    m_acceptThreads.Clear();
 			print("Closed Lobby");
 		}
 
 		/// <summary>
 		/// Disconnects all clients and stops all waiting threads.
 		/// </summary>
-		public void Kill() {
-			waitingForConnections = false;
-			foreach(Socket client in Clients){
-				client.Close();
+		public void Kill() 
+        {
+			m_waitingForConnections = false;
+			foreach(Socket client in Clients)
+			{
+			    client.Close();
 			}
-			foreach(GameLobbyThread thread in AcceptThreads){
-				thread.Kill();
+			
+            Clients.Clear();
+			foreach(var thread in m_acceptThreads)
+            {
+				thread.Abort();
 			}
+            m_acceptThreads.Clear();
 			GameLobbySocket.Close();
         }
+
+        #endregion
+
+        #region Connection Thread
+
+		/// <summary>
+		/// Starts accepting incoming connections.
+		/// This will block the thread until a connection is found.
+		/// </summary>
+		private void WaitForClient() {
+			try {
+				Socket client = GameLobbySocket.Accept();
+				print("Accepting Connection ...");
+				Clients.Add(client);
+                InvokeNewConnection(new ConnectionEventArgs(client));
+			    print("Accepted Client #" + Clients.Count);
+			} catch (SocketException ex) {
+				Console.WriteLine(ex);
+			} catch (ThreadAbortException) {
+				print("Listener Killed");
+			}
+				
+		}
+
 
         #endregion
     }
 
 
-   
+
+
+
 }
