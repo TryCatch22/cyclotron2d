@@ -21,25 +21,34 @@ namespace Cyclotron2D.Core
     }
 
 
-    public class CycleInfo
-    {
-        public Color Color;
-        public Direction Direction;
-        public Vector2 GridPosition;
-
-        /// <summary>
-        /// Starting conditions for a Cycle
-        /// </summary>
-        /// <param name="pos">In Grid Coordinates</param>
-        /// <param name="dir"></param>
-        /// <param name="c"></param>
-        public CycleInfo(Vector2 pos, Direction dir, Color c)
-        {
-            GridPosition = pos;
-            Direction = dir;
-            Color = c;
-        }
-    }
+//    public class CycleInfo
+//    {
+//        public Color Color;
+//        public Direction Direction;
+//        public Vector2 GridPosition;
+//
+//        /// <summary>
+//        /// Starting conditions for a Cycle
+//        /// </summary>
+//        /// <param name="pos">In Grid Coordinates</param>
+//        /// <param name="dir"></param>
+//        /// <param name="c"></param>
+//        public CycleInfo(Vector2 pos, Direction dir, Color c)
+//        {
+//            GridPosition = pos;
+//            Direction = dir;
+//            Color = c;
+//        }
+//
+//        /// <summary>
+//        /// Starting color for a Cycle
+//        /// </summary>
+//        /// <param name="c"></param>
+//        public CycleInfo( Color c)
+//        {
+//            Color = c;
+//        }
+//    }
 
     public class Cycle : DrawableScreenComponent
     {
@@ -114,14 +123,14 @@ namespace Cyclotron2D.Core
 
         #region Constructor
 
-        public Cycle(Game game, Screen screen, Grid grid, CycleInfo info, Player player)
+        public Cycle(Game game, Screen screen, Grid grid, StartCondition info, Player player)
             : base(game, screen)
         {
             m_vertices = new List<Point>();
-            TrailColor = info.Color;
+            TrailColor = player.Color;
             Grid = grid;
-            Position = grid.ToWorldCoords(info.GridPosition);
-            Direction = info.Direction;
+            Position = grid.ToWorldCoords(info.Position);
+            Direction = info.Dir;
             m_player = player;
             //add start position
             m_vertices.Add(Position);

@@ -29,7 +29,7 @@ namespace Cyclotron2D.UI
         {
             base.Draw(gameTime);
 
-            Game.SpriteBatch.Draw(Art.Pixel, PlayerColorRect, Player.Cycle.TrailColor);
+            Game.SpriteBatch.Draw(Art.Pixel, PlayerColorRect, Player.Color);
 
             if (NameAndId.Visible)
             {

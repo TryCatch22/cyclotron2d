@@ -7,18 +7,18 @@ using System.Net.Sockets;
 namespace Cyclotron2D.Network {
 	class GameLobbyThread {
 
-		ManualResetEvent WaitHandle;
+		//ManualResetEvent WaitHandle;
 		List<Socket> Clients;
-		GameLobby Server;
+		//GameLobby Server;
 		Socket ServerSocket;
 		private Thread ConnectionThread;
 		public bool IsAlive { get {return ConnectionThread.IsAlive;} }
 
 		public GameLobbyThread(GameLobby server, String name = "Unnamed") {
-			WaitHandle = new ManualResetEvent(false);
-			this.Server = server;
-			this.Clients = server.clients;
-			this.ServerSocket = server.GameLobbySocket;
+			//WaitHandle = new ManualResetEvent(false);
+		//	this.Server = server;
+			Clients = server.Clients;
+			ServerSocket = server.GameLobbySocket;
 
 			ConnectionThread = new Thread(WaitForClient) {IsBackground = true, Name = name};
 		}

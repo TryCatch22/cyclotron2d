@@ -77,13 +77,17 @@ namespace Cyclotron2D
                 }
             }
             Keys k;
-            if (keys.Count >= 1 && PreviousKeyState.IsKeyUp(k = keys[keys.Count-1]))
+            if (keys.Count >= 1 && PreviousKeyState.IsKeyUp(k = keys[0]))
             {
                 c = GetCharacter(k, modKeys.Contains(Keys.LeftShift) || modKeys.Contains(Keys.RightShift));
 
-                if (k==Keys.Space)
+                if (k == Keys.Space)
                 {
                     c = ' ';
+                }
+                else if (string.IsNullOrEmpty(c.Value.ToString()) || c == '\0')
+                {
+                    c = GetNumPadChar(k);
                 }
 
                 if (!string.IsNullOrEmpty(c.Value.ToString()) && c != '\0')
@@ -95,6 +99,36 @@ namespace Cyclotron2D
             }
 
             return false;
+        }
+
+        private static char GetNumPadChar(Keys key)
+        {
+            switch (key)
+            {
+                case Keys.NumPad0:
+                    return '0';
+                case Keys.NumPad1:
+                    return '1';
+                case Keys.NumPad2:
+                    return '2';
+                case Keys.NumPad3:
+                    return '3';
+                case Keys.NumPad4:
+                    return '4';
+                case Keys.NumPad5:
+                    return '5';
+                case Keys.NumPad6:
+                    return '6';
+                case Keys.NumPad7:
+                    return '7';
+                case Keys.NumPad8:
+                    return '8';
+                case Keys.NumPad9:
+                    return '9';
+                default:
+                    return '\0';
+
+            }
         }
 
         /// \brief Converts a key from the enum Keys to a char

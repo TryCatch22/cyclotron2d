@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cyclotron2D.Components;
+using Cyclotron2D.Core;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Screens.Base;
@@ -9,6 +10,33 @@ using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Core
 {
+    public struct ColorMap
+    {
+        public Color this[int i]
+        {
+            get
+            {
+                switch (i)
+                {
+                    case 1:
+                        return Color.Red;
+                    case 2:
+                        return Color.Yellow;
+                    case 3:
+                        return Color.Green;
+                    case 4:
+                        return Color.Teal;
+                    case 5:
+                        return Color.DarkOrange;
+                    case 6:
+                        return Color.WhiteSmoke;
+                    default:
+                        return Color.Transparent;
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// The Game Engine handles events from Player objects in order to simulate the game. It has no concept of the difference
     /// between a local and remote player.
@@ -20,20 +48,10 @@ namespace Cyclotron2D.Core
         public List<Player> Players { get { return m_playerMap.Keys.ToList(); } }
 
         private Grid m_grid;
+
         private Dictionary<Player, Cycle> m_playerMap;
 
-        private StartRandomizer starter;
-
-        //these values are overwritten, except for colors
-        private readonly List<CycleInfo> m_startConditions = new List<CycleInfo>
-                                                        {
-                                                            new CycleInfo(new Vector2(3, 3), Direction.Right, Color.Red), //1
-                                                            new CycleInfo(new Vector2(30, 70), Direction.Up, Color.Yellow), //2
-                                                            new CycleInfo(new Vector2(80, 28), Direction.Down, Color.Green), //3
-                                                            new CycleInfo(new Vector2(120, 90), Direction.Left, Color.Teal), //4
-                                                            new CycleInfo(new Vector2(150, 50), Direction.Up, Color.DarkOrange), //5
-                                                            new CycleInfo(new Vector2(120, 12), Direction.Left, Color.WhiteSmoke), //6
-                                                        };
+        private StartRandomizer startRandomizer;
 
         #endregion
 
@@ -49,7 +67,7 @@ namespace Cyclotron2D.Core
             : base(game, screen)
         {
             m_playerMap = new Dictionary<Player, Cycle>();
-            starter = new StartRandomizer(game);
+            startRandomizer = new StartRandomizer(game);
 
             m_grid = new Grid(Game, Screen, Game.GraphicsDevice.Viewport.Bounds.Size());
         }
@@ -87,13 +105,13 @@ namespace Cyclotron2D.Core
 
         public void StartGame(IEnumerable<Player> players)
         {
-            RandomizeStart();
+            startRandomizer.Randomize(6, m_grid.PixelsPerInterval);
             int i = 0;
             foreach (var player in players)
             {
-                Cycle c = new Cycle(Game, Screen, m_grid, m_startConditions[i], player);
+                Cycle c = new Cycle(Game, Screen, m_grid, startRandomizer.StartConditions[i++], player);
                 m_playerMap.Add(player, c);
-                player.Initialize(c, ++i);
+                player.Initialize(c);
             }
 
             m_grid.Initialize(m_playerMap.Values);
@@ -114,22 +132,6 @@ namespace Cyclotron2D.Core
             foreach (var cycle in m_playerMap.Values.Where(cycle => cycle.Visible))
             {
                 cycle.Draw(gameTime);
-            }
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private void RandomizeStart()
-        {
-            var values = starter.Randomize(6, m_grid.PixelsPerInterval);
-
-            for (int i = 0; i < 6; i++)
-            {
-                m_startConditions[i].Direction = values[i].Dir;
-                m_startConditions[i].GridPosition = values[i].Position;
-
             }
         }
 

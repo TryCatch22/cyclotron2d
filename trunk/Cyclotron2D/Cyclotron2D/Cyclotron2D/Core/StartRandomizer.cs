@@ -7,25 +7,32 @@ using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Core
 {
+
+    public struct StartCondition
+    {
+        /// <summary>
+        /// In Grid coordinates.
+        /// </summary>
+        public Vector2 Position;
+
+        public Direction Dir;
+
+        public StartCondition(Vector2 pos, Direction dir)
+        {
+            Position = pos;
+            Dir = dir;
+        }
+    }
+
     public class StartRandomizer : CyclotronComponent
     {
         private Random m_rand;
 
-        public struct StartCond
-        {
-            /// <summary>
-            /// In Grid coordinates.
-            /// </summary>
-            public Vector2 Position;
 
-            public Direction Dir;
 
-            public StartCond(Vector2 pos, Direction dir)
-            {
-                Position = pos;
-                Dir = dir;
-            }
-        }
+        public List<StartCondition> StartConditions { get; private set; }
+
+
 
 
         public StartRandomizer(Game game) : base(game)
@@ -33,12 +40,12 @@ namespace Cyclotron2D.Core
             m_rand = new Random((int)DateTime.Now.Ticks);
         }
 
-        public List<StartCond> Randomize(int count, int gridRatio)
+        public void Randomize(int count, int gridRatio)
         {
-            var list = new List<StartCond>();
+            var list = new List<StartCondition>();
             int i = 0;
           
-            int dx = (Game.GraphicsDevice.Viewport.Bounds.Width / gridRatio) / 3;
+            int dx = (Game.GraphicsDevice.Viewport.Bounds.Width / gridRatio) / (count / 2);
             int dy = (Game.GraphicsDevice.Viewport.Bounds.Height / gridRatio) / 2;
             List<int> p = new List<int>();
             for (int j = 0; j < count; j++)
@@ -59,11 +66,12 @@ namespace Cyclotron2D.Core
 
                 var dirs = GetDirections(zone);
                
-                list.Add(new StartCond(new Vector2(x, y), dirs[m_rand.Next(0, dirs.Length)]));
+                list.Add(new StartCondition(new Vector2(x, y), dirs[m_rand.Next(0, dirs.Length)]));
                 i++;
             }
+            StartConditions = list;
 
-            return list;
+//return list;
         }
 
         private Direction[] GetDirections(int zone)

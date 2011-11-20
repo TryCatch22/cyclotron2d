@@ -24,9 +24,9 @@ namespace Cyclotron2D.Core.Players
 
         public override string Name { get { return "AIPlayer"; } set { } }
 
-        public override void Initialize(Cycle cycle, int id)
+        public override void Initialize(Cycle cycle)
         {
-            base.Initialize(cycle, id);
+            base.Initialize(cycle);
 
             m_rand = new Random(DateTime.Now.Millisecond / PlayerID);
             SubscribeCycle();
@@ -65,7 +65,7 @@ namespace Cyclotron2D.Core.Players
 
             dirs = safestHelper(dirs.ToList(), 1);
 
-            if (dirs.Length > 0)
+            if (dirs.Length > 0 && (!dirs.Contains(Cycle.Direction) || m_rand.Next(0, 3) == 0))
             {
                 return dirs[m_rand.Next(0, dirs.Length)];
             }

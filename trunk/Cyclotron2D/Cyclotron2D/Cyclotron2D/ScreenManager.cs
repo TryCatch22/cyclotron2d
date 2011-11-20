@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using Cyclotron2D.Components;
 using Cyclotron2D.Screens.Base;
+using Cyclotron2D.Screens.Main;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D
@@ -28,6 +29,11 @@ namespace Cyclotron2D
         /// The currently active Main Screen based on the Game State
         /// </summary>
         public MainScreen ActiveScreen { get; private set; }
+
+        /// <summary>
+        /// was needed for initializing players outside of the game
+        /// </summary>
+        public GameScreen GameScreen { get; private set; }
 
         /// <summary>
         /// Screen with Focus (Topmost screen)
@@ -120,6 +126,10 @@ namespace Cyclotron2D
             if (screen is MainScreen)
             {
                 Screens.Add(screen as MainScreen, new List<PopupScreen>());
+                if (screen is GameScreen)
+                {
+                    GameScreen = screen as GameScreen;
+                }
             }
             else
             {
