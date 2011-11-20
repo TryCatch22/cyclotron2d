@@ -14,13 +14,16 @@ namespace Cyclotron2D.Mod
 
         public static Settings Default { get; set; }
 
-        public static Settings Current { get; set; }
+        public static Settings SinglePlayer { get; set; }
+
+        public static Settings Multiplayer { get; set; }
 
 
         static Settings()
         {
             Default = new Settings();
-            Current = new Settings();
+            SinglePlayer = new Settings();
+            Multiplayer = new Settings();
         }
 
         /// <summary>

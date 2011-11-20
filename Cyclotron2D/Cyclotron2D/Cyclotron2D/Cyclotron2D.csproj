@@ -115,6 +115,8 @@
     <Compile Include="Helpers\RectangleBuilder.cs" />
     <Compile Include="Helpers\Sorter.cs" />
     <Compile Include="Helpers\Vector2Extention.cs" />
+    <Compile Include="Network\MessageEventArgs.cs" />
+    <Compile Include="Network\NetworkMonitor.cs" />
     <Compile Include="Network\PlayerMonitor.cs" />
     <Compile Include="Network\Client.cs" />
     <Compile Include="Network\GameLobby.cs" />
@@ -136,6 +138,7 @@
     <Compile Include="Mod\Setting.cs" />
     <Compile Include="Mod\Settings.cs" />
     <Compile Include="UI\CancelOk.cs" />
+    <Compile Include="UI\IpTextBox.cs" />
     <Compile Include="UI\LabelCheckBox.cs" />
     <Compile Include="UI\PlayerView.cs" />
     <Compile Include="UI\EndGameTable.cs" />
@@ -162,7 +165,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Cyclotron.cs" />
-    <Compile Include="Network\TCPMessage.cs" />
+    <Compile Include="Network\NetworkMessage.cs" />
     <Compile Include="InputState.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="Components\CyclotronComponent.cs" />

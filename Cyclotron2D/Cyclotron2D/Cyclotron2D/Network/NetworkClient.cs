@@ -6,11 +6,16 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace Cyclotron2D.Network {
-	class NetworkClient {
+namespace Cyclotron2D.Network 
+{
+
+    /// <summary>
+    /// Wrapper for Socket that handles received messages on a seperate thread
+    /// </summary>
+	public class NetworkClient {
 
 		public const int MAX_BUFFER_SIZE = 1024;
-		private Socket Client;
+        public Socket Socket { get; private set; }
 		private NetworkClientThread ReceiveThread;
 
 		/// <summary>
@@ -33,14 +38,14 @@ namespace Cyclotron2D.Network {
 		/// Attempts to connect to the game lobby server.
 		/// </summary>
 		public void ConnectToServer() {
-			if (Client != null && Client.Connected) {
+			if (Socket != null && Socket.Connected) {
 				//full disconnect or the listener thread crashes when the socked is closed -AL
                 Disconnect();
 			}
 
 			try {
-				Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-				Client.Connect(IPAddress.Loopback, GameLobby.GAME_PORT);
+				Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+				Socket.Connect(IPAddress.Loopback, GameLobby.GAME_PORT);
 				Print("Client Connected");
 				StartReceiving();
 			} catch (Exception ex) {
@@ -51,14 +56,14 @@ namespace Cyclotron2D.Network {
 		}
 
 		public void StartReceiving() {
-			ReceiveThread = new NetworkClientThread(Client);
+			ReceiveThread = new NetworkClientThread(Socket);
 		}
 
 		public void Disconnect() {
 			if (ReceiveThread != null) {
 				ReceiveThread.Kill();
 			}
-			if(Client != null)Client.Close();
+			if(Socket != null)Socket.Close();
 		}
 
 
@@ -70,14 +75,14 @@ namespace Cyclotron2D.Network {
 			private Socket ClientSocket;
 			private Thread ReceivingThread;
 			private bool StayAlive;
-			private Byte[] buffer;
+		//	private Byte[] buffer;
 			private String msg;
 
 			public NetworkClientThread(Socket clientSocket) {
 				ClientSocket = clientSocket;
 				ReceivingThread = new Thread(Receive) {IsBackground = true};
 			    StayAlive = true;
-				buffer = new Byte[MAX_BUFFER_SIZE];
+			//	buffer = new Byte[MAX_BUFFER_SIZE];
 				ClearReceiveBuffer();
 				ReceivingThread.Start();
 			}
@@ -97,15 +102,29 @@ namespace Cyclotron2D.Network {
 			/// Runs until the thread dies.
 			/// </summary>
 			private void Receive() {
+
+                byte[] buffer = new byte[MAX_BUFFER_SIZE];
 				while (ReceivingThread.IsAlive) {
 					Console.WriteLine("Client Receiving: ");
 					//Wait for messages
-					while (ClientSocket.Available == 0 && StayAlive) ;
-					while (ClientSocket.Available > 0) {
-						ClientSocket.Receive(buffer);
-						msg = Encoding.Unicode.GetString(buffer).TrimEnd(new[] { '\0' });
-						Print(msg);
-					}
+					while (ClientSocket.Available <7 && StayAlive) ;
+
+                    ClientSocket.Receive(buffer);
+
+				    NetworkMessage message = NetworkMessage.Build(buffer);
+
+				    while (message.Length > message.Content.Length)
+				    {
+                        Array.Clear(buffer, 0, MAX_BUFFER_SIZE);
+                        ClientSocket.Receive(buffer);
+                        message.AddContent(buffer);
+				    }
+
+				    if (message.Type == MessageType.Debug)
+				    {
+				        Print(message.Content);
+				    }
+
 					Array.Clear(buffer, 0, MAX_BUFFER_SIZE);
 				}
 			}

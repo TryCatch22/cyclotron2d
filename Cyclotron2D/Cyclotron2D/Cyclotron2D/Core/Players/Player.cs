@@ -12,6 +12,9 @@ namespace Cyclotron2D.Core.Players
     /// </summary>
     public abstract class Player : ScreenComponent
     {
+
+        private static ColorMap s_map = new ColorMap();
+
         protected Player(Game game, Screen screen) : base(game, screen)
         {
         }
@@ -20,11 +23,13 @@ namespace Cyclotron2D.Core.Players
 
         public Cycle Cycle { get; protected set; }
 
+        public Color Color { get {return s_map[PlayerID];}}
+
         /// <summary>
         /// Unique player ID.
         /// There must be an identical mapping from PlayerID's to people on all connected machines
         /// </summary>
-        public int PlayerID { get; private set; }
+        public int PlayerID { get; set; }
 
         public bool Winner { get; set; }
 
@@ -48,13 +53,12 @@ namespace Cyclotron2D.Core.Players
             return Name + "(" + PlayerID + ")";
         }
 
-        public virtual void Initialize(Cycle cycle, int id)
+        public virtual void Initialize(Cycle cycle)
         {
             Winner = false;
             Cycle = cycle;
 
             SubscribeCycle();
-            PlayerID = id;
         }
 
         public override void Update(GameTime gameTime)

@@ -22,9 +22,9 @@ namespace Cyclotron2D.Core.Players
 
         public override string Name { get { return (Screen as GameScreen).GameSettings.PlayerName.Value; } set { } }
 
-        public override void Initialize(Cycle cycle, int id)
+        public override void Initialize(Cycle cycle)
         {
-            base.Initialize(cycle, id);
+            base.Initialize(cycle);
             SubscribeCycleCollision();
         }
 

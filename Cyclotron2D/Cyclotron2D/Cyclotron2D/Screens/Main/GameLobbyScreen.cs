@@ -1,27 +1,33 @@
 ﻿using System;
+using System.Collections.Generic;
 using Cyclotron2D.Screens.Base;
+using Cyclotron2D.UI;
 using Microsoft.Xna.Framework;
 using Cyclotron2D.Network;
 using Cyclotron2D.UI.UIElements;
 using Cyclotron2D.Helpers;
-using Cyclotron2D.UI;
 
 namespace Cyclotron2D.Screens.Main {
 
-	class GameLobbyScreen : MainScreen {
+	public class GameLobbyScreen : MainScreen
+	{
+	  /*  private StretchPanel m_playersPanel;
 
-		private const int X_DRAW = 10;
-		private const int Y_DRAW = 10;
+	    private List<PlayerView> m_playerViews;
+       */
 
-		Button SpamButton;
+        Button SpamButton;
 		Button CancelButton;
 		Button CloseButton;
 		LabelTextBox SpamTextBox;
 
-		GameLobby Lobby;
+        public GameLobby Lobby { get; private set; }
 
 		public GameLobbyScreen(Game game)
 			: base(game, GameState.GameLobbyHost | GameState.GameLobbyClient) {
+
+            /*m_playerViews = new List<PlayerView>();
+            m_playersPanel = new StretchPanel(game, this);*/
 
 			SpamButton = new Button(game, this);
 			SpamButton.Click += OnSpamButtonClicked;
@@ -56,16 +62,12 @@ namespace Cyclotron2D.Screens.Main {
         }
 
 		private void OnSpamButtonClicked(Object sender, EventArgs e) {
-			if (this.HasFocus) {
-				Lobby.messageAllClients(SpamTextBox.BoxText);
-			}
+				Lobby.messageAllClients(new NetworkMessage(MessageType.Debug, SpamTextBox.BoxText));
 		}
 
 		private void OnCancelButtonClicked(Object sender, EventArgs e) {
-			if (this.HasFocus) {
 				Lobby.Kill();
 				Game.ChangeState(GameState.MainMenu);
-			}
 		}
 
 		private void OnCloseButtonClick(Object sender, EventArgs e) {

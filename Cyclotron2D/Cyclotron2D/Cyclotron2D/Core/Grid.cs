@@ -25,7 +25,7 @@ namespace Cyclotron2D.Core
 
         #region Properties
 
-        public int PixelsPerInterval { get { return (Screen as GameScreen).GameSettings.GridSize.Value; } }
+        public int PixelsPerInterval { get { return Game.ScreenManager.GameScreen.GameSettings.GridSize.Value; } }
 
         /// <summary>
         /// in Pixels

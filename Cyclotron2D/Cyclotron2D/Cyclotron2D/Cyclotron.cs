@@ -98,7 +98,7 @@ namespace Cyclotron2D
             IsMouseVisible = true;
             Art.Initalize(this);
             LoadScreens();
-            Settings.Current.LoadFromFile();
+            Settings.SinglePlayer.LoadFromFile();
 
             ChangeState(GameState.MainMenu);
             base.Initialize();

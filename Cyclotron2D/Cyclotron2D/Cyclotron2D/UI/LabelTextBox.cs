@@ -1,10 +1,11 @@
 ﻿using System;
 using Cyclotron2D.Screens.Base;
+using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
 
-namespace Cyclotron2D.UI.UIElements
+namespace Cyclotron2D.UI
 {
-    public sealed class LabelTextBox : LabeledElement
+    public class LabelTextBox : LabeledElement
     {
         //for convenience
         public String BoxText { get { return Element.Text; } set { Element.Text = value; } }

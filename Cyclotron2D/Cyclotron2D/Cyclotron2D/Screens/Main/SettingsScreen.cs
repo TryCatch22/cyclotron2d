@@ -73,7 +73,7 @@ namespace Cyclotron2D.Screens.Main
         {
             if (e.IsValid)
             {
-                Settings.Current.WriteToFile();
+                Settings.SinglePlayer.WriteToFile();
                 Game.ChangeState(GameState.MainMenu);
             }
         }
@@ -85,13 +85,11 @@ namespace Cyclotron2D.Screens.Main
             base.OnStateChanged(sender, e);
             if (IsValidState)
             {
-                m_settingsView.LoadSettings(Settings.Current);
+                m_settingsView.LoadSettings(Settings.SinglePlayer);
             }
         }
 
         #endregion
-
-
 
     }
 }
