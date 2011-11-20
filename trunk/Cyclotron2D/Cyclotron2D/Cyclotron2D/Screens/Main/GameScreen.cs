@@ -83,6 +83,11 @@ namespace Cyclotron2D.Screens.Main
         protected override void OnStateChanged(object sender, StateChangedEventArgs e)
         {
             base.OnStateChanged(sender, e);
+
+            //game screen disabled if not in its own state
+            Enabled = IsValidState;
+
+
             if (m_gameStarted)
                 return;
 

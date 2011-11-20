@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
+﻿using System.Text;
 
 namespace Cyclotron2D.Network
 {
@@ -11,6 +7,14 @@ namespace Cyclotron2D.Network
     public enum MessageType : byte
     {
         Debug,
+
+        Hello,
+
+        Welcome,
+
+        GameStart,
+
+
     }
 
 
@@ -23,7 +27,7 @@ namespace Cyclotron2D.Network
     public class NetworkMessage
     {
 
-        private static Encoding encoding = Encoding.ASCII;
+        protected static Encoding encoding = Encoding.ASCII;//because its the shortest one and i dont think we will need other characters
 
         public static string EndOfHeader = "\n\n";
 
