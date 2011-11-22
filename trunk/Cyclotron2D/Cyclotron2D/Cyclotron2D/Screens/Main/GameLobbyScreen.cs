@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Sockets;
 using Cyclotron2D.Core.Players;
+using Cyclotron2D.Helpers;
+using Cyclotron2D.Mod;
+using Cyclotron2D.Network;
 using Cyclotron2D.Screens.Base;
 using Cyclotron2D.UI;
-using Microsoft.Xna.Framework;
-using Cyclotron2D.Network;
 using Cyclotron2D.UI.UIElements;
-using Cyclotron2D.Helpers;
+using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Screens.Main
 {
@@ -21,12 +23,16 @@ namespace Cyclotron2D.Screens.Main
         Button CloseButton;
         //LabelTextBox SpamTextBox;
 
+        private List<Player> Players { get; set; } 
+
         public GameLobby Lobby { get; private set; }
+
+        private GameScreen GameScreen { get; set; }
 
         public GameLobbyScreen(Game game)
             : base(game, GameState.GameLobbyHost | GameState.GameLobbyClient)
         {
-
+            Players = new List<Player>();
             m_playersPanel = new PlayerPanel(game, this);
 
             //		   SpamButton = new Button(game, this);
@@ -53,6 +59,11 @@ namespace Cyclotron2D.Screens.Main
             CloseButton.Click += OnCloseButtonClick;
             CloseButton.Text = "Close Lobby";
 
+            GameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
+
+            Debug.Assert(GameScreen != null, "GameScreen should not be null at Initialize.");
+
+            SubscribeCommunicator();
 
             //            SpamTextBox.Label.Background = Color.Black;
             //            SpamTextBox.Label.TextColor = Color.White;
@@ -85,36 +96,45 @@ namespace Cyclotron2D.Screens.Main
 
         public void AddPlayer(Player player, Socket socket)
         {
-               GameScreen gameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
-            if (gameScreen != null)
+            if(player is RemotePlayer)
             {
-                if(player is RemotePlayer)
-                {
-                    Game.Communicator.Add(player as RemotePlayer, socket);
+                Game.Communicator.Add(player as RemotePlayer, socket);
 
-                }
-                gameScreen.AddPlayer(player);
-                m_playersPanel.AddPlayer(player);
             }
+            GameScreen.AddPlayer(player);
+            m_playersPanel.AddPlayer(player);
+            Players.Add(player);
+            
         }
 
 
-
+        /// <summary>
+        /// this will also disconnect the players connection
+        /// </summary>
+        /// <param name="player"></param>
         public void RemovePlayer(Player player)
         {
-            GameScreen gameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
-
-            if (gameScreen != null)
+            if (player is RemotePlayer)
             {
-                if (player is RemotePlayer)
-                {
-                    Game.Communicator.Remove(player as RemotePlayer);
-                }
-                gameScreen.RemovePlayer(player);
-                m_playersPanel.RemovePlayer(player);
+                Game.Communicator.Remove(player as RemotePlayer);
             }
+            GameScreen.RemovePlayer(player);
+            m_playersPanel.RemovePlayer(player);
+            Players.Remove(player);
         }
 
+        /// <summary>
+        /// for use when leaving a game lobby so that we can return to a clean one next time
+        /// </summary>
+        private void Cleanup()
+        {
+            foreach (var player in m_playersPanel.Players)
+            {
+                RemovePlayer(player);
+
+                player.Dispose();
+            }
+        }
 
         #region Client Side
 
@@ -164,14 +184,16 @@ namespace Cyclotron2D.Screens.Main
 
         private void OnNewConnection(object sender, ConnectionEventArgs e)
         {
-               GameScreen gameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
+            GameScreen gameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
             if (gameScreen != null)
             {
                 var rem = new RemotePlayer(Game, gameScreen) {PlayerID = gameScreen.RemotePlayers.Count + 2};
 
                 AddPlayer(rem, e.Socket);
 
-                Game.Communicator.MessagePlayer(rem, new NetworkMessage(MessageType.NewID, rem.PlayerID.ToString()));
+                string content = rem.PlayerID.ToString() + "\n" + Settings.SinglePlayer.PlayerName.Value;
+
+                Game.Communicator.MessagePlayer(rem, new NetworkMessage(MessageType.Welcome, content));
             }
         }
 
@@ -192,7 +214,13 @@ namespace Cyclotron2D.Screens.Main
 
         private void OnCancelButtonClicked(Object sender, EventArgs e)
         {
-            if (Game.State == GameState.GameLobbyHost) Lobby.Kill();
+            if (Game.State == GameState.GameLobbyHost)
+            {
+                Lobby.Kill();
+            }
+            
+            Cleanup();
+
             Game.ChangeState(GameState.MainMenu);
         }
 
@@ -219,6 +247,7 @@ namespace Cyclotron2D.Screens.Main
                         SubscribeLobby();
                     }
                     Lobby.Start();
+                    AddLocalPlayer(new LocalPlayer(Game, GameScreen){PlayerID = 1});
                     break;
                 case GameState.GameLobbyClient:
                     //setup client side info, maybe deal with initial control messages from server here
@@ -231,6 +260,38 @@ namespace Cyclotron2D.Screens.Main
 
         #endregion
 
+
+        public void SubscribeCommunicator()
+        {
+            Game.Communicator.MessageReceived += OnMessageReceived;
+        }
+
+        private void OnMessageReceived(object sender, MessageEventArgs e)
+        {
+            var connection = sender as NetworkConnection;
+            if (connection != null)
+            {
+                switch (e.Message.Type)
+                {
+                    //for server side getting the name of the newly connected player
+                    //once it has this it can announce the new player to the other players.
+                    case MessageType.Hello:
+                        {
+                            Game.Communicator.GetPlayer(connection).Name = e.Message.Content;
+                        }
+                        break;
+                    default:
+                        return;
+                }
+            }
+            
+        }
+
+
+        public void UnsubscribeCommunicator()
+        {
+            Game.Communicator.MessageReceived -= OnMessageReceived;
+        }
 
         public override void Draw(GameTime gameTime)
         {
@@ -274,6 +335,7 @@ namespace Cyclotron2D.Screens.Main
             {
                 Lobby.Dispose();
                 Lobby = null;
+                UnsubscribeCommunicator();
             }
             base.Dispose(disposing);
         }

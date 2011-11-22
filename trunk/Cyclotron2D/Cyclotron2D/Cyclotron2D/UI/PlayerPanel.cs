@@ -14,6 +14,12 @@ namespace Cyclotron2D.UI
         private FixedPanel m_playerPanel;
         private List<PlayerView> m_playerViews;
 
+        /// <summary>
+        /// Copy of the players used here. You cannot add or remove items from this list and 
+        /// expect things to happen
+        /// </summary>
+        public List<Player> Players { get { return m_playerViews.Select(view => view.Player).ToList(); } }
+
         public PlayerPanel(Game game, Screen screen) : base(game, screen)
         {
             m_playerViews = new List<PlayerView>();

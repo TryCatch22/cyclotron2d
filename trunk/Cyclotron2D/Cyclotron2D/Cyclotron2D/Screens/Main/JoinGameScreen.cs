@@ -72,10 +72,12 @@ namespace Cyclotron2D.Screens.Main {
 			try
 			{
 			    var ip = IPAddress.Parse(m_hostIp.BoxText);
-                if(Host.ConnectTo(ip))
-                {
-                    CreateHost();
-                }
+			    if(Host.ConnectTo(ip))
+			    {
+			        CreateHost();
+
+
+			    }
 			}
 			catch (FormatException)
 			{
@@ -87,7 +89,7 @@ namespace Cyclotron2D.Screens.Main {
 		    }
 		}
 
-
+//
         private void CreateHost()
         {
             var lobbyScreen = Game.ScreenManager.GetMainScreen<GameLobbyScreen>() as GameLobbyScreen;
@@ -100,7 +102,7 @@ namespace Cyclotron2D.Screens.Main {
                 lobbyScreen.AddHost(hostPlayer, Host);
             }
         }
-
+//
 
 
 
@@ -138,14 +140,16 @@ namespace Cyclotron2D.Screens.Main {
 	    private void OnMessageReceived(object sender, MessageEventArgs e)
 	    {
             //if this is not the newID message from the host or we are not the active screen
-	        if (e.Message.Type != MessageType.NewID || !IsValidState)
+	        if (e.Message.Type != MessageType.Welcome || !IsValidState)
 	        {
 	            return;
 	        }
 
 	        int id;
 
-	        if(int.TryParse(e.Message.Content, out id))
+            var lines = e.Message.Content.Split(new []{'\n'});
+
+	        if(int.TryParse(lines[0], out id))
 	        {
                 var lobbyScreen = Game.ScreenManager.GetMainScreen<GameLobbyScreen>() as GameLobbyScreen;
                 var gameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
@@ -153,10 +157,14 @@ namespace Cyclotron2D.Screens.Main {
 
                 if (lobbyScreen != null && gameScreen != null)
                 {
-                    LocalPlayer player = new LocalPlayer(Game, gameScreen) { PlayerID = id};
-
+                    LocalPlayer player = new LocalPlayer(Game, gameScreen) { PlayerID = id, Name= m_playerName.BoxText};
+                    Game.Communicator.Host.Name = lines[1];
                     lobbyScreen.AddLocalPlayer(player);
                 }
+
+
+                Game.Communicator.MessagePlayer(Game.Communicator.Host,
+                    new NetworkMessage(MessageType.Hello, m_playerName.BoxText));
 
                 Game.ChangeState(GameState.GameLobbyClient);
 	        }
