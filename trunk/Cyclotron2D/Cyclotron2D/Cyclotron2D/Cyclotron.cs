@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Cyclotron2D
 {
     /// <summary>
-    /// This is the main Class for Cyclotron it instanciates the main modules and keeps track of GameState
+    /// This is the main Class for Cyclotron it instantiates the main modules and keeps track of GameState
     /// </summary>
     public class Cyclotron : Game
     {
