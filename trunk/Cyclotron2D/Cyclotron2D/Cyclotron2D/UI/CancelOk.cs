@@ -64,9 +64,9 @@ namespace Cyclotron2D.UI
             m_buttonsPanel.Rect = Rect;
         }
 
-        protected override void HandleInupt(GameTime gameTime)
+        protected override void HandleInput(GameTime gameTime)
         {
-            base.HandleInupt(gameTime);
+            base.HandleInput(gameTime);
             if (Game.InputState.IsNewKeyPress(Keys.Enter))
             {
                 OnOk();
