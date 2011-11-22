@@ -15,9 +15,9 @@ namespace Cyclotron2D.UI.UIElements
 
         public bool IsSelected { get; set; }
 
-        protected override void HandleInupt(GameTime gameTime)
+        protected override void HandleInput(GameTime gameTime)
         {
-            base.HandleInupt(gameTime);
+            base.HandleInput(gameTime);
 
             if (IsMouseOver)
             {

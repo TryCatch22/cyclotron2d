@@ -61,6 +61,10 @@ namespace Cyclotron2D.Network
 
         #region Constructor
 
+        /// <summary>
+        /// creates a new connection object using the provided socket
+        /// </summary>
+        /// <param name="socket">an already connected socket</param>
         public NetworkConnection(Socket socket)
         {
             Socket = socket;
@@ -176,7 +180,7 @@ namespace Cyclotron2D.Network
             while (true)
             {
                 //Wait for messages
-                while (Socket.Available == 0 && m_stayAlive) Thread.Yield();
+                while (m_stayAlive && Socket.Available == 0) Thread.Yield();
 
                 if (!m_stayAlive) break;//exit and let thread die
 

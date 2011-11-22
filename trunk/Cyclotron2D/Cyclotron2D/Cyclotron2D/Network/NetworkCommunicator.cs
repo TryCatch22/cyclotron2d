@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
 using Cyclotron2D.Components;
 using Cyclotron2D.Core.Players;
 using Microsoft.Xna.Framework;
@@ -14,7 +12,6 @@ namespace Cyclotron2D.Network
     {
 
         public Dictionary<RemotePlayer, NetworkConnection> Connections { get; private set; }
-
 
         public RemotePlayer Host { get; private set; }
 
@@ -64,20 +61,6 @@ namespace Cyclotron2D.Network
 
         }
 
-       /* public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-
-            var removed = (from kvp in Connections where !kvp.Value.IsConnected select kvp.Key).ToList();
-
-            foreach (var remotePlayer in removed)
-            {
-                Connections[remotePlayer].Disconnect();
-                Connections.Remove(remotePlayer);
-            }
-        }
-*/
-
         public void SendDebugMessage(string message)
         {
             foreach (var networkConnection in Connections.Values)
@@ -96,6 +79,14 @@ namespace Cyclotron2D.Network
             if (Connections.ContainsKey(player))
             {
                 Connections[player].Send(message);
+            }
+        }
+
+        public void MessageOtherPlayers(RemotePlayer player, NetworkMessage message)
+        {
+            foreach (RemotePlayer remotePlayer in Connections.Keys.Where(key => key != player))
+            {
+                Connections[remotePlayer].Send(message);
             }
         }
 

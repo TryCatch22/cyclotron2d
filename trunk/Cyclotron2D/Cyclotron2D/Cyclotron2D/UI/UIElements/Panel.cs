@@ -20,23 +20,33 @@ namespace Cyclotron2D.UI.UIElements
 
         public virtual void AddItems(params UIElement[] item)
         {
-            Items.AddRange(item);
+            lock(Items)
+            {
+                Items.AddRange(item);
+            }
         }
 
         public virtual void RemoveItem(params UIElement[] items)
         {
-            foreach (var item in items)
+            lock (Items)
             {
-                Items.Remove(item);
-            }   
+                foreach (var item in items)
+                {
+                    Items.Remove(item);
+                }
+            }
+   
 
         }
 
         public void DrawElements()
         {
-            foreach (var uiElement in Items.Where(itm => itm.Visible))
+            lock (Items)
             {
-                uiElement.Draw(Game.GameTime);
+                foreach (var uiElement in Items.Where(itm => itm.Visible))
+                {
+                    uiElement.Draw(Game.GameTime);
+                }
             }
         }
 

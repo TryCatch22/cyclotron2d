@@ -24,9 +24,9 @@ namespace Cyclotron2D.UI.UIElements
             if (handler != null) handler(this, new EventArgs());
         }
 
-        protected override void HandleInupt(GameTime gameTime)
+        protected override void HandleInput(GameTime gameTime)
         {
-            base.HandleInupt(gameTime);
+            base.HandleInput(gameTime);
             if (IsMouseOver && Game.InputState.IsNewLeftClick)
             {
                 InvokeClick();

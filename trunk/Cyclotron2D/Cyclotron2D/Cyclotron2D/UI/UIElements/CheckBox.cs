@@ -29,9 +29,9 @@ namespace Cyclotron2D.UI.UIElements
 
         }
 
-        protected override void HandleInupt(GameTime gameTime)
+        protected override void HandleInput(GameTime gameTime)
         {
-            base.HandleInupt(gameTime);
+            base.HandleInput(gameTime);
             if (IsMouseOver && Game.InputState.IsNewLeftClick)
             {
                 IsChecked = !IsChecked;
