@@ -58,6 +58,8 @@ namespace Cyclotron2D.Core
         #region Properties
 
         public TimeSpan GameStart { get; set; }
+        public TimeSpan Delay { get; set; }
+        public TimeSpan GameStartDelay;  //GameStart + Delay for delaying the start
 
         #endregion
 
@@ -70,6 +72,8 @@ namespace Cyclotron2D.Core
             startRandomizer = new StartRandomizer(game);
 
             m_grid = new Grid(Game, Screen, Game.GraphicsDevice.Viewport.Bounds.Size());
+
+            Delay = new TimeSpan(0, 0, 3);
         }
 
         #endregion
@@ -78,44 +82,48 @@ namespace Cyclotron2D.Core
 
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
 
-            if (m_playerMap == null)
-            {
-                return;
-            }
+                base.Update(gameTime);
 
-            int i = 0;
-            Player winner = null;
-            foreach (var player in m_playerMap.Keys)
-            {
-                var cycle = m_playerMap[player];
-                if (cycle.Enabled)
+                if (m_playerMap == null)
                 {
-                    i++;
-                    winner = player;
+                    return;
                 }
-            }
-            if(i == 1)
-            {
-                winner.Winner = true;
-                m_playerMap[winner].Enabled = false;
-            }
+
+                int i = 0;
+                Player winner = null;
+                foreach (var player in m_playerMap.Keys)
+                {
+                    var cycle = m_playerMap[player];
+                    if (cycle.Enabled)
+                    {
+                        i++;
+                        winner = player;
+                    }
+                }
+                if (i == 1)
+                {
+                    winner.Winner = true;
+                    m_playerMap[winner].Enabled = false;
+                }
         }
 
         public void StartGame(IEnumerable<Player> players)
         {
+            GameStart = Game.GameTime.TotalGameTime;
+            GameStartDelay = GameStart + Delay;
+
             startRandomizer.Randomize(6, m_grid.PixelsPerInterval);
             int i = 0;
             foreach (var player in players)
             {
-                Cycle c = new Cycle(Game, Screen, m_grid, startRandomizer.StartConditions[i++], player);
+                Cycle c = new Cycle(Game, Screen, m_grid, startRandomizer.StartConditions[i++], player, GameStartDelay);
                 m_playerMap.Add(player, c);
                 player.Initialize(c);
             }
 
             m_grid.Initialize(m_playerMap.Values);
-            GameStart = Game.GameTime.TotalGameTime;
+            
             SubscribePlayers();
             SubscribeCycles();
         }
