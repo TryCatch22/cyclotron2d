@@ -30,14 +30,15 @@ namespace Cyclotron2D.UI
 
         public SettingsChanger(Game game, Screen screen) : base(game, screen)
         {
-            m_drawGrid = new LabelCheckBox(game, screen);
-            m_plasmaGrid = new LabelCheckBox(game, screen);
+			int labelWidth = 400;
+			m_drawGrid = new LabelCheckBox(game, screen, labelWidth);
+			m_plasmaGrid = new LabelCheckBox(game, screen, labelWidth);
             m_OptionsPanel = new StretchPanel(game, screen);
-            m_gridSize = new LabelTextBox(game, screen);
-            m_cycleSpeed = new LabelTextBox(game, screen);
-            m_maxTailLength = new LabelTextBox(game, screen);
-            m_suicide = new LabelCheckBox(game, screen);
-            m_playerName = new LabelTextBox(game, screen);
+            m_gridSize = new LabelTextBox(game, screen, labelWidth);
+			m_cycleSpeed = new LabelTextBox(game, screen, labelWidth);
+			m_maxTailLength = new LabelTextBox(game, screen, labelWidth);
+			m_suicide = new LabelCheckBox(game, screen, labelWidth);
+			m_playerName = new LabelTextBox(game, screen, labelWidth);
 
             m_OptionsPanel.AddItems(m_gridSize, m_cycleSpeed, m_maxTailLength, m_suicide, m_drawGrid, m_plasmaGrid, m_playerName);
 
