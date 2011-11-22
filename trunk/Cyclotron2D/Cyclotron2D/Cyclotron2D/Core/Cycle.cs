@@ -118,12 +118,13 @@ namespace Cyclotron2D.Core
         /// </summary>
         public int MaxTailLength { get { return (Screen as GameScreen).GameSettings.MaxTailLength.Value; } }
 
+        public TimeSpan GameStartDelay;
 
         #endregion
 
         #region Constructor
 
-        public Cycle(Game game, Screen screen, Grid grid, StartCondition info, Player player)
+        public Cycle(Game game, Screen screen, Grid grid, StartCondition info, Player player, TimeSpan gameStartDelay)
             : base(game, screen)
         {
             m_vertices = new List<Point>();
@@ -134,6 +135,8 @@ namespace Cyclotron2D.Core
             m_player = player;
             //add start position
             m_vertices.Add(Position);
+            GameStartDelay = gameStartDelay;
+
         }
 
         #endregion
@@ -314,15 +317,19 @@ namespace Cyclotron2D.Core
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            Position = new Point((int) (Position.X + Velocity.X), (int) (Position.Y + Velocity.Y));
 
-            // working on adding finite length tails
-            LimitTailLength();
+            if (gameTime.TotalGameTime > GameStartDelay)
+            {
+                Position = new Point((int)(Position.X + Velocity.X), (int)(Position.Y + Velocity.Y));
 
-            CheckForCollision();
-            if (Enabled)
-            {//could have been disabled during collision check
-                CheckScheduledTurn();
+                // working on adding finite length tails
+                LimitTailLength();
+
+                CheckForCollision();
+                if (Enabled)
+                {//could have been disabled during collision check
+                    CheckScheduledTurn();
+                }
             }
             
            
