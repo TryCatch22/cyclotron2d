@@ -173,7 +173,7 @@ namespace Cyclotron2D.Network {
             try
             {
                 GameLobbySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                IPEndPoint localServer = new IPEndPoint(IPAddress.Loopback, GAME_PORT);
+                IPEndPoint localServer = new IPEndPoint(IPAddress.Any, GAME_PORT);
                 GameLobbySocket.Bind(localServer);
                 GameLobbySocket.Blocking = true;
                 GameLobbySocket.Listen(CONNECTION_BACKLOG);
