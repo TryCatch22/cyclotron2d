@@ -11,7 +11,7 @@ namespace Cyclotron2D.UI
 
         public bool IsChecked { get { return Element.IsChecked; } set { Element.IsChecked = value; }}
             
-        public LabelCheckBox(Game game, Screen screen) : base(game, screen)
+        public LabelCheckBox(Game game, Screen screen, int? labelWidth = null) : base(game, screen, labelWidth)
         {
             Element = new CheckBox(game, screen);
         }

@@ -16,15 +16,24 @@ namespace Cyclotron2D.UI.UIElements
         public TextElement Label { get; private set; }
         public UIElement Element { get; set; }
 
-        public LabeledElement(Game game, Screen screen) : base(game, screen)
+		// In case of forced label width, so that a list of elements looks pretty.
+		// If null, text size determines width of label.
+		public int? LabelWidth { get; private set; }
+
+        public LabeledElement(Game game, Screen screen, int? labelWidth = null) : base(game, screen)
         {
             Label = new TextElement(game, screen);
+			LabelWidth = labelWidth;
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
             Vector2 lblsize = Art.Font.MeasureString(LabelText) + new Vector2(2, 2);
+			if (LabelWidth.HasValue)
+			{
+				lblsize.X = (float)LabelWidth;
+			}
             Label.Rect = new Rectangle(Rect.X, Rect.Y, (int)lblsize.X, Rect.Height);
             Element.Rect = new Rectangle(Rect.X + Label.Rect.Width, Rect.Y, Rect.Width - Label.Rect.Width, Rect.Height);
 

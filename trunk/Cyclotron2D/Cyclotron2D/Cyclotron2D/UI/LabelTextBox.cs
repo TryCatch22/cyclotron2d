@@ -12,7 +12,7 @@ namespace Cyclotron2D.UI
 
         public new TextBox Element { get { return base.Element as TextBox; } private set { base.Element = value; } }
 
-        public LabelTextBox(Game game, Screen screen) : base(game, screen)
+        public LabelTextBox(Game game, Screen screen, int? labelWidth = null) : base(game, screen, labelWidth)
         {
             Element = new TextBox(game, screen);
         }
