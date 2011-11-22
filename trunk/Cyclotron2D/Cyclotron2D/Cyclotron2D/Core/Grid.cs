@@ -13,13 +13,9 @@ namespace Cyclotron2D.Core
     {
         #region Fields
 
-        private TimeSpan m_lastColorChange;
+		private float m_hue = 0;
 
-        private TimeSpan m_changeRate;
-
-        private bool rateIncreasing, redUp, blueUp, greenUp;
-
-        int maxColorByte = 200;
+        private float m_changeRate;
 
         #endregion
 
@@ -107,55 +103,19 @@ namespace Cyclotron2D.Core
 
         private void UpdateChangeRate(GameTime gameTime)
         {
-            TimeSpan min = new TimeSpan(0, 0, 0, 0, 10), max = new TimeSpan(0, 0, 0, 0, 50);
-
-
-            if (rateIncreasing && m_changeRate < max)
-            {
-                m_changeRate += new TimeSpan(0, 0, 0, 0, 3);
-            }
-            else if (!rateIncreasing && m_changeRate > min)
-            {
-                m_changeRate -= new TimeSpan(0, 0, 0, 0, 4);
-            }
-            else
-            {
-                rateIncreasing = !rateIncreasing;
-            }
+			m_changeRate = 3f * ((float)new Random().NextDouble() + 0.1f);
         }
 
         private void UpdateColor(GameTime gameTime)
         {
-      
-            int inc = 1, xr = 3, xg = 5, xb = 2;
-            if (m_lastColorChange == TimeSpan.Zero)
-            {
-                m_lastColorChange = gameTime.TotalGameTime;
-                Random b = new Random((int)DateTime.Now.Ticks);
-                GridColor = new Color(b.Next(0, maxColorByte), b.Next(0, maxColorByte), b.Next(0, maxColorByte), 180);
-                m_changeRate = new TimeSpan(0, 0, 0, 0, 10);
-            }
-
-     
-
-            if (gameTime.TotalGameTime - m_lastColorChange > m_changeRate)
-            {
-               // int ms = (int)gameTime.TotalGameTime.TotalMilliseconds;
-
-                redUp = (redUp && GridColor.R > maxColorByte - inc * xr) || (!redUp && GridColor.R < inc * xr) ? !redUp : redUp;
-                greenUp = (greenUp && GridColor.G > maxColorByte - inc * xg) || (!greenUp && GridColor.G < inc * xg) ? !greenUp : greenUp;
-                blueUp = (blueUp && GridColor.B > maxColorByte - inc * xb) || (!blueUp && GridColor.B < inc * xb) ? !blueUp : blueUp;
-
-                int r = redUp ? GridColor.R + (inc * xr) : GridColor.R - (inc * xr),
-                    g = greenUp ? GridColor.G + (inc * xg) : GridColor.G - (inc * xg),
-                    b = blueUp ? GridColor.B + (inc * xb) : GridColor.B - (inc * xb);
-
-                GridColor = new Color(r, g, b, 180);
-                UpdateChangeRate(gameTime);
-                m_lastColorChange = gameTime.TotalGameTime;
-            }
-
-           
+			var oldHue = m_hue;
+			m_hue += m_changeRate * (float)gameTime.ElapsedGameTime.TotalSeconds;
+			if (m_hue == 0 || (oldHue < 2 && m_hue >= 2) || (oldHue < 4 && m_hue >= 4) || (oldHue < 6 && m_hue >= 6))
+			{
+				UpdateChangeRate(gameTime);
+			}
+			m_hue %= 6;
+			GridColor = new Vector3(m_hue, 1f, 0.5f).HSVToColor();
         }
 
         #endregion
