@@ -64,6 +64,10 @@ namespace Cyclotron2D.Network
         public NetworkConnection(Socket socket)
         {
             Socket = socket;
+            if(SocketProbe.IsConnected(socket))
+            {
+                StartReceiving();
+            }
         }
 
         public NetworkConnection()

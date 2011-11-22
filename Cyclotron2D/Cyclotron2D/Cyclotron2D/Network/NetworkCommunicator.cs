@@ -55,7 +55,9 @@ namespace Cyclotron2D.Network
             {
                 if (Connections.ContainsKey(player))
                 {
-                    Connections[player].MessageReceived -= MessageReceived;
+                    var connection = Connections[player];
+                    connection.MessageReceived -= MessageReceived;
+                    connection.Disconnect();
                     Connections.Remove(player);
                 }
             }

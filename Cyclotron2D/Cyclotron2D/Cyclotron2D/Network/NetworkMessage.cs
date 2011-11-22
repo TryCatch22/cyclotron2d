@@ -10,13 +10,13 @@ namespace Cyclotron2D.Network
 
         Hello,
 
-        NewID,
+        Welcome,
 
         GameStart,
 
-        NewPlayer,
+        PlayerJoined,
 
-        PlayerLost,
+        PlayerLeft,
 
 
     }

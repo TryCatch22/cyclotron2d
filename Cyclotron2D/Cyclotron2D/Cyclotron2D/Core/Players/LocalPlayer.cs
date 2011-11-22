@@ -18,9 +18,10 @@ namespace Cyclotron2D.Core.Players
 
         public LocalPlayer(Game game, Screen screen) : base(game, screen)
         {
+            Name = (Screen as GameScreen).GameSettings.PlayerName.Value;
         }
 
-        public override string Name { get { return (Screen as GameScreen).GameSettings.PlayerName.Value; } set { } }
+        public override string Name { get; set; }
 
         public override void Initialize(Cycle cycle)
         {
