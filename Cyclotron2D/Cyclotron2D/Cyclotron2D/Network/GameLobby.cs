@@ -74,6 +74,14 @@ namespace Cyclotron2D.Network {
 	        if (handler != null) handler(this, e);
 	    }
 
+        public event EventHandler<ConnectionEventArgs> LostConnection;
+
+        private void InvokeLostConnection(ConnectionEventArgs e)
+        {
+            EventHandler<ConnectionEventArgs> handler = LostConnection;
+            if (handler != null) handler(this, e);
+        }
+
 	    #endregion
 
         #region Private Methods
@@ -123,7 +131,7 @@ namespace Cyclotron2D.Network {
 
             var thread = new Thread(WaitForClient) {IsBackground = true, Name = "Connection Listener"}; 
             thread.Start();
-            print("Listening Thread Started");
+         //   print("Listening Thread Started");
             m_acceptThreads.Add(thread);
 
         }
@@ -144,6 +152,7 @@ namespace Cyclotron2D.Network {
                 if (!SocketProbe.IsConnected(client))
                 {
                     DebugMessages.Add("Client Disconnected");
+                    InvokeLostConnection(new ConnectionEventArgs(client));
                 }
             }
 
@@ -234,11 +243,24 @@ namespace Cyclotron2D.Network {
 			} catch (SocketException ex) {
 				Console.WriteLine(ex);
 			} catch (ThreadAbortException) {
-				print("Listener Killed");
+				//print("Listener Killed");
 			}
 				
 		}
 
+
+        #endregion
+
+        #region IDisposable
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Kill();
+            }
+            base.Dispose(disposing);
+        }
 
         #endregion
     }

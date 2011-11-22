@@ -6,7 +6,11 @@ using System.Threading;
 namespace Cyclotron2D.Network 
 {
 
-
+    /// <summary>
+    /// little helper class that checks if a socket is still connected. 
+    /// It will currently falsly identify a socket where Listen has been called and a connection is pending as disconnected.
+    /// this currently does not matter but if it one day does we might have to look into an alternative
+    /// </summary>
     public static class SocketProbe
     {
         public static bool IsConnected(Socket socket)
@@ -82,14 +86,6 @@ namespace Cyclotron2D.Network
             if (handler != null) handler(this, e);
         }
 
-//        public event EventHandler Disconnected;
-//
-//        private void InvokeDisconnected()
-//        {
-//            EventHandler handler = Disconnected;
-//            if (handler != null) handler(this, new EventArgs());
-//        }
-
         #endregion
 
         #region Public Methods
@@ -116,8 +112,10 @@ namespace Cyclotron2D.Network
         /// <summary>
         /// Attempts to connect to the specified address. Creates a new Socket in the process
         /// </summary>
-        public void ConnectTo(IPAddress address)
+        public bool ConnectTo(IPAddress address)
         {
+
+            bool connected = false;
             if (Socket != null && Socket.Connected)
             {
                 
@@ -131,12 +129,18 @@ namespace Cyclotron2D.Network
 
                 Print("Client Connected");
 
+                connected = true;
+
+
                 StartReceiving();
+
             }
             catch (Exception ex)
             {
                 Print(ex.Message);
             }
+
+            return connected;
         }
 
 
@@ -149,7 +153,6 @@ namespace Cyclotron2D.Network
             m_receivingThread = null;
             if (Socket != null) Socket.Close();
 
-//            InvokeDisconnected();
         }
 
         #endregion

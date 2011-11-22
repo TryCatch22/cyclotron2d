@@ -9,6 +9,8 @@ namespace Cyclotron2D.UI
     {
         public Player Player { get; set; }
 
+        public Color TextColor { get { return NameAndId.TextColor; } set { NameAndId.TextColor = value; } }
+
         private Rectangle PlayerColorRect { get; set; }
 
         private TextElement NameAndId { get; set; }

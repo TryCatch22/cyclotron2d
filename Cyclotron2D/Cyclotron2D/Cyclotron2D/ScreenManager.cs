@@ -30,10 +30,10 @@ namespace Cyclotron2D
         /// </summary>
         public MainScreen ActiveScreen { get; private set; }
 
-        /// <summary>
-        /// was needed for initializing players outside of the game
-        /// </summary>
-        public GameScreen GameScreen { get; private set; }
+//        /// <summary>
+//        /// was needed for initializing players outside of the game
+//        /// </summary>
+//        public GameScreen GameScreen { get; private set; }
 
         /// <summary>
         /// Screen with Focus (Topmost screen)
@@ -121,15 +121,21 @@ namespace Cyclotron2D
 
         #region Public Methods
 
+
+        public MainScreen GetMainScreen<T>()
+        {
+            return (from screen in Screens.Keys where screen is T select screen).FirstOrDefault();
+        }
+
         public void AddScreen(Screen screen)
         {
             if (screen is MainScreen)
             {
                 Screens.Add(screen as MainScreen, new List<PopupScreen>());
-                if (screen is GameScreen)
-                {
-                    GameScreen = screen as GameScreen;
-                }
+//                if (screen is GameScreen)
+//                {
+//                    GameScreen = screen as GameScreen;
+//                }
             }
             else
             {
