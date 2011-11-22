@@ -20,7 +20,7 @@ namespace Cyclotron2D.Screens.Main
 
         public List<RemotePlayer> RemotePlayers { get { return m_engine.Players.Where(player => player is RemotePlayer).Select( player => player as RemotePlayer).ToList(); } }
 
-        private List<RemotePlayer> m_remotePlayers;
+        private List<Player> m_lobbyPlayers;
 
         public Settings GameSettings { get; set; }
 
@@ -32,7 +32,7 @@ namespace Cyclotron2D.Screens.Main
             : base(game, GameState.PlayingAsClient | GameState.PlayingSolo | GameState.PlayingAsHost)
         {
             GameSettings = Settings.SinglePlayer;
-            m_remotePlayers = new List<RemotePlayer>();
+            m_lobbyPlayers = new List<Player>();
             m_engine = new Engine(game, this);
         }
 
@@ -52,7 +52,7 @@ namespace Cyclotron2D.Screens.Main
         public void StopGame()
         {
             m_gameStarted = false;
-            m_remotePlayers.Clear();
+         //   m_remotePlayers.Clear();
         }
 
         public override void Draw(GameTime gameTime)
@@ -63,9 +63,15 @@ namespace Cyclotron2D.Screens.Main
             }
         }
 
-        public void AddRemotePlayer(RemotePlayer player)
+        public void AddPlayer(Player player)
         {
-            m_remotePlayers.Add(player);
+            m_lobbyPlayers.Add(player);
+        }
+
+
+        public void RemovePlayer(Player player)
+        {
+            m_lobbyPlayers.Remove(player);
         }
 
         protected override void Dispose(bool disposing)
@@ -116,7 +122,7 @@ namespace Cyclotron2D.Screens.Main
             {
                 //get players from network and then start game
                 players = new List<Player>();
-                players.AddRange(m_remotePlayers);
+                players.AddRange(m_lobbyPlayers);
 
                 GameSettings = Settings.Multiplayer;
             }
@@ -124,7 +130,7 @@ namespace Cyclotron2D.Screens.Main
             {
                 //get players and settings from network and start game
                 players = new List<Player>();
-                players.AddRange(m_remotePlayers);
+                players.AddRange(m_lobbyPlayers);
                 GameSettings = Settings.Multiplayer;
             }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using Cyclotron2D.Core.Players;
 using Cyclotron2D.Mod;
 using Cyclotron2D.Screens.Base;
 using Cyclotron2D.UI;
@@ -19,7 +20,7 @@ namespace Cyclotron2D.Screens.Main {
 	    private StretchPanel m_panel;
 
 		private CancelOk m_ok;
-		private NetworkConnection Client;
+		private NetworkConnection Host;
 
 		public JoinGameScreen(Game game)
 			: base(game, GameState.JoiningGame) {
@@ -28,28 +29,18 @@ namespace Cyclotron2D.Screens.Main {
             m_playerName = new LabelTextBox(game, this);
             m_hostIp = new IpTextBox(game, this);
 			m_ok = new CancelOk(game, this);
-			Client = new NetworkConnection();
+			Host = new NetworkConnection();
 
             m_panel.AddItems(m_playerName, m_hostIp);
 		}
 
-		protected override void Dispose(bool disposing) {
-			if (disposing && m_hostIp != null) {
-				m_hostIp.Dispose();
-				m_ok.Dispose();
-
-				m_hostIp = null;
-				m_ok = null;
-			}
-			base.Dispose(disposing);
-		}
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            if (!Client.IsConnected && Client.Socket!= null && Client.Socket.Connected)
+            if (!Host.IsConnected && Host.Socket!= null && Host.Socket.Connected)
             {
-                Client.Disconnect();
+                Host.Disconnect();
                 DebugMessages.Add("Connection Lost");
             }
         }
@@ -73,13 +64,18 @@ namespace Cyclotron2D.Screens.Main {
 			m_ok.Rect = new Rectangle((int)(vp.Width * 3.2 / 5), vp.Height * 5 / 6, (int)(vp.Width / 3.7), vp.Height / 7);
 			m_ok.OnCancel = CancelConnection;
 			m_ok.OnOk = TryConnect;
+
+            SubscribeCommunicator();
 		}
 
 		private void TryConnect() {
 			try
 			{
 			    var ip = IPAddress.Parse(m_hostIp.BoxText);
-                Client.ConnectTo(ip);
+                if(Host.ConnectTo(ip))
+                {
+                    CreateHost();
+                }
 			}
 			catch (FormatException)
 			{
@@ -91,8 +87,25 @@ namespace Cyclotron2D.Screens.Main {
 		    }
 		}
 
+
+        private void CreateHost()
+        {
+            var lobbyScreen = Game.ScreenManager.GetMainScreen<GameLobbyScreen>() as GameLobbyScreen;
+            var gameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
+
+            if (lobbyScreen != null && gameScreen != null)
+            {
+                //we are connecting to host. Host always has player id = 1
+                RemotePlayer hostPlayer = new RemotePlayer(Game, gameScreen) { PlayerID = 1 };
+                lobbyScreen.AddHost(hostPlayer, Host);
+            }
+        }
+
+
+
+
 		private void CancelConnection() {
-			Client.Disconnect();
+			Host.Disconnect();
 			Game.ChangeState(GameState.MainMenu);
 		}
 
@@ -107,6 +120,72 @@ namespace Cyclotron2D.Screens.Main {
 			}
 
 
-		}
-	}
+        }
+
+
+        #region Subscription
+
+        public void SubscribeCommunicator()
+        {
+            Game.Communicator.MessageReceived += OnMessageReceived;
+        }
+
+        public void UnsubscribeCommunicator()
+        {
+            Game.Communicator.MessageReceived -= OnMessageReceived;
+        }
+
+	    private void OnMessageReceived(object sender, MessageEventArgs e)
+	    {
+            //if this is not the newID message from the host or we are not the active screen
+	        if (e.Message.Type != MessageType.NewID || !IsValidState)
+	        {
+	            return;
+	        }
+
+	        int id;
+
+	        if(int.TryParse(e.Message.Content, out id))
+	        {
+                var lobbyScreen = Game.ScreenManager.GetMainScreen<GameLobbyScreen>() as GameLobbyScreen;
+                var gameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
+
+
+                if (lobbyScreen != null && gameScreen != null)
+                {
+                    LocalPlayer player = new LocalPlayer(Game, gameScreen) { PlayerID = id};
+
+                    lobbyScreen.AddLocalPlayer(player);
+                }
+
+                Game.ChangeState(GameState.GameLobbyClient);
+	        }
+
+          
+
+	    }
+
+	    #endregion
+
+        #region IDisposable
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && m_hostIp != null)
+            {
+                m_hostIp.Dispose();
+                m_ok.Dispose();
+
+                m_hostIp = null;
+                m_ok = null;
+
+                UnsubscribeCommunicator();
+            }
+            base.Dispose(disposing);
+        }
+
+
+        #endregion
+
+    }
 }

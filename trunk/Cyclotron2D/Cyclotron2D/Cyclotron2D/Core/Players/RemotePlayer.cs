@@ -16,6 +16,8 @@ namespace Cyclotron2D.Core.Players
 
         public override string Name { get; set; } 
 
+
+
         #region Subscription
 
         private void SubscribeConnection()

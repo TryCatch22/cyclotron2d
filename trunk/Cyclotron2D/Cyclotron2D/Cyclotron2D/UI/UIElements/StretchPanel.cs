@@ -27,8 +27,8 @@ namespace Cyclotron2D.UI.UIElements
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            int height = (Rect.Height - (Items.Count + 1)*ItemSpacing)/Items.Count;
-            int width = (Rect.Width - (Items.Count + 1) * ItemSpacing) / Items.Count;
+            int height = Items.Count == 0 ? 0 : (Rect.Height - (Items.Count + 1)*ItemSpacing)/Items.Count;
+            int width = Items.Count == 0 ? 0 : (Rect.Width - (Items.Count + 1)*ItemSpacing)/Items.Count;
             for (int i = 0; i < Items.Count; i++)
             {
                 Items[i].Rect = Orientation == Orientation.Vertical ? 
@@ -41,10 +41,7 @@ namespace Cyclotron2D.UI.UIElements
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
-            foreach (var uiElement in Items.Where(itm => itm.Visible))
-            {
-                uiElement.Draw(gameTime);
-            }
+            DrawElements();
         }
     }
 }

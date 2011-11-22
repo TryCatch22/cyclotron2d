@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
 
@@ -29,6 +30,14 @@ namespace Cyclotron2D.UI.UIElements
                 Items.Remove(item);
             }   
 
+        }
+
+        public void DrawElements()
+        {
+            foreach (var uiElement in Items.Where(itm => itm.Visible))
+            {
+                uiElement.Draw(Game.GameTime);
+            }
         }
 
         #region IDisposable

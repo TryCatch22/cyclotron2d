@@ -16,6 +16,8 @@ namespace Cyclotron2D.Network
         public Dictionary<RemotePlayer, NetworkConnection> Connections { get; private set; }
 
 
+        public RemotePlayer Host { get; private set; }
+
         public NetworkCommunicator(Game game)
             : base(game)
         {
@@ -24,17 +26,43 @@ namespace Cyclotron2D.Network
 
         public void Add(RemotePlayer player, Socket socket)
         {
+            Add(player, new NetworkConnection(socket));
+        }
+
+        public void AddHost(RemotePlayer hostPlayer, NetworkConnection host)
+        {
+            Host = hostPlayer;
+            Add(hostPlayer, host);
+        }
+
+        public void Add(RemotePlayer player, NetworkConnection connection)
+        {
             lock (Connections)
             {
                 if (!Connections.ContainsKey(player))
                 {
-                    Connections.Add(player, new NetworkConnection(socket));
+                    Connections.Add(player, connection);
+                    connection.MessageReceived += MessageReceived;
                 }
             }
-           
         }
 
-        public override void Update(GameTime gameTime)
+        public event EventHandler<MessageEventArgs> MessageReceived;
+
+        public void Remove(RemotePlayer player)
+        {
+            lock (Connections)
+            {
+                if (Connections.ContainsKey(player))
+                {
+                    Connections[player].MessageReceived -= MessageReceived;
+                    Connections.Remove(player);
+                }
+            }
+
+        }
+
+       /* public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -46,7 +74,7 @@ namespace Cyclotron2D.Network
                 Connections.Remove(remotePlayer);
             }
         }
-
+*/
 
         public void SendDebugMessage(string message)
         {
@@ -68,5 +96,32 @@ namespace Cyclotron2D.Network
                 Connections[player].Send(message);
             }
         }
+
+        public RemotePlayer GetPlayer(Socket socket)
+        {
+            return (from kvp in Connections where kvp.Value.Socket == socket select kvp.Key).FirstOrDefault();
+        }
+
+        public RemotePlayer GetPlayer(NetworkConnection connection)
+        {
+            return (from kvp in Connections where kvp.Value == connection select kvp.Key).FirstOrDefault();
+        }
+
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+
+                List<RemotePlayer> players = Connections.Keys.ToList();
+
+                foreach (var key in players)
+                {
+                    Remove(key);
+                }
+            }
+            base.Dispose(disposing);
+        }
+
     }
 }

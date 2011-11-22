@@ -119,9 +119,7 @@
     <Compile Include="Network\NetworkCommunicator.cs" />
     <Compile Include="Network\PlayerMonitor.cs" />
     <Compile Include="Network\GameLobby.cs" />
-    <Compile Include="Network\GameLobbyThread.cs" />
     <Compile Include="Network\NetworkConnection.cs" />
-    <Compile Include="Network\Server.cs" />
     <Compile Include="Screens\Base\MainScreen.cs" />
     <Compile Include="Screens\Base\PopupScreen.cs" />
     <Compile Include="Screens\Base\Screen.cs" />
@@ -139,12 +137,14 @@
     <Compile Include="UI\CancelOk.cs" />
     <Compile Include="UI\IpTextBox.cs" />
     <Compile Include="UI\LabelCheckBox.cs" />
+    <Compile Include="UI\PlayerPanel.cs" />
     <Compile Include="UI\PlayerView.cs" />
     <Compile Include="UI\EndGameTable.cs" />
     <Compile Include="UI\SettingsChanger.cs" />
     <Compile Include="UI\UIElements\Button.cs" />
     <Compile Include="UI\UIElements\CheckBox.cs" />
     <Compile Include="UI\LabelTextBox.cs" />
+    <Compile Include="UI\UIElements\FixedPanel.cs" />
     <Compile Include="UI\UIElements\LabeledElement.cs" />
     <Compile Include="UI\UIElements\Panel.cs" />
     <Compile Include="UI\UIElements\StretchPanel.cs" />
