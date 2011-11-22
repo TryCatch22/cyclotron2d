@@ -29,9 +29,9 @@ namespace Cyclotron2D.Core.Players
             SubscribeCycleCollision();
         }
 
-        protected override void HandleInupt(GameTime gameTime)
+        protected override void HandleInput(GameTime gameTime)
         {
-            base.HandleInupt(gameTime);
+            base.HandleInput(gameTime);
             Debug.Assert(Cycle != null, "Player has not been initialized.");
 
             InputState input = Game.InputState;

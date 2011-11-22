@@ -55,9 +55,9 @@ namespace Cyclotron2D.UI.UIElements
                 InvokeValueChanged(new ValueChangedEventArgs(oldText));
         }
 
-        protected override void HandleInupt(GameTime gameTime)
+        protected override void HandleInput(GameTime gameTime)
         {
-            base.HandleInupt(gameTime);
+            base.HandleInput(gameTime);
 
             var input = Game.InputState;
             if (input.IsNewLeftClick)

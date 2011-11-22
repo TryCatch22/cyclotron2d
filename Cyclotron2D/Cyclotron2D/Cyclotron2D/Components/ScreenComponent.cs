@@ -31,11 +31,11 @@ namespace Cyclotron2D.Components
             base.Update(gameTime);
             if (Screen.HasFocus)
             {
-                HandleInupt(gameTime);
+                HandleInput(gameTime);
             }
         }
 
-        protected virtual void HandleInupt(GameTime gameTime)
+        protected virtual void HandleInput(GameTime gameTime)
         {
         }
 
@@ -125,11 +125,11 @@ namespace Cyclotron2D.Components
             base.Update(gameTime);
             if (Screen.HasFocus)
             {
-                HandleInupt(gameTime);
+                HandleInput(gameTime);
             }
         }
 
-        protected virtual void HandleInupt(GameTime gameTime)
+        protected virtual void HandleInput(GameTime gameTime)
         {
         }
 

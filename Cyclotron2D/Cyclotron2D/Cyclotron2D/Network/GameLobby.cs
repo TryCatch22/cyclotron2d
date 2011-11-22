@@ -110,10 +110,10 @@ namespace Cyclotron2D.Network {
                     SpawnThread();
                 }
                 //Poll all connected clients to see if someone disconnected
-                if (Clients.Count > 0)
-                {
-                    Socket.Select(null, Clients, null, 1000);
-                }
+//                if (Clients.Count > 0)
+//                {
+//                    Socket.Select(null, Clients, null, 1000);
+//                }
 
                 m_acceptThreads.RemoveAll(t => !t.IsAlive);
 
@@ -146,17 +146,19 @@ namespace Cyclotron2D.Network {
         {
             base.Update(gameTime);
 
-
-            foreach (var client in Clients)
+            lock (Clients)
             {
-                if (!SocketProbe.IsConnected(client))
+                foreach (var client in Clients)
                 {
-                    DebugMessages.Add("Client Disconnected");
-                    InvokeLostConnection(new ConnectionEventArgs(client));
+                    if (!SocketProbe.IsConnected(client))
+                    {
+                        DebugMessages.Add("Client Disconnected");
+                        InvokeLostConnection(new ConnectionEventArgs(client));
+                    }
                 }
-            }
 
-            Clients.RemoveAll(socket => !SocketProbe.IsConnected(socket));
+                Clients.RemoveAll(socket => !SocketProbe.IsConnected(socket));
+            }
         }
 
 
@@ -211,12 +213,15 @@ namespace Cyclotron2D.Network {
 		public void Kill() 
         {
 			m_waitingForConnections = false;
-			foreach(Socket client in Clients)
-			{
-			    client.Close();
-			}
-			
-            Clients.Clear();
+            lock (Clients)
+            {
+                foreach (Socket client in Clients)
+                {
+                    client.Close();
+                }
+                Clients.Clear();
+            }
+
 			foreach(var thread in m_acceptThreads)
             {
 				thread.Abort();
@@ -237,7 +242,7 @@ namespace Cyclotron2D.Network {
 			try {
 				Socket client = GameLobbySocket.Accept();
 				print("Accepting Connection ...");
-				Clients.Add(client);
+                lock (Clients) { Clients.Add(client); }
                 InvokeNewConnection(new ConnectionEventArgs(client));
 			    print("Accepted Client #" + Clients.Count);
 			} catch (SocketException ex) {

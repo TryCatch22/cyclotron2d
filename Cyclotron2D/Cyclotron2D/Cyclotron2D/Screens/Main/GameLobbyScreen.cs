@@ -92,6 +92,16 @@ namespace Cyclotron2D.Screens.Main
 
         }
 
+        /// <summary>
+        /// adding a client player to another client player
+        /// </summary>
+        /// <param name="player"></param>
+        public void AddPlayer(Player player)
+        {
+            GameScreen.AddPlayer(player);
+            m_playersPanel.AddPlayer(player);
+            Players.Add(player);
+        }
 
 
         public void AddPlayer(Player player, Socket socket)
@@ -187,7 +197,7 @@ namespace Cyclotron2D.Screens.Main
             GameScreen gameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
             if (gameScreen != null)
             {
-                var rem = new RemotePlayer(Game, gameScreen) {PlayerID = gameScreen.RemotePlayers.Count + 2};
+                var rem = new RemotePlayer(Game, gameScreen) {PlayerID = Players.Count + 2};
 
                 AddPlayer(rem, e.Socket);
 
@@ -277,7 +287,38 @@ namespace Cyclotron2D.Screens.Main
                     //once it has this it can announce the new player to the other players.
                     case MessageType.Hello:
                         {
-                            Game.Communicator.GetPlayer(connection).Name = e.Message.Content;
+                            RemotePlayer player = Game.Communicator.GetPlayer(connection);
+                            player.Name = e.Message.Content;
+                            string content = player.PlayerID + "\n" + player.Name;
+                            Game.Communicator.MessageOtherPlayers(player, 
+                                new NetworkMessage(MessageType.PlayerJoined, content));
+
+                            foreach (Player otherPlayer in Players)
+                            {
+                                if (otherPlayer != player)
+                                {
+                                    content = otherPlayer.PlayerID + "\n" + otherPlayer.Name;
+                                    Game.Communicator.MessagePlayer(player,
+                                        new NetworkMessage(MessageType.PlayerJoined, content));
+                                }
+                            }
+                        }
+                        break;
+                    //now on client side we can add the new player
+                    case MessageType.PlayerJoined:
+                        {
+                            var lines = e.Message.Content.Split(new[] {'\n'});
+
+                            int id;
+                            if(int.TryParse(lines[0], out id))
+                            {
+                                var player = new RemotePlayer(Game, GameScreen) {PlayerID = id, Name = lines[1]};
+                                AddPlayer(player);
+                            }
+
+                            
+
+
                         }
                         break;
                     default:
