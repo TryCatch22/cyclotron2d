@@ -55,14 +55,17 @@ namespace Cyclotron2D.Core
 
         private Countdown m_countdown;
 
+        private TimeSpan m_delay;
+
+        private TimeSpan m_gameStartDelay;  //GameStart + Delay for delaying the start
+
         #endregion
 
         #region Properties
 
         public TimeSpan GameStart { get; set; }
-        public int Count;
-        private TimeSpan m_delay;
-        private TimeSpan m_gameStartDelay;  //GameStart + Delay for delaying the start
+        
+        public int Count;  // starting countdown number; determines delay     
 
         #endregion
 
