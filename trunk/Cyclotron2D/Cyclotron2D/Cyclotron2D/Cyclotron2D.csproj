@@ -135,7 +135,7 @@
     <Compile Include="Mod\InvalidValueException.cs" />
     <Compile Include="Mod\Setting.cs" />
     <Compile Include="Mod\Settings.cs" />
-    <Compile Include="SpriteSheet.cs" />
+    <Compile Include="Animation.cs" />
     <Compile Include="UI\CancelOk.cs" />
     <Compile Include="UI\UIElements\Countdown.cs" />
     <Compile Include="UI\IpTextBox.cs" />

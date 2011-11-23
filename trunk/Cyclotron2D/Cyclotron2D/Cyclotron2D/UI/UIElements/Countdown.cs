@@ -8,6 +8,9 @@ namespace Cyclotron2D.UI.UIElements
     {
         private static readonly TimeSpan OneSecond = new TimeSpan(0, 0, 0, 1);
 
+        /// <summary>
+        /// Time in seconds left on the timer
+        /// </summary>
         public int Value { get; set; }
 
         private int m_startValue;

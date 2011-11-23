@@ -52,7 +52,7 @@ namespace Cyclotron2D.Screens.Main
         public void StopGame()
         {
             m_gameStarted = false;
-         //   m_remotePlayers.Clear();
+            m_lobbyPlayers.Clear();
         }
 
         public override void Draw(GameTime gameTime)
