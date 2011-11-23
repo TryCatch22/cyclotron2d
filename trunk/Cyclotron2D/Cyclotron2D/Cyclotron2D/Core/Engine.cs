@@ -6,6 +6,7 @@ using Cyclotron2D.Core;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Screens.Base;
+using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Core
@@ -45,8 +46,6 @@ namespace Cyclotron2D.Core
     {
         #region Fields
 
-        public List<Player> Players { get { return m_playerMap.Keys.ToList(); } }
-
         private Grid m_grid;
 
         private Dictionary<Player, Cycle> m_playerMap;
@@ -55,17 +54,15 @@ namespace Cyclotron2D.Core
 
         private Countdown m_countdown;
 
-        private TimeSpan m_delay;
-
-        private TimeSpan m_gameStartDelay;  //GameStart + Delay for delaying the start
-
         #endregion
 
         #region Properties
 
+        public List<Player> Players { get { return m_playerMap.Keys.ToList(); } }
+
         public TimeSpan GameStart { get; set; }
-        
-        public int Count;  // starting countdown number; determines delay     
+
+        public int Countdown { get; set; }  // starting countdown number; determines delay     
 
         #endregion
 
@@ -74,19 +71,22 @@ namespace Cyclotron2D.Core
         public Engine(Game game, Screen screen)
             : base(game, screen)
         {
+            Countdown = 3;
             m_playerMap = new Dictionary<Player, Cycle>();
             startRandomizer = new StartRandomizer(game);
+            var vp = Game.GraphicsDevice.Viewport.Bounds;
+            m_grid = new Grid(Game, Screen, vp.Size());
 
-            m_grid = new Grid(Game, Screen, Game.GraphicsDevice.Viewport.Bounds.Size());
-            m_countdown = new Countdown(Game, Screen);
+            m_countdown = new Countdown(Game, Screen) { Value = Countdown };
+            m_countdown.Rect = RectangleBuilder.Centered(vp, new Vector2(0.2f, 0.2f));
 
-            Count = 3;
-            m_delay = new TimeSpan(0, 0, Count);
+
         }
 
         #endregion
 
         #region Public Methods
+
 
         public override void Update(GameTime gameTime)
         {
@@ -119,19 +119,18 @@ namespace Cyclotron2D.Core
         public void StartGame(IEnumerable<Player> players)
         {
             GameStart = Game.GameTime.TotalGameTime;
-            m_gameStartDelay = GameStart + m_delay;
 
             startRandomizer.Randomize(6, m_grid.PixelsPerInterval);
             int i = 0;
             foreach (var player in players)
             {
-                Cycle c = new Cycle(Game, Screen, m_grid, startRandomizer.StartConditions[i++], player, m_gameStartDelay);
+                Cycle c = new Cycle(Game, Screen, m_grid, startRandomizer.StartConditions[i++], player){GameStartDelay = GameStart + new TimeSpan(0, 0, 0, Countdown)};
                 m_playerMap.Add(player, c);
                 player.Initialize(c);
             }
 
             m_grid.Initialize(m_playerMap.Values);
-            m_countdown.Initialize(GameStart, Count);
+            m_countdown.Start();
 
             SubscribePlayers();
             SubscribeCycles();
@@ -151,8 +150,10 @@ namespace Cyclotron2D.Core
                 cycle.Draw(gameTime);
             }
 
-            if (gameTime.TotalGameTime < m_gameStartDelay)
+            if (m_countdown.Visible)
+            {
                 m_countdown.Draw(gameTime);
+            }
         }
 
         #endregion

@@ -137,7 +137,7 @@
     <Compile Include="Mod\Settings.cs" />
     <Compile Include="SpriteSheet.cs" />
     <Compile Include="UI\CancelOk.cs" />
-    <Compile Include="Core\Countdown.cs" />
+    <Compile Include="UI\UIElements\Countdown.cs" />
     <Compile Include="UI\IpTextBox.cs" />
     <Compile Include="UI\LabelCheckBox.cs" />
     <Compile Include="UI\PlayerPanel.cs" />
