@@ -55,6 +55,8 @@ namespace Cyclotron2D.Network
 
         private bool m_stayAlive;
 
+        private static readonly object MessageHandleLock = new Object();
+
         private Thread m_receivingThread;
 
         #endregion
@@ -90,8 +92,11 @@ namespace Cyclotron2D.Network
 
         private void InvokeMessageReceived(MessageEventArgs e)
         {
-            EventHandler<MessageEventArgs> handler = MessageReceived;
-            if (handler != null) handler(this, e);
+            lock (MessageHandleLock)
+            {
+                EventHandler<MessageEventArgs> handler = MessageReceived;
+                if (handler != null) handler(this, e);
+            }
         }
 
         #endregion

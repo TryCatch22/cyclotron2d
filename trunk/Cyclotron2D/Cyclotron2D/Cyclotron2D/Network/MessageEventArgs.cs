@@ -13,16 +13,29 @@ namespace Cyclotron2D.Network
         }
     }
 
-    public class ConnectionEventArgs: EventArgs
+    public class SocketEventArgs: EventArgs
     {
 
         public Socket Socket { get; private set; }
 
-        public ConnectionEventArgs(Socket socket)
+        public SocketEventArgs(Socket socket)
         {
             Socket = socket;
         }
    
+
+    }
+
+    public class ConnectionEventArgs : EventArgs
+    {
+
+        public NetworkConnection Connection { get; private set; }
+
+        public ConnectionEventArgs(NetworkConnection socket)
+        {
+            Connection = socket;
+        }
+
 
     }
 }

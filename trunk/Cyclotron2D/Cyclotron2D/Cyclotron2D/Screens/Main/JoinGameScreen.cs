@@ -158,11 +158,12 @@ namespace Cyclotron2D.Screens.Main {
                 if (lobbyScreen != null && gameScreen != null)
                 {
                     LocalPlayer player = new LocalPlayer(Game, gameScreen) { PlayerID = id, Name= m_playerName.BoxText};
+                    Game.Communicator.LocalId = id;
                     Game.Communicator.Host.Name = lines[1];
-                    lobbyScreen.AddLocalPlayer(player);
+                    lobbyScreen.AddPlayer(player);
                 }
 
-
+                
                 Game.Communicator.MessagePlayer(Game.Communicator.Host,
                     new NetworkMessage(MessageType.Hello, m_playerName.BoxText));
 

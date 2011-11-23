@@ -66,21 +66,21 @@ namespace Cyclotron2D.Network {
 
         #region Events
 
-	    public event EventHandler<ConnectionEventArgs> NewConnection;
+	    public event EventHandler<SocketEventArgs> NewConnection;
 
-        private void InvokeNewConnection(ConnectionEventArgs e)
+        private void InvokeNewConnection(SocketEventArgs e)
 	    {
-            EventHandler<ConnectionEventArgs> handler = NewConnection;
+            EventHandler<SocketEventArgs> handler = NewConnection;
 	        if (handler != null) handler(this, e);
 	    }
 
-        public event EventHandler<ConnectionEventArgs> LostConnection;
-
-        private void InvokeLostConnection(ConnectionEventArgs e)
-        {
-            EventHandler<ConnectionEventArgs> handler = LostConnection;
-            if (handler != null) handler(this, e);
-        }
+//        public event EventHandler<ConnectionEventArgs> LostConnection;
+//
+//        private void InvokeLostConnection(ConnectionEventArgs e)
+//        {
+//            EventHandler<ConnectionEventArgs> handler = LostConnection;
+//            if (handler != null) handler(this, e);
+//        }
 
 	    #endregion
 
@@ -148,14 +148,14 @@ namespace Cyclotron2D.Network {
 
             lock (Clients)
             {
-                foreach (var client in Clients)
-                {
-                    if (!SocketProbe.IsConnected(client))
-                    {
-                        DebugMessages.Add("Client Disconnected");
-                        InvokeLostConnection(new ConnectionEventArgs(client));
-                    }
-                }
+//                foreach (var client in Clients)
+//                {
+//                    if (!SocketProbe.IsConnected(client))
+//                    {
+//                        DebugMessages.Add("Client Disconnected");
+//                        InvokeLostConnection(new ConnectionEventArgs(client));
+//                    }
+//                }
 
                 Clients.RemoveAll(socket => !SocketProbe.IsConnected(socket));
             }
@@ -243,7 +243,7 @@ namespace Cyclotron2D.Network {
 				Socket client = GameLobbySocket.Accept();
 				print("Accepting Connection ...");
                 lock (Clients) { Clients.Add(client); }
-                InvokeNewConnection(new ConnectionEventArgs(client));
+                InvokeNewConnection(new SocketEventArgs(client));
 			    print("Accepted Client #" + Clients.Count);
 			} catch (SocketException ex) {
 				Console.WriteLine(ex);

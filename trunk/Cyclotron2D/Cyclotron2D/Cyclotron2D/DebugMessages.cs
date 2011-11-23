@@ -4,9 +4,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Cyclotron2D {
 	internal class DebugMessages {
+
 		#region Constants
 
-		private const float DisplayTime = 4f;
+		private const float DisplayTime = 7f;
 
 		#endregion
 
