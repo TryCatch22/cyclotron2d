@@ -53,13 +53,16 @@ namespace Cyclotron2D.Core
 
         private StartRandomizer startRandomizer;
 
+        private Countdown m_countdown;
+
         #endregion
 
         #region Properties
 
         public TimeSpan GameStart { get; set; }
-        public TimeSpan Delay { get; set; }
-        public TimeSpan GameStartDelay;  //GameStart + Delay for delaying the start
+        public int Count;
+        private TimeSpan m_delay;
+        private TimeSpan m_gameStartDelay;  //GameStart + Delay for delaying the start
 
         #endregion
 
@@ -72,8 +75,10 @@ namespace Cyclotron2D.Core
             startRandomizer = new StartRandomizer(game);
 
             m_grid = new Grid(Game, Screen, Game.GraphicsDevice.Viewport.Bounds.Size());
+            m_countdown = new Countdown(Game, Screen);
 
-            Delay = new TimeSpan(0, 0, 3);
+            Count = 3;
+            m_delay = new TimeSpan(0, 0, Count);
         }
 
         #endregion
@@ -83,47 +88,48 @@ namespace Cyclotron2D.Core
         public override void Update(GameTime gameTime)
         {
 
-                base.Update(gameTime);
+            base.Update(gameTime);
 
-                if (m_playerMap == null)
-                {
-                    return;
-                }
+            if (m_playerMap == null)
+            {
+                return;
+            }
 
-                int i = 0;
-                Player winner = null;
-                foreach (var player in m_playerMap.Keys)
+            int i = 0;
+            Player winner = null;
+            foreach (var player in m_playerMap.Keys)
+            {
+                var cycle = m_playerMap[player];
+                if (cycle.Enabled)
                 {
-                    var cycle = m_playerMap[player];
-                    if (cycle.Enabled)
-                    {
-                        i++;
-                        winner = player;
-                    }
+                    i++;
+                    winner = player;
                 }
-                if (i == 1)
-                {
-                    winner.Winner = true;
-                    m_playerMap[winner].Enabled = false;
-                }
+            }
+            if (i == 1)
+            {
+                winner.Winner = true;
+                m_playerMap[winner].Enabled = false;
+            }
         }
 
         public void StartGame(IEnumerable<Player> players)
         {
             GameStart = Game.GameTime.TotalGameTime;
-            GameStartDelay = GameStart + Delay;
+            m_gameStartDelay = GameStart + m_delay;
 
             startRandomizer.Randomize(6, m_grid.PixelsPerInterval);
             int i = 0;
             foreach (var player in players)
             {
-                Cycle c = new Cycle(Game, Screen, m_grid, startRandomizer.StartConditions[i++], player, GameStartDelay);
+                Cycle c = new Cycle(Game, Screen, m_grid, startRandomizer.StartConditions[i++], player, m_gameStartDelay);
                 m_playerMap.Add(player, c);
                 player.Initialize(c);
             }
 
             m_grid.Initialize(m_playerMap.Values);
-            
+            m_countdown.Initialize(GameStart, Count);
+
             SubscribePlayers();
             SubscribeCycles();
         }
@@ -136,11 +142,14 @@ namespace Cyclotron2D.Core
             {
                 m_grid.Draw(gameTime);
             }
-            
+
             foreach (var cycle in m_playerMap.Values.Where(cycle => cycle.Visible))
             {
                 cycle.Draw(gameTime);
             }
+
+            if (gameTime.TotalGameTime < m_gameStartDelay)
+                m_countdown.Draw(gameTime);
         }
 
         #endregion
