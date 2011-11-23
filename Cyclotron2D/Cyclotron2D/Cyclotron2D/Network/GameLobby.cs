@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -74,14 +73,6 @@ namespace Cyclotron2D.Network {
 	        if (handler != null) handler(this, e);
 	    }
 
-//        public event EventHandler<ConnectionEventArgs> LostConnection;
-//
-//        private void InvokeLostConnection(ConnectionEventArgs e)
-//        {
-//            EventHandler<ConnectionEventArgs> handler = LostConnection;
-//            if (handler != null) handler(this, e);
-//        }
-
 	    #endregion
 
         #region Private Methods
@@ -148,15 +139,6 @@ namespace Cyclotron2D.Network {
 
             lock (Clients)
             {
-//                foreach (var client in Clients)
-//                {
-//                    if (!SocketProbe.IsConnected(client))
-//                    {
-//                        DebugMessages.Add("Client Disconnected");
-//                        InvokeLostConnection(new ConnectionEventArgs(client));
-//                    }
-//                }
-
                 Clients.RemoveAll(socket => !SocketProbe.IsConnected(socket));
             }
         }
