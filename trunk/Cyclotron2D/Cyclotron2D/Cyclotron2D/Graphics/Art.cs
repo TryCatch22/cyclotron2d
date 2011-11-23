@@ -2,14 +2,14 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Cyclotron2D
+namespace Cyclotron2D.Graphics
 {
     public static class Art
     {
 		private static ContentManager content;
 
         public static Texture2D Pixel, Circle, Bike;
-		public static Animation Explosion;
+		public static Texture2D ExplosionSheet;
         public static SpriteFont Font;
 
         private static Cyclotron s_game;
@@ -30,17 +30,10 @@ namespace Cyclotron2D
             Circle = content.Load<Texture2D>("Circle");
 			Bike = content.Load<Texture2D>("Bike");
 
-			Explosion = LoadSpriteSheet("BlueExplosion", new Vector2(120), 12);
+            ExplosionSheet = content.Load<Texture2D>("BlueExplosion");
 
 			Font = content.Load<SpriteFont>("Font");
         }
-
-		private static Animation LoadSpriteSheet(string name, Vector2 spriteSize, int frameCount = -1, Vector2? sheetSize = null, bool loop = false, int drawsPerUpdate = 1)
-		{
-			string path = name;
-			Texture2D spriteSheet = content.Load<Texture2D>(path);
-			return new Animation(spriteSize, spriteSheet, frameCount, sheetSize, loop, drawsPerUpdate);
-		}
 		
 
         public static void UnloadContent(ContentManager content)

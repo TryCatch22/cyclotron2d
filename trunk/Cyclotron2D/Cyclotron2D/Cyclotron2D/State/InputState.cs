@@ -1,11 +1,10 @@
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using Cyclotron2D.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace Cyclotron2D
+namespace Cyclotron2D.State
 {
     public class InputState : CyclotronComponent
     {

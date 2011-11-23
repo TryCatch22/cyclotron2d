@@ -4,7 +4,7 @@ using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
-namespace Cyclotron2D
+namespace Cyclotron2D.Graphics
 {
     /// <summary>
     /// Special type of drawable Component that plays with its own visibility

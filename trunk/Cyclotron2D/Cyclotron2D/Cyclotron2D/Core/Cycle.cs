@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Cyclotron2D.Components;
 using Cyclotron2D.Core.Players;
+using Cyclotron2D.Graphics;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Screens.Base;
 using Cyclotron2D.Screens.Main;

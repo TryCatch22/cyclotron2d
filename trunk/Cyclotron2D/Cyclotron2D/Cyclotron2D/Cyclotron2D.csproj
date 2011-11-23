@@ -107,8 +107,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Art.cs" />
-    <Compile Include="Camera.cs" />
+    <Compile Include="Graphics\Art.cs" />
     <Compile Include="Core\Players\AIPlayer.cs" />
     <Compile Include="Core\Players\LocalPlayer.cs" />
     <Compile Include="Core\Players\RemotePlayer.cs" />
@@ -124,7 +123,7 @@
     <Compile Include="Screens\Base\MainScreen.cs" />
     <Compile Include="Screens\Base\PopupScreen.cs" />
     <Compile Include="Screens\Base\Screen.cs" />
-    <Compile Include="ScreenManager.cs" />
+    <Compile Include="State\ScreenManager.cs" />
     <Compile Include="Screens\Main\GameLobbyScreen.cs" />
     <Compile Include="Screens\Main\GameScreen.cs" />
     <Compile Include="Screens\Main\JoinGameScreen.cs" />
@@ -135,7 +134,7 @@
     <Compile Include="Mod\InvalidValueException.cs" />
     <Compile Include="Mod\Setting.cs" />
     <Compile Include="Mod\Settings.cs" />
-    <Compile Include="Animation.cs" />
+    <Compile Include="Graphics\Animation.cs" />
     <Compile Include="UI\CancelOk.cs" />
     <Compile Include="UI\UIElements\Countdown.cs" />
     <Compile Include="UI\IpTextBox.cs" />
@@ -168,8 +167,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Cyclotron.cs" />
     <Compile Include="Network\NetworkMessage.cs" />
-    <Compile Include="InputState.cs" />
-    <Compile Include="GameState.cs" />
+    <Compile Include="State\InputState.cs" />
+    <Compile Include="State\GameState.cs" />
     <Compile Include="Components\CyclotronComponent.cs" />
   </ItemGroup>
   <ItemGroup>

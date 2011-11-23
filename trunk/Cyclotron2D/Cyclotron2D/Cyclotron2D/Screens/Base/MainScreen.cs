@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Cyclotron2D.State;
+using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Screens.Base
 {
