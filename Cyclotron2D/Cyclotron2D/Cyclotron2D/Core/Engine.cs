@@ -77,7 +77,7 @@ namespace Cyclotron2D.Core
             var vp = Game.GraphicsDevice.Viewport.Bounds;
             m_grid = new Grid(Game, Screen, vp.Size());
 
-            m_countdown = new Countdown(Game, Screen) { Value = Countdown };
+            m_countdown = new Countdown(Game, Screen) { Value = Countdown, TextColor = Color.Red};
             m_countdown.Rect = RectangleBuilder.Centered(vp, new Vector2(0.2f, 0.2f));
 
 
