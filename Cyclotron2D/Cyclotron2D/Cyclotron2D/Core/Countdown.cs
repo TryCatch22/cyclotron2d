@@ -70,8 +70,9 @@ namespace Cyclotron2D.Core
                 m_count--;
 
                 m_countText.Text = m_count.ToString();
-                m_countText.TextScale = 3f;
+                m_countText.TextScale = 3f;  // resets number size after incrementing
             }
+            // increment size of number
             else
             {
                 m_countText.TextScale = m_countText.TextScale*1.05f;
