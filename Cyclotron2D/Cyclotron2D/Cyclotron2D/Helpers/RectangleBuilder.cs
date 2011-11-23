@@ -34,7 +34,12 @@ namespace Cyclotron2D.Helpers
 
 
 
-
+        public static Rectangle Right(Rectangle source, Vector2 dimR, int padding)
+        {
+            int w = (int)(source.Width * dimR.X), h = (int)(source.Height * dimR.Y);
+            return new Rectangle(source.X + source.Width - w - padding,
+                                    source.Y + (source.Height - h)/2, w, h);
+        }
 
         public static Rectangle BottomRight(Rectangle source, Vector2 dimR, Point padding)
         {

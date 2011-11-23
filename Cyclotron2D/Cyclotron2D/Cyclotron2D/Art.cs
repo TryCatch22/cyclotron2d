@@ -9,7 +9,7 @@ namespace Cyclotron2D
 		private static ContentManager content;
 
         public static Texture2D Pixel, Circle, Bike;
-		public static SpriteSheet Explosion;
+		public static Animation Explosion;
         public static SpriteFont Font;
 
         private static Cyclotron s_game;
@@ -35,11 +35,11 @@ namespace Cyclotron2D
 			Font = content.Load<SpriteFont>("Font");
         }
 
-		private static SpriteSheet LoadSpriteSheet(string name, Vector2 spriteSize, int frameCount = -1, Vector2? sheetSize = null, bool loop = false, int drawsPerUpdate = 1)
+		private static Animation LoadSpriteSheet(string name, Vector2 spriteSize, int frameCount = -1, Vector2? sheetSize = null, bool loop = false, int drawsPerUpdate = 1)
 		{
 			string path = name;
 			Texture2D spriteSheet = content.Load<Texture2D>(path);
-			return new SpriteSheet(spriteSize, spriteSheet, frameCount, sheetSize, loop, drawsPerUpdate);
+			return new Animation(spriteSize, spriteSheet, frameCount, sheetSize, loop, drawsPerUpdate);
 		}
 		
 

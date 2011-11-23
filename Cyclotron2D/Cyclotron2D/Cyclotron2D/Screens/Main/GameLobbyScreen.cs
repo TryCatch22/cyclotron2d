@@ -19,8 +19,9 @@ namespace Cyclotron2D.Screens.Main
     {
         private PlayerPanel m_playersPanel;
 
-        Button CancelButton;
-        Button CloseButton;
+        private Button CancelButton;
+        private Button CloseButton;
+        private Button StartGameButton;
 
 
         private List<Player> Players { get; set; } 
@@ -36,7 +37,7 @@ namespace Cyclotron2D.Screens.Main
             m_playersPanel = new PlayerPanel(game, this);
 
             CancelButton = new Button(game, this);
-
+            StartGameButton = new Button(game, this);
             CloseButton = new Button(game, this);
         }
 
@@ -57,8 +58,11 @@ namespace Cyclotron2D.Screens.Main
             CancelButton.Text = "Leave";
 
 
-            CloseButton.Click += OnCloseButtonClick;
+            CloseButton.Click += OnCloseButtonClicked;
             CloseButton.Text = "Close Lobby";
+
+            StartGameButton.Text = "Start Game";
+            StartGameButton.Click += OnStartGameClicked;
 
             GameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
 
@@ -68,18 +72,21 @@ namespace Cyclotron2D.Screens.Main
 
         }
 
+
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
             Rectangle win = GraphicsDevice.Viewport.Bounds;
 
             CloseButton.Visible = CloseButton.Enabled = Game.State == GameState.GameLobbyHost;
+            StartGameButton.Visible = StartGameButton.Enabled = Game.State == GameState.GameLobbyHost;
 
             m_playersPanel.Rect = RectangleBuilder.TopLeft(win, new Vector2(0.35f, 0.5f), new Point(15, 15));
 
             CancelButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.1f), new Point(20, 10));
             CloseButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.1f), new Point(25 + CancelButton.Rect.Width, 10));
-
+            StartGameButton.Rect = RectangleBuilder.Right(win, new Vector2(0.2f, 0.15f), 30);
 
 
         }
@@ -134,6 +141,11 @@ namespace Cyclotron2D.Screens.Main
             Lobby.NewConnection += OnNewConnection;
         }
 
+        private void OnStartGameClicked(object sender, EventArgs e)
+        {
+            Game.ChangeState(GameState.PlayingAsHost);
+        }
+
         private void OnNewConnection(object sender, SocketEventArgs e)
         {
             var rem = new RemotePlayer(Game, GameScreen) {PlayerID = Players.Count + 1};
@@ -160,7 +172,7 @@ namespace Cyclotron2D.Screens.Main
 
         }
 
-        private void OnCloseButtonClick(Object sender, EventArgs e)
+        private void OnCloseButtonClicked(Object sender, EventArgs e)
         {
             Lobby.CloseGameLobby();
         }
@@ -357,6 +369,11 @@ namespace Cyclotron2D.Screens.Main
             if (CloseButton.Visible)
             {
                 CloseButton.Draw(gameTime);
+            }
+
+            if (StartGameButton.Visible)
+            {
+                StartGameButton.Draw(gameTime);
             }
 
             if (m_playersPanel.Visible)
