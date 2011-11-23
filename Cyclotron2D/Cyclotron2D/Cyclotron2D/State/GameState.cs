@@ -1,6 +1,6 @@
 using System;
 
-namespace Cyclotron2D
+namespace Cyclotron2D.State
 {
     /// <summary>
     /// States the Game can be in.

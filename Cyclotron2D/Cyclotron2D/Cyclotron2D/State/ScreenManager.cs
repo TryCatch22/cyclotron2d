@@ -3,10 +3,9 @@ using System.Diagnostics;
 using System.Linq;
 using Cyclotron2D.Components;
 using Cyclotron2D.Screens.Base;
-using Cyclotron2D.Screens.Main;
 using Microsoft.Xna.Framework;
 
-namespace Cyclotron2D
+namespace Cyclotron2D.State
 {
     /// <summary>
     /// Maintains a Collection of screens.
