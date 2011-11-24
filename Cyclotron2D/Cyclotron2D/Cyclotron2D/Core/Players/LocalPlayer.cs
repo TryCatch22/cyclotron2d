@@ -36,7 +36,10 @@ namespace Cyclotron2D.Core.Players
         protected override void HandleInput(GameTime gameTime)
         {
             base.HandleInput(gameTime);
-            Debug.Assert(Cycle != null, "Player has not been initialized.");
+
+            if (Cycle == null || gameTime.TotalGameTime < Cycle.GameStart) return;
+
+           // Debug.Assert(Cycle != null, "Player has not been initialized.");
 
             InputState input = Game.InputState;
 
