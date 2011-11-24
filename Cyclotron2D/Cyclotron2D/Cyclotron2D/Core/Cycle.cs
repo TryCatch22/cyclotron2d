@@ -8,6 +8,7 @@ using Cyclotron2D.Graphics;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Screens.Base;
 using Cyclotron2D.Screens.Main;
+using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -267,6 +268,36 @@ namespace Cyclotron2D.Core
             if (direction == Direction)
                 return;
 
+            var lines = GetLines();
+            if (lines.Count == 0)
+            {
+                return;
+            }
+
+            var headLine = lines[lines.Count - 1];
+
+            switch (headLine.Orientation)
+            {
+                case Orientation.Horizontal:
+                    {
+                        Debug.Assert(gridCrossing.Y == headLine.End.Y, "Missed turn message detected");
+                    }
+                    break;
+                case Orientation.Vertical:
+                    {
+                        Debug.Assert(gridCrossing.X == headLine.End.X, "Missed turn message detected");
+                    }
+                    break;
+
+            }
+
+           // int common = headLine.Orientation == Orientation.Horizontal ? headLine.Start.X : headLine.Start.Y;
+
+
+
+     
+
+
 
             m_nextTurnIntersection = gridCrossing;
             m_scheduledDirection = direction;
@@ -428,13 +459,13 @@ namespace Cyclotron2D.Core
 
                 Direction = m_scheduledDirection;
 
-                if (elapsedDistance > 0)
-                {
+            //    if (elapsedDistance > 0)
+            //    {
                     m_vertices.Add(m_nextTurnIntersection.Value);
-                }
+              //  }
 
                 Position = m_nextTurnIntersection.Value.AddOffset(m_scheduledDirection, elapsedDistance);
-                m_vertices.Add(Position);
+              //  m_vertices.Add(Position);
 
                 
             }
