@@ -13,15 +13,18 @@ namespace Cyclotron2D.Core.Players
     public abstract class Player : ScreenComponent
     {
 
-        private static ColorMap s_map = new ColorMap();
+        private static ColorMap s_map;
 
         protected Player(Game game, Screen screen) : base(game, screen)
         {
+            Ready = false;
         }
 
         public abstract string Name { get; set; }
 
         public Cycle Cycle { get; protected set; }
+
+        public bool Ready { get; set; }
 
         public Color Color { get {return s_map[PlayerID];}}
 
@@ -64,7 +67,10 @@ namespace Cyclotron2D.Core.Players
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            if(Cycle.Enabled)SurvivalTime = gameTime.TotalGameTime - (Screen as GameScreen).GameStartTime;
+            if(Cycle != null && Cycle.Enabled && gameTime.TotalGameTime > Cycle.GameStart)
+            {
+                SurvivalTime = gameTime.TotalGameTime - Cycle.GameStart;
+            }
 
         }
 

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Screens.Base;
@@ -10,7 +8,7 @@ using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.UI
 {
-    public class EndGameTable : UIElement, IComparer<PlayerView>
+    public class EndGameTable : UIElement
     {
         private StretchPanel m_playerPanel;
         private List<PlayerView> m_playerViews;
@@ -77,7 +75,7 @@ namespace Cyclotron2D.UI
         {
             m_playerPanel.RemoveItem(m_playerViews.ToArray());
 
-            Sorter.Sort(m_playerViews, this);
+            Sorter.Sort(m_playerViews, Compare);
             m_playerPanel.AddItems(m_playerViews.ToArray());
 
 

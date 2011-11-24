@@ -76,7 +76,7 @@ namespace Cyclotron2D.Core
         /// <summary>
         /// delay before game start
         /// </summary>
-        public TimeSpan GameStartDelay { get; set; }
+        public TimeSpan GameStart { get; set; }
 
         /// <summary>
         /// total length of tail at the moment
@@ -103,6 +103,7 @@ namespace Cyclotron2D.Core
         public Cycle(Game game, Screen screen, Grid grid, StartCondition info, Player player)
             : base(game, screen)
         {
+            GameStart = TimeSpan.MaxValue;
             m_vertices = new List<Point>();
             TrailColor = player.Color;
             Grid = grid;
@@ -293,19 +294,24 @@ namespace Cyclotron2D.Core
         {
             base.Update(gameTime);
 
-            if (gameTime.TotalGameTime > GameStartDelay)
+            if (gameTime.TotalGameTime < GameStart)
             {
-                Position = new Point((int)(Position.X + Velocity.X), (int)(Position.Y + Velocity.Y));
-
-                // working on adding finite length tails
-                LimitTailLength();
-
-                CheckForCollision();
-                if (Enabled)
-                {//could have been disabled during collision check
-                    CheckScheduledTurn();
-                }
+                return;
             }
+
+
+
+            Position = new Point((int)(Position.X + Velocity.X), (int)(Position.Y + Velocity.Y));
+
+            // working on adding finite length tails
+            LimitTailLength();
+
+            CheckForCollision();
+            if (Enabled)
+            {//could have been disabled during collision check
+                CheckScheduledTurn();
+            }
+            
             
            
         }

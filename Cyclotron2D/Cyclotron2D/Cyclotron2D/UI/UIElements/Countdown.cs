@@ -19,6 +19,7 @@ namespace Cyclotron2D.UI.UIElements
 
         public Countdown(Game game, Screen screen) : base(game, screen)
         {
+            m_startTime = TimeSpan.MaxValue;
         }
 
         public void Start()

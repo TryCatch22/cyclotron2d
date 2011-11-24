@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cyclotron2D.Components;
-using Cyclotron2D.Core;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Screens.Base;
@@ -46,11 +45,9 @@ namespace Cyclotron2D.Core
     {
         #region Fields
 
-        private Grid m_grid;
+        public Grid Grid { get; private set; }
 
         private Dictionary<Player, Cycle> m_playerMap;
-
-        private StartRandomizer startRandomizer;
 
         private Countdown m_countdown;
 
@@ -73,9 +70,9 @@ namespace Cyclotron2D.Core
         {
             Countdown = 3;
             m_playerMap = new Dictionary<Player, Cycle>();
-            startRandomizer = new StartRandomizer(game);
+           
             var vp = Game.GraphicsDevice.Viewport.Bounds;
-            m_grid = new Grid(Game, Screen, vp.Size());
+            Grid = new Grid(Game, Screen, vp.Size());
 
             m_countdown = new Countdown(Game, Screen) { Value = Countdown, TextColor = Color.Red};
             m_countdown.Rect = RectangleBuilder.Centered(vp, new Vector2(0.2f, 0.2f));
@@ -116,21 +113,32 @@ namespace Cyclotron2D.Core
             }
         }
 
-        public void StartGame(IEnumerable<Player> players)
+        public void StartGame()
         {
-            GameStart = Game.GameTime.TotalGameTime;
+            GameStart = Game.GameTime.TotalGameTime + new TimeSpan(0, 0, 0, Countdown);
 
-            startRandomizer.Randomize(6, m_grid.PixelsPerInterval);
+            foreach (var cycle in m_playerMap.Values)
+            {
+                cycle.GameStart = GameStart;
+            }
+
+            m_countdown.Start();
+        }
+
+        public void SetupGame(IEnumerable<Player> players, List<StartCondition> startConditions)
+        {
+           
             int i = 0;
             foreach (var player in players)
             {
-                Cycle c = new Cycle(Game, Screen, m_grid, startRandomizer.StartConditions[i++], player){GameStartDelay = GameStart + new TimeSpan(0, 0, 0, Countdown)};
+                Cycle c = new Cycle(Game, Screen, Grid, startConditions[i++], player);
                 m_playerMap.Add(player, c);
                 player.Initialize(c);
             }
 
-            m_grid.Initialize(m_playerMap.Values);
-            m_countdown.Start();
+            Grid.Initialize(m_playerMap.Values);
+
+
 
             SubscribePlayers();
             SubscribeCycles();
@@ -140,9 +148,9 @@ namespace Cyclotron2D.Core
         {
             base.Draw(gameTime);
 
-            if (m_grid.Visible)
+            if (Grid.Visible)
             {
-                m_grid.Draw(gameTime);
+                Grid.Draw(gameTime);
             }
 
             foreach (var cycle in m_playerMap.Values.Where(cycle => cycle.Visible))
@@ -238,15 +246,17 @@ namespace Cyclotron2D.Core
                 }
 
 
-                m_grid.Dispose();
+                Grid.Dispose();
 
                 m_playerMap = null;
-                m_grid = null;
+                Grid = null;
             }
 
             base.Dispose(disposing);
         }
 
         #endregion
+
+
     }
 }

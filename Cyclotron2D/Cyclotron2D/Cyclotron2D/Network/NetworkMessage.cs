@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Cyclotron2D.Network
 {
@@ -12,13 +14,15 @@ namespace Cyclotron2D.Network
 
         Welcome,
 
-        GameStart,
+        SetupGame,
 
         PlayerJoined,
 
         PlayerLeft,
 
+        Ready,
 
+        AllReady
     }
 
 
@@ -39,9 +43,13 @@ namespace Cyclotron2D.Network
 
         public byte Source { get; set; }
 
-        public int Length { get; set; }
+        private int length = 0;
+
+        public int Length { get { return length == 0 ? encoding.GetByteCount(Content) : length; } set { length = value; } }
 
         public string Content { get; private set; }
+
+        public List<string> ContentLines { get { return Content.Split(new [] {'\n'}).Where(line => !string.IsNullOrEmpty(line)).ToList(); } }
 
         public NetworkMessage(MessageType type, string content)
         {
@@ -51,9 +59,9 @@ namespace Cyclotron2D.Network
 
         public byte[] Data
         {
-            get 
-            { 
-                string header = (byte)Type + " " + Source + " " + encoding.GetByteCount(Content);
+            get
+            {
+                string header = (byte) Type + " " + Source + " " + Length;
 
                 return encoding.GetBytes(header + EndOfHeader + Content);
 

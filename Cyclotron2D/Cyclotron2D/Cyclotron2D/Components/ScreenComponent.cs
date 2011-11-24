@@ -56,6 +56,7 @@ namespace Cyclotron2D.Components
 
         private void OnScreenEnabledChanged(object sender, EventArgs e)
         {
+
             if (Screen.Enabled)
             {
                 Enabled = m_oldEnabled;

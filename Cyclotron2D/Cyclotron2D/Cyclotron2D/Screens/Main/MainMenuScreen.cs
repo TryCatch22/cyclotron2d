@@ -65,6 +65,17 @@ namespace Cyclotron2D.Screens.Main
             }
         }
 
+        protected override void OnStateChanged(object sender, StateChangedEventArgs e)
+        {
+            base.OnStateChanged(sender, e);
+            
+            if (!IsValidState) return;
+
+            Game.Communicator.ClearAll();
+
+
+        }
+
         protected override void OnEnabledChanged(object sender, EventArgs args)
         {
             base.OnEnabledChanged(sender, args);

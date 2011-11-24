@@ -20,9 +20,10 @@ namespace Cyclotron2D.Screens.Main
     {
         private PlayerPanel m_playersPanel;
 
-        private Button CancelButton;
+        private Button LeaveButton;
         private Button CloseButton;
         private Button StartGameButton;
+
 
 
         private List<Player> Players { get; set; } 
@@ -37,7 +38,7 @@ namespace Cyclotron2D.Screens.Main
             Players = new List<Player>();
             m_playersPanel = new PlayerPanel(game, this);
 
-            CancelButton = new Button(game, this);
+            LeaveButton = new Button(game, this);
             StartGameButton = new Button(game, this);
             CloseButton = new Button(game, this);
         }
@@ -55,8 +56,8 @@ namespace Cyclotron2D.Screens.Main
             m_playersPanel.Background = new Color(20, 0, 90);
 
 
-            CancelButton.Click += OnCancelButtonClicked;
-            CancelButton.Text = "Leave";
+            LeaveButton.Click += OnLeaveButtonClicked;
+            LeaveButton.Text = "Leave";
 
 
             CloseButton.Click += OnCloseButtonClicked;
@@ -85,8 +86,8 @@ namespace Cyclotron2D.Screens.Main
 
             m_playersPanel.Rect = RectangleBuilder.TopLeft(win, new Vector2(0.35f, 0.5f), new Point(15, 15));
 
-            CancelButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.1f), new Point(20, 10));
-            CloseButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.1f), new Point(25 + CancelButton.Rect.Width, 10));
+            LeaveButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.1f), new Point(20, 10));
+            CloseButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.1f), new Point(25 + LeaveButton.Rect.Width, 10));
             StartGameButton.Rect = RectangleBuilder.Right(win, new Vector2(0.2f, 0.15f), 30);
 
 
@@ -111,13 +112,40 @@ namespace Cyclotron2D.Screens.Main
         /// <summary>
         /// for use when leaving a game lobby so that we can return to a clean one next time
         /// </summary>
-        private void Cleanup()
+        private void CancelGame()
         {
+            if(Lobby != null)
+            {
+                Lobby.Dispose();
+                Lobby = null;
+            }
+
+
             foreach (var player in m_playersPanel.Players)
             {
                 RemovePlayer(player);
 
                 player.Dispose();
+
+            }
+        }
+
+        /// <summary>
+        /// for use when starting a new game
+        /// </summary>
+        private void Cleanup()
+        {
+            if(Lobby != null)
+            {
+                Lobby.ClearSockets();
+                Lobby.CloseGameLobby();
+            }
+
+
+            foreach (var player in m_playersPanel.Players)
+            {
+                m_playersPanel.RemovePlayer(player);
+                Players.Remove(player);
             }
         }
 
@@ -182,15 +210,9 @@ namespace Cyclotron2D.Screens.Main
 
         #region Event Handlers
 
-        private void OnCancelButtonClicked(Object sender, EventArgs e)
+        private void OnLeaveButtonClicked(Object sender, EventArgs e)
         {
-            if (Game.State == GameState.GameLobbyHost)
-            {
-                Lobby.Kill();
-            }
-            
-            Cleanup();
-
+            CancelGame();
             Game.ChangeState(GameState.MainMenu);
         }
 
@@ -221,6 +243,15 @@ namespace Cyclotron2D.Screens.Main
                 case GameState.GameLobbyClient:
                     //nothing here yet
                     break;
+                case GameState.PlayingAsHost:
+                case GameState.PlayingAsClient:
+                    {
+                        if (e.OldState == GameState.GameLobbyHost || e.OldState == GameState.GameLobbyClient)
+                        {
+                            Cleanup();
+                        }
+                    }
+                    break;
                 default:
                     return;
             }
@@ -238,6 +269,12 @@ namespace Cyclotron2D.Screens.Main
 
         private void OnConnectionLost(object sender, ConnectionEventArgs e)
         {
+            if (!IsValidState)
+            {
+                //only handle connection lost events while in lobby
+                return;
+            }
+
             if (Game.State == GameState.GameLobbyHost)
             {
                 var player = Game.Communicator.GetPlayer(e.Connection);
@@ -248,14 +285,14 @@ namespace Cyclotron2D.Screens.Main
 
                 string content = "";
 
-                for (int i = 0; i < Players.Count; i++)
+                foreach (Player t in Players)
                 {
-                    int id = Players[i].PlayerID;
-                    int newid = id == player.PlayerID ? -1 : (Players[i].PlayerID < player.PlayerID ? Players[i].PlayerID : Players[i].PlayerID - 1);
+                    int id = t.PlayerID;
+                    int newid = id == player.PlayerID ? -1 : (t.PlayerID < player.PlayerID ? t.PlayerID : t.PlayerID - 1);
                     content +=  id + " " + newid + "\n";
                     if(newid != -1)
                     {
-                        Players[i].PlayerID = newid;
+                        t.PlayerID = newid;
                     }
                 }
 
@@ -270,7 +307,7 @@ namespace Cyclotron2D.Screens.Main
             {
                 //client side, we lost connection to the host. we can leave the lobby
                 DebugMessages.Add("Lost connection with host");
-                Cleanup();
+                CancelGame();
                 Game.ChangeState(GameState.MainMenu);
 
             }
@@ -278,6 +315,10 @@ namespace Cyclotron2D.Screens.Main
 
         private void OnMessageReceived(object sender, MessageEventArgs e)
         {
+            //only handle messages if we are in one of our states
+            if (!IsValidState) return;
+
+
             var connection = sender as NetworkConnection;
             if (connection != null)
             {
@@ -330,7 +371,7 @@ namespace Cyclotron2D.Screens.Main
 
                                 int.TryParse(idstrings[0], out oId);
                                 int.TryParse(idstrings[1], out nId);
-                                var player = GetPlayer(oId);
+                                Player player = GetPlayer(oId);
                                 
                                 if (nId == -1)
                                 {
@@ -344,6 +385,12 @@ namespace Cyclotron2D.Screens.Main
                                 }
 
                             }
+                        }
+                        break;
+                    case MessageType.SetupGame:
+                        {
+                            GameScreen.SetupMessage = e.Message;
+                            Game.ChangeState(GameState.PlayingAsClient);
                         }
                         break;
                     default:
@@ -362,9 +409,9 @@ namespace Cyclotron2D.Screens.Main
 
         public override void Draw(GameTime gameTime)
         {
-            if (CancelButton.Visible)
+            if (LeaveButton.Visible)
             {
-                CancelButton.Draw(gameTime);
+                LeaveButton.Draw(gameTime);
             }
 
             if (CloseButton.Visible)

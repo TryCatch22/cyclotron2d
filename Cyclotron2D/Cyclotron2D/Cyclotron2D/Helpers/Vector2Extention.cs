@@ -24,6 +24,16 @@ namespace Cyclotron2D.Helpers
 		{
 			return (float)Math.Atan2(v.Y, v.X);
 		}
+
+        public static Vector2 FromString(string s)
+        {
+            int xs = s.IndexOf("X:") + 2, xe = s.IndexOf(' ');
+            int ys = s.IndexOf("Y:") + 2, ye = s.IndexOf('}');
+            string x = s.Substring(xs, xe-xs);
+            string y = s.Substring(ys, ye-ys);
+
+            return new Vector2(float.Parse(x), float.Parse(y));
+        }
     }
 
     public static class PointExtention
