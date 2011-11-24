@@ -23,7 +23,7 @@ namespace Cyclotron2D.Screens.Main
         private Button LeaveButton;
         private Button CloseButton;
         private Button StartGameButton;
-
+		private Button UDPButton;
 
 
         private List<Player> Players { get; set; } 
@@ -41,6 +41,7 @@ namespace Cyclotron2D.Screens.Main
             LeaveButton = new Button(game, this);
             StartGameButton = new Button(game, this);
             CloseButton = new Button(game, this);
+			UDPButton = new Button(game, this);
         }
 
         public Player GetPlayer(int id)
@@ -66,6 +67,9 @@ namespace Cyclotron2D.Screens.Main
             StartGameButton.Text = "Start Game";
             StartGameButton.Click += OnStartGameClicked;
 
+			UDPButton.Text = "UDP!!!";
+			UDPButton.Click += OnUDPClicked;
+
             GameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
 
             Debug.Assert(GameScreen != null, "GameScreen should not be null at Initialize.");
@@ -83,13 +87,14 @@ namespace Cyclotron2D.Screens.Main
 
             CloseButton.Visible = CloseButton.Enabled = Game.State == GameState.GameLobbyHost;
             StartGameButton.Visible = StartGameButton.Enabled = Game.State == GameState.GameLobbyHost;
+			UDPButton.Visible = true;
 
             m_playersPanel.Rect = RectangleBuilder.TopLeft(win, new Vector2(0.35f, 0.5f), new Point(15, 15));
 
             LeaveButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.1f), new Point(20, 10));
             CloseButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.1f), new Point(25 + LeaveButton.Rect.Width, 10));
             StartGameButton.Rect = RectangleBuilder.Right(win, new Vector2(0.2f, 0.15f), 30);
-
+			UDPButton.Rect = RectangleBuilder.Right(win, new Vector2(0.2f, 0f), 30);
 
         }
 
@@ -175,6 +180,11 @@ namespace Cyclotron2D.Screens.Main
             Game.ChangeState(GameState.PlayingAsHost);
         }
 
+		private void OnUDPClicked(object sender, EventArgs e)
+		{
+			
+		}
+
         private void OnNewConnection(object sender, SocketEventArgs e)
         {
             var rem = new RemotePlayer(Game, GameScreen) {PlayerID = Players.Count + 1};
@@ -184,6 +194,18 @@ namespace Cyclotron2D.Screens.Main
             Game.Communicator.MessagePlayer(rem, new NetworkMessage(MessageType.Welcome, content));
             
         }
+
+		public void AddPlayerUdp(Player player, Socket socket = null)
+		{
+			if (player is RemotePlayer && socket != null)
+			{
+				new UdpNetworkConnection().
+			}
+			GameScreen.AddPlayer(player);
+			m_playersPanel.AddPlayer(player);
+			Players.Add(player);
+		}
+
 
         /// <summary>
         /// add client player
@@ -199,7 +221,6 @@ namespace Cyclotron2D.Screens.Main
             GameScreen.AddPlayer(player);
             m_playersPanel.AddPlayer(player);
             Players.Add(player);
-
         }
 
         private void OnCloseButtonClicked(Object sender, EventArgs e)
@@ -425,6 +446,11 @@ namespace Cyclotron2D.Screens.Main
             {
                 StartGameButton.Draw(gameTime);
             }
+
+			if (UDPButton.Visible)
+			{
+				UDPButton.Draw(gameTime);
+			}
 
             if (m_playersPanel.Visible)
             {

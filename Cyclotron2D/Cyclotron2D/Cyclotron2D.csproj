@@ -115,6 +115,7 @@
     <Compile Include="Helpers\RectangleBuilder.cs" />
     <Compile Include="Helpers\Sorter.cs" />
     <Compile Include="Helpers\Vector2Extention.cs" />
+    <Compile Include="Network\UdpNetworkConnection.cs" />
     <Compile Include="Network\MessageEventArgs.cs" />
     <Compile Include="Network\NetworkCommunicator.cs" />
     <Compile Include="Network\PlayerMonitor.cs" />
