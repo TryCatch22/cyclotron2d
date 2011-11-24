@@ -57,6 +57,16 @@ namespace Cyclotron2D.Helpers
         {
             return (float)Math.Sqrt(Math.Pow(v.X - u.X, 2) + Math.Pow(v.Y - u.Y, 2));
         }
+
+        public static Point FromString(string s)
+        {
+            int xs = s.IndexOf("X:") + 2, xe = s.IndexOf(' ');
+            int ys = s.IndexOf("Y:") + 2, ye = s.IndexOf('}');
+            string x = s.Substring(xs, xe - xs);
+            string y = s.Substring(ys, ye - ys);
+
+            return new Point(int.Parse(x), int.Parse(y));
+        }
     }
 
     public static class RectanlgeExtention

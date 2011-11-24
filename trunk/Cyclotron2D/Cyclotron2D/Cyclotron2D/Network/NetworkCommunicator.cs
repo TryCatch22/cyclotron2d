@@ -10,8 +10,6 @@ namespace Cyclotron2D.Network
 {
     public class NetworkCommunicator : CyclotronComponent
     {
-
-        
         private TimeSpan lastConnectionCheck;
 
         public Dictionary<RemotePlayer, NetworkConnection> Connections { get; private set; }

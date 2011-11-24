@@ -101,6 +101,7 @@ namespace Cyclotron2D.Screens.Main {
                 //we are connecting to host. Host always has player id = 1
                 RemotePlayer hostPlayer = new RemotePlayer(Game, gameScreen) { PlayerID = 1 };
                 lobbyScreen.AddHost(hostPlayer, Host);
+                hostPlayer.SubscribeConnection();
             }
         }
 //

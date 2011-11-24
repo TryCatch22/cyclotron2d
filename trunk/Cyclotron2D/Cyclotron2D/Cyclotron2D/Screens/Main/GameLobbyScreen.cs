@@ -179,6 +179,7 @@ namespace Cyclotron2D.Screens.Main
         {
             var rem = new RemotePlayer(Game, GameScreen) {PlayerID = Players.Count + 1};
             AddPlayer(rem, e.Socket);
+            rem.SubscribeConnection();
             string content = rem.PlayerID + "\n" + Settings.SinglePlayer.PlayerName.Value;
             Game.Communicator.MessagePlayer(rem, new NetworkMessage(MessageType.Welcome, content));
             
@@ -355,6 +356,7 @@ namespace Cyclotron2D.Screens.Main
                             {
                                 var player = new RemotePlayer(Game, GameScreen) {PlayerID = id, Name = lines[1]};
                                 AddPlayer(player);
+                                player.SubscribeConnection();
                                 DebugMessages.Add("Player " + player.PlayerID + " Joined");
                             }
 
