@@ -4,7 +4,9 @@ using System.Linq;
 using Cyclotron2D.Components;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Helpers;
+using Cyclotron2D.Network;
 using Cyclotron2D.Screens.Base;
+using Cyclotron2D.State;
 using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
 
@@ -47,7 +49,7 @@ namespace Cyclotron2D.Core
 
         public Grid Grid { get; private set; }
 
-        private Dictionary<Player, Cycle> m_playerMap;
+        private Dictionary<Player, Cycle> m_playerCycleMap;
 
         private Countdown m_countdown;
 
@@ -55,7 +57,7 @@ namespace Cyclotron2D.Core
 
         #region Properties
 
-        public List<Player> Players { get { return m_playerMap.Keys.ToList(); } }
+        public List<Player> Players { get { return m_playerCycleMap.Keys.ToList(); } }
 
         public TimeSpan GameStart { get; set; }
 
@@ -69,7 +71,7 @@ namespace Cyclotron2D.Core
             : base(game, screen)
         {
             Countdown = 3;
-            m_playerMap = new Dictionary<Player, Cycle>();
+            m_playerCycleMap = new Dictionary<Player, Cycle>();
            
             var vp = Game.GraphicsDevice.Viewport.Bounds;
             Grid = new Grid(Game, Screen, vp.Size());
@@ -90,16 +92,16 @@ namespace Cyclotron2D.Core
 
             base.Update(gameTime);
 
-            if (m_playerMap == null)
+            if (m_playerCycleMap == null)
             {
                 return;
             }
 
             int i = 0;
             Player winner = null;
-            foreach (var player in m_playerMap.Keys)
+            foreach (var player in m_playerCycleMap.Keys)
             {
-                var cycle = m_playerMap[player];
+                var cycle = m_playerCycleMap[player];
                 if (cycle.Enabled)
                 {
                     i++;
@@ -109,7 +111,7 @@ namespace Cyclotron2D.Core
             if (i == 1)
             {
                 winner.Winner = true;
-                m_playerMap[winner].Enabled = false;
+                m_playerCycleMap[winner].Enabled = false;
             }
         }
 
@@ -117,7 +119,7 @@ namespace Cyclotron2D.Core
         {
             GameStart = Game.GameTime.TotalGameTime + new TimeSpan(0, 0, 0, Countdown);
 
-            foreach (var cycle in m_playerMap.Values)
+            foreach (var cycle in m_playerCycleMap.Values)
             {
                 cycle.GameStart = GameStart;
             }
@@ -132,11 +134,11 @@ namespace Cyclotron2D.Core
             foreach (var player in players)
             {
                 Cycle c = new Cycle(Game, Screen, Grid, startConditions[i++], player);
-                m_playerMap.Add(player, c);
+                m_playerCycleMap.Add(player, c);
                 player.Initialize(c);
             }
 
-            Grid.Initialize(m_playerMap.Values);
+            Grid.Initialize(m_playerCycleMap.Values);
 
 
 
@@ -148,20 +150,31 @@ namespace Cyclotron2D.Core
         {
             base.Draw(gameTime);
 
-            if (Grid.Visible)
+
+            try
             {
-                Grid.Draw(gameTime);
+                if (Grid.Visible)
+                {
+                    Grid.Draw(gameTime);
+                }
+
+                foreach (var cycle in m_playerCycleMap.Values.Where(cycle => cycle.Visible))
+                {
+                    cycle.Draw(gameTime);
+                }
+
+                if (m_countdown.Visible)
+                {
+                    m_countdown.Draw(gameTime);
+                }
+            }
+            catch (NullReferenceException)
+            {
+                //engine was disposed on seperate thread in the middle of draw call. 
+                //dont need to do anything, this object is about to no longer exist
             }
 
-            foreach (var cycle in m_playerMap.Values.Where(cycle => cycle.Visible))
-            {
-                cycle.Draw(gameTime);
-            }
 
-            if (m_countdown.Visible)
-            {
-                m_countdown.Draw(gameTime);
-            }
         }
 
         #endregion
@@ -171,9 +184,28 @@ namespace Cyclotron2D.Core
         private void OnPlayerDirectionChanged(object sender, DirectionChangeEventArgs e)
         {
             var player = sender as Player;
-            if (player != null && m_playerMap[player].Enabled)
+            if (player != null && m_playerCycleMap[player].Enabled)
             {
-                m_playerMap[player].TurnAt(e.Direction, e.Position);
+                string content = (int)e.Direction + " " + e.Position;
+                
+                if(Game.State == GameState.PlayingAsHost)
+                {
+                    if (player is RemotePlayer)
+                    {
+                        Game.Communicator.MessageOtherPlayers(player as RemotePlayer, new NetworkMessage(MessageType.SignalTurn, content), (byte)player.PlayerID);
+                    }
+                    else
+                    {
+                        Game.Communicator.MessageAll(new NetworkMessage(MessageType.SignalTurn, content), (byte)player.PlayerID);
+                    }
+                }
+                else if (Game.State == GameState.PlayingAsClient && player is LocalPlayer)
+                {
+                    Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.SignalTurn, content));
+                }
+
+
+                m_playerCycleMap[player].TurnAt(e.Direction, e.Position);
             }
         }
 
@@ -192,7 +224,7 @@ namespace Cyclotron2D.Core
 
         private void SubscribePlayers()
         {
-            foreach (Player player in m_playerMap.Keys)
+            foreach (Player player in m_playerCycleMap.Keys)
             {
                 player.DirectionChange += OnPlayerDirectionChanged;
             }
@@ -201,7 +233,7 @@ namespace Cyclotron2D.Core
 
         private void UnsubscribePlayers()
         {
-            foreach (Player player in m_playerMap.Keys)
+            foreach (Player player in m_playerCycleMap.Keys)
             {
                 player.DirectionChange -= OnPlayerDirectionChanged;
             }
@@ -209,7 +241,7 @@ namespace Cyclotron2D.Core
 
         private void SubscribeCycles()
         {
-            foreach (var cycle in m_playerMap.Values)
+            foreach (var cycle in m_playerCycleMap.Values)
             {
                 cycle.Collided += OnCycleCollided;
             }
@@ -218,7 +250,7 @@ namespace Cyclotron2D.Core
 
         private void UnsubscribeCycles()
         {
-            foreach (var cycle in m_playerMap.Values)
+            foreach (var cycle in m_playerCycleMap.Values)
             {
                 cycle.Collided += OnCycleCollided;
             }
@@ -230,17 +262,17 @@ namespace Cyclotron2D.Core
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && m_playerMap != null)
+            if (disposing && m_playerCycleMap != null)
             {
                 UnsubscribePlayers();
                 UnsubscribeCycles();
 
-                foreach (var cycle in m_playerMap.Values)
+                foreach (var cycle in m_playerCycleMap.Values)
                 {
                     cycle.Dispose();
                 }
 
-                foreach (var player in m_playerMap.Keys)
+                foreach (var player in m_playerCycleMap.Keys)
                 {
                     player.Dispose();
                 }
@@ -248,7 +280,7 @@ namespace Cyclotron2D.Core
 
                 Grid.Dispose();
 
-                m_playerMap = null;
+                m_playerCycleMap = null;
                 Grid = null;
             }
 

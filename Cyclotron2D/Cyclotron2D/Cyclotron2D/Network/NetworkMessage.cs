@@ -22,7 +22,9 @@ namespace Cyclotron2D.Network
 
         Ready,
 
-        AllReady
+        AllReady,
+
+        SignalTurn
     }
 
 
