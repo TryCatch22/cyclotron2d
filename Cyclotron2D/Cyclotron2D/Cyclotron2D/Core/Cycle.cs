@@ -291,14 +291,6 @@ namespace Cyclotron2D.Core
 
             }
 
-           // int common = headLine.Orientation == Orientation.Horizontal ? headLine.Start.X : headLine.Start.Y;
-
-
-
-     
-
-
-
             m_nextTurnIntersection = gridCrossing;
             m_scheduledDirection = direction;
         }
