@@ -73,6 +73,11 @@ namespace Cyclotron2D
 
         #region Public Methods
 
+        public bool IsState(GameState state)
+        {
+            return (State & state) == State;
+        }
+
         /// <summary>
         /// This is the method that should be called to transition  between states.
         /// A Call to this should be sufficient to completely change states. If certain Screens need

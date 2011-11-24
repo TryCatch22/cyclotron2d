@@ -11,7 +11,7 @@ namespace Cyclotron2D.Network
     public class NetworkCommunicator : CyclotronComponent
     {
 
-
+        
         private TimeSpan lastConnectionCheck;
 
         public Dictionary<RemotePlayer, NetworkConnection> Connections { get; private set; }
@@ -48,9 +48,15 @@ namespace Cyclotron2D.Network
                 if (!Connections.ContainsKey(player))
                 {
                     Connections.Add(player, connection);
-                    connection.MessageReceived += MessageReceived;
+                    connection.MessageReceived += OnMessageReceived;
                 }
             }
+        }
+
+        private void OnMessageReceived(object sender, MessageEventArgs e)
+        {
+            EventHandler<MessageEventArgs> handler = MessageReceived;
+            if (handler != null) handler(sender, e);
         }
 
         public event EventHandler<ConnectionEventArgs> ConnectionLost;
@@ -64,6 +70,7 @@ namespace Cyclotron2D.Network
 
         public event EventHandler<MessageEventArgs> MessageReceived;
 
+
         public void Remove(RemotePlayer player)
         {
             lock (Connections)
@@ -71,7 +78,7 @@ namespace Cyclotron2D.Network
                 if (Connections.ContainsKey(player))
                 {
                     var connection = Connections[player];
-                    connection.MessageReceived -= MessageReceived;
+                    connection.MessageReceived -= OnMessageReceived;
                     connection.Disconnect();
                     Connections.Remove(player);
                 }
@@ -145,6 +152,20 @@ namespace Cyclotron2D.Network
             }
         }
 
+        public void MessageAll(NetworkMessage message)
+        {
+            MessageAll(message, (byte)LocalId);
+        }
+
+        public void MessageAll(NetworkMessage message, byte source)
+        {
+            message.Source = source;
+            foreach (RemotePlayer remotePlayer in Connections.Keys)
+            {
+                Connections[remotePlayer].Send(message);
+            }
+        }
+
         public RemotePlayer GetPlayer(Socket socket)
         {
             return (from kvp in Connections where kvp.Value.Socket == socket select kvp.Key).FirstOrDefault();
@@ -160,16 +181,20 @@ namespace Cyclotron2D.Network
         {
             if (disposing)
             {
-
-                List<RemotePlayer> players = Connections.Keys.ToList();
-
-                foreach (var key in players)
-                {
-                    Remove(key);
-                }
+                ClearAll();
             }
             base.Dispose(disposing);
         }
 
+
+        public void ClearAll()
+        {
+            List<RemotePlayer> players = Connections.Keys.ToList();
+
+            foreach (var key in players)
+            {
+                Remove(key);
+            }
+        }
     }
 }

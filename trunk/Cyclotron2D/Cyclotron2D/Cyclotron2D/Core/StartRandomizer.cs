@@ -44,8 +44,10 @@ namespace Cyclotron2D.Core
         {
             var list = new List<StartCondition>();
             int i = 0;
-          
-            int dx = (Game.GraphicsDevice.Viewport.Bounds.Width / gridRatio) / (count / 2);
+
+            int w = (int) Math.Ceiling(count/2f);
+
+            int dx = (Game.GraphicsDevice.Viewport.Bounds.Width / gridRatio) / w ;
             int dy = (Game.GraphicsDevice.Viewport.Bounds.Height / gridRatio) / 2;
             List<int> p = new List<int>();
             for (int j = 0; j < count; j++)
@@ -58,8 +60,8 @@ namespace Cyclotron2D.Core
                 int zone = p[m_rand.Next(0, p.Count)];
                 p.Remove(zone);
 
-                int a = (int) Math.Floor((double)(zone)/3);
-                int b = zone%3;
+                int a = (int) Math.Floor((double)(zone)/w);
+                int b = zone%w;
 
                 int x = m_rand.Next(b * dx + 3, (b + 1) * dx -3);
                 int y = m_rand.Next(a * dy + 3, (a + 1) * dy -3);

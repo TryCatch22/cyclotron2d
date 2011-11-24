@@ -185,7 +185,17 @@ namespace Cyclotron2D.Network
             while (true)
             {
                 //Wait for messages
-                while (m_stayAlive && Socket.Available == 0) Thread.Yield();
+                try
+                {
+                    while (m_stayAlive && Socket.Available == 0) Thread.Yield();
+                }
+                catch (ObjectDisposedException)
+                {
+                   Disconnect();
+                    return;
+                }
+
+               
 
                 if (!m_stayAlive) break;//exit and let thread die
 

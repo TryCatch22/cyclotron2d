@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Cyclotron2D.Mod;
 using Cyclotron2D.Screens.Base;
 using Cyclotron2D.Screens.Main;
 using Cyclotron2D.Screens.Popup;
@@ -19,7 +20,8 @@ namespace Cyclotron2D.Core.Players
 
         public LocalPlayer(Game game, Screen screen) : base(game, screen)
         {
-            Name = (Screen as GameScreen).GameSettings.PlayerName.Value;
+            Name = Settings.SinglePlayer.PlayerName.Value;
+
         }
 
         public override string Name { get; set; }
@@ -28,6 +30,7 @@ namespace Cyclotron2D.Core.Players
         {
             base.Initialize(cycle);
             SubscribeCycleCollision();
+            Ready = true;
         }
 
         protected override void HandleInput(GameTime gameTime)
@@ -61,7 +64,7 @@ namespace Cyclotron2D.Core.Players
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            if (Winner && !m_gameEnded)
+            if (Winner && !m_gameEnded && gameTime.TotalGameTime > Cycle.GameStart)
             {
                 Game.ScreenManager.AddScreen(new EndGamePopup(Game, Screen as MainScreen, "Victory"));
                 m_gameEnded = true;

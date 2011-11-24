@@ -19,6 +19,7 @@ namespace Cyclotron2D.Components
         {
             if (disposing)
             {
+                Enabled = false;
                 Game.Components.Remove(this);
             }
             base.Dispose(disposing);
@@ -43,6 +44,7 @@ namespace Cyclotron2D.Components
         {
             if (disposing)
             {
+                Enabled = Visible = false;
                 Game.Components.Remove(this);
             }
             base.Dispose(disposing);

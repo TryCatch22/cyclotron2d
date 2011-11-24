@@ -122,7 +122,7 @@ namespace Cyclotron2D.Network {
 
             var thread = new Thread(WaitForClient) {IsBackground = true, Name = "Connection Listener"}; 
             thread.Start();
-         //   print("Listening Thread Started");
+            print("Listening Thread Started");
             m_acceptThreads.Add(thread);
 
         }
@@ -154,6 +154,13 @@ namespace Cyclotron2D.Network {
 
             try
             {
+                if (GameLobbySocket != null)
+                {
+                    GameLobbySocket.Close();
+                    GameLobbySocket.Dispose();
+                    GameLobbySocket = null;
+                }
+
                 GameLobbySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 IPEndPoint localServer = new IPEndPoint(IPAddress.Any, GAME_PORT);
                 GameLobbySocket.Bind(localServer);
@@ -174,7 +181,10 @@ namespace Cyclotron2D.Network {
 
 		}
 
-
+        public void ClearSockets()
+        {
+            Clients.Clear();
+        }
 
 		/// <summary>
 		/// Stops accepting connections.
@@ -210,6 +220,7 @@ namespace Cyclotron2D.Network {
 			}
             m_acceptThreads.Clear();
 			GameLobbySocket.Close();
+            print("Lobby killed");
         }
 
         #endregion
