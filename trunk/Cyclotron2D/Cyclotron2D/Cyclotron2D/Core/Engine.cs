@@ -59,7 +59,7 @@ namespace Cyclotron2D.Core
 
         public List<Player> Players { get { return m_playerCycleMap.Keys.ToList(); } }
 
-        public TimeSpan GameStart { get; set; }
+        public TimeSpan GameStartTime { get; set; }
 
         public int Countdown { get; set; }  // starting countdown number; determines delay     
 
@@ -70,6 +70,8 @@ namespace Cyclotron2D.Core
         public Engine(Game game, Screen screen)
             : base(game, screen)
         {
+            GameStartTime = TimeSpan.MaxValue;
+
             Countdown = 3;
             m_playerCycleMap = new Dictionary<Player, Cycle>();
            
@@ -117,11 +119,11 @@ namespace Cyclotron2D.Core
 
         public void StartGame()
         {
-            GameStart = Game.GameTime.TotalGameTime + new TimeSpan(0, 0, 0, Countdown);
+            GameStartTime = Game.GameTime.TotalGameTime + new TimeSpan(0, 0, 0, Countdown);
 
             foreach (var cycle in m_playerCycleMap.Values)
             {
-                cycle.GameStart = GameStart;
+                cycle.GameStart = GameStartTime;
             }
 
             m_countdown.Start();
@@ -183,6 +185,8 @@ namespace Cyclotron2D.Core
 
         private void OnPlayerDirectionChanged(object sender, DirectionChangeEventArgs e)
         {
+            if (Game.GameTime.TotalGameTime < GameStartTime) return;
+
             var player = sender as Player;
             if (player != null && m_playerCycleMap[player].Enabled)
             {
