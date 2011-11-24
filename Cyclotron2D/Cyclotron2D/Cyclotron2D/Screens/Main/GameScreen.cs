@@ -30,7 +30,7 @@ namespace Cyclotron2D.Screens.Main
 
         public Settings GameSettings { get; set; }
 
-        public TimeSpan GameStartTime { get { return m_engine.GameStart; } }
+        public TimeSpan GameStartTime { get { return m_engine.GameStartTime; } }
 
         public NetworkMessage SetupMessage { get; set; }
 
@@ -296,7 +296,7 @@ namespace Cyclotron2D.Screens.Main
                 //get players from network and then start game
                 players = new List<Player>();
                 players.AddRange(m_lobbyPlayers);
-                GameSettings = Settings.Multiplayer;
+                GameSettings = Settings.SinglePlayer;
                 SetupGame(players);
 
             }

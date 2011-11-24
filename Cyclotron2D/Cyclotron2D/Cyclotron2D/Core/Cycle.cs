@@ -426,26 +426,26 @@ namespace Cyclotron2D.Core
         {
             if (NextTurnIntersection.HasValue)
             {
-                if ((int) Direction == - (int) m_scheduledDirection)
-                {
-                    if (AllowSuicide)
-                    {
-                        DebugMessages.Add(m_player +"committed suicide");
-                        InvokeCollided();
-                    }
-                    else
-                    {
-                        //cancel turn
-                        m_scheduledDirection = Direction;
-                        NextTurnIntersection = null;
-                    }
-                    return;
-                }
-                else if (CycleJustTurned() || m_vertices.Last() == NextTurnIntersection)
-                {
-                    NextTurnIntersection = null;
-                    return;
-                }
+				if ((int)Direction == -(int)m_scheduledDirection)
+				{
+					if (AllowSuicide)
+					{
+						DebugMessages.Add(m_player + "committed suicide");
+						InvokeCollided();
+					}
+					else
+					{
+						//cancel turn
+						m_scheduledDirection = Direction;
+						NextTurnIntersection = null;
+					}
+					return;
+				}
+				else if (CycleJustTurned() || m_vertices.Last() == NextTurnIntersection)
+				{
+					NextTurnIntersection = null;
+					return;
+				}
 
                 int elapsedDistance = (int)Position.Distance(NextTurnIntersection.Value);
 
