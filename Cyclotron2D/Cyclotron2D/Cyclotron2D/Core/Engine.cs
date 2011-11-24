@@ -188,7 +188,8 @@ namespace Cyclotron2D.Core
             if (Game.GameTime.TotalGameTime < GameStartTime) return;
 
             var player = sender as Player;
-            if (player != null && m_playerCycleMap[player].Enabled)
+            var cycle = m_playerCycleMap[player];
+            if (player != null && cycle.Enabled && cycle.Direction != e.Direction &&(cycle.NextTurnIntersection == null || cycle.NextTurnIntersection!=e.Position))
             {
                 string content = (int)e.Direction + " " + e.Position;
                 

@@ -27,7 +27,7 @@ namespace Cyclotron2D.Core
         #region Fields
 
         // We only turn on grid lines, so if the input is received early, we have to keep track of it.
-        private Point? m_nextTurnIntersection;
+        public Point? NextTurnIntersection { get; private set; }
         private Player m_player;
         private Direction m_scheduledDirection;
 
@@ -291,7 +291,7 @@ namespace Cyclotron2D.Core
 
             }
 
-            m_nextTurnIntersection = gridCrossing;
+            NextTurnIntersection = gridCrossing;
             m_scheduledDirection = direction;
         }
 
@@ -387,26 +387,26 @@ namespace Cyclotron2D.Core
 
         private void CheckScheduledTurn()
         {
-            if (m_nextTurnIntersection == null)
+            if (NextTurnIntersection == null)
                 return;
 
             bool turn = false;
             switch (Direction)
             {
                 case Direction.Down:
-                    if (Position.Y >= m_nextTurnIntersection.Value.Y)
+                    if (Position.Y >= NextTurnIntersection.Value.Y)
                         turn = true;
                     break;
                 case Direction.Up:
-                    if (Position.Y <= m_nextTurnIntersection.Value.Y)
+                    if (Position.Y <= NextTurnIntersection.Value.Y)
                         turn = true;
                     break;
                 case Direction.Right:
-                    if (Position.X >= m_nextTurnIntersection.Value.X)
+                    if (Position.X >= NextTurnIntersection.Value.X)
                         turn = true;
                     break;
                 case Direction.Left:
-                    if (Position.X <= m_nextTurnIntersection.Value.X)
+                    if (Position.X <= NextTurnIntersection.Value.X)
                         turn = true;
                     break;
                 default:
@@ -415,7 +415,7 @@ namespace Cyclotron2D.Core
             if (turn)
             {
                 Turn();
-                m_nextTurnIntersection = null;
+                NextTurnIntersection = null;
             }
         }
 
@@ -424,7 +424,7 @@ namespace Cyclotron2D.Core
         // Turn now.
         private void Turn()
         {
-            if (m_nextTurnIntersection.HasValue)
+            if (NextTurnIntersection.HasValue)
             {
                 if ((int) Direction == - (int) m_scheduledDirection)
                 {
@@ -437,26 +437,26 @@ namespace Cyclotron2D.Core
                     {
                         //cancel turn
                         m_scheduledDirection = Direction;
-                        m_nextTurnIntersection = null;
+                        NextTurnIntersection = null;
                     }
                     return;
                 }
-                else if (CycleJustTurned() || m_vertices.Last() == m_nextTurnIntersection)
+                else if (CycleJustTurned() || m_vertices.Last() == NextTurnIntersection)
                 {
-                    m_nextTurnIntersection = null;
+                    NextTurnIntersection = null;
                     return;
                 }
 
-                int elapsedDistance = (int)Position.Distance(m_nextTurnIntersection.Value);
+                int elapsedDistance = (int)Position.Distance(NextTurnIntersection.Value);
 
                 Direction = m_scheduledDirection;
 
             //    if (elapsedDistance > 0)
             //    {
-                    m_vertices.Add(m_nextTurnIntersection.Value);
+                    m_vertices.Add(NextTurnIntersection.Value);
               //  }
 
-                Position = m_nextTurnIntersection.Value.AddOffset(m_scheduledDirection, elapsedDistance);
+                Position = NextTurnIntersection.Value.AddOffset(m_scheduledDirection, elapsedDistance);
               //  m_vertices.Add(Position);
 
                 
