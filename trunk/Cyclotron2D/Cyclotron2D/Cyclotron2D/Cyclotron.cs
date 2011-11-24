@@ -46,6 +46,9 @@ namespace Cyclotron2D
 
         public Cyclotron()
         {
+
+            IsFixedTimeStep = true;
+            //TargetElapsedTime = new TimeSpan(0, 0, 0, 990);
             Content.RootDirectory = "Content";
 
             m_graphics = new GraphicsDeviceManager(this);
