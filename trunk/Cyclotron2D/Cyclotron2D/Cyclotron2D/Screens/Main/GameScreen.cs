@@ -300,16 +300,6 @@ namespace Cyclotron2D.Screens.Main
                 SetupGame(players);
 
             }
-//            else if (e.NewState == GameState.PlayingAsClient && e.OldState == GameState.GameLobbyClient)
-//            {
-                //get players and settings from network and start game
-//                players = new List<Player>();
-//                players.AddRange(m_lobbyPlayers);
-//                SetupGame(players);
-//                GameSettings = Settings.Multiplayer;
-//            }
-
-
         }
     }
 }

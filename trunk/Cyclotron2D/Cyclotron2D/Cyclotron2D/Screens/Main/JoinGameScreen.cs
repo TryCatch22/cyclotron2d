@@ -20,7 +20,7 @@ namespace Cyclotron2D.Screens.Main {
 
 	    private StretchPanel m_panel;
 
-		private CancelOk m_ok;
+		private OkCancel m_ok;
 		private NetworkConnection Host;
 
 		public JoinGameScreen(Game game)
@@ -29,7 +29,7 @@ namespace Cyclotron2D.Screens.Main {
             m_panel = new StretchPanel(game, this);
             m_playerName = new LabelTextBox(game, this);
             m_hostIp = new IpTextBox(game, this);
-			m_ok = new CancelOk(game, this);
+			m_ok = new OkCancel(game, this);
 			Host = new NetworkConnection();
 
             m_panel.AddItems(m_playerName, m_hostIp);
@@ -39,7 +39,7 @@ namespace Cyclotron2D.Screens.Main {
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            if (!Host.IsConnected && Host.Socket!= null && Host.Socket.Connected)
+            if (!Host.IsConnected && Host.TcpSocket!= null && Host.TcpSocket.Connected)
             {
                 Host.Disconnect();
                 DebugMessages.Add("Connection Lost");

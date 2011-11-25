@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -78,6 +79,12 @@ namespace Cyclotron2D.Network
 
         public static NetworkMessage Build(byte[] data)
         {
+            if(data.Length > NetworkConnection.MAX_BUFFER_SIZE)
+            {
+                throw new Exception("Data is too long");
+            }
+
+
             string s = encoding.GetString(data).TrimEnd(new[] { '\0' });
 
             string header = s.Substring(0, s.IndexOf(EndOfHeader));

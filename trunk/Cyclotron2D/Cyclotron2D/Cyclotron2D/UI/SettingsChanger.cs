@@ -24,24 +24,26 @@ namespace Cyclotron2D.UI
         private LabelTextBox m_playerName;
 
 
-        private StretchPanel m_OptionsPanel;
+        private StretchPanel m_optionsPanel;
 
         private Button m_okButton;
 
         public SettingsChanger(Game game, Screen screen) : base(game, screen)
         {
-			int labelWidth = 400;
-			TextAlign align = TextAlign.Right;
-			m_drawGrid = new LabelCheckBox(game, screen, labelWidth, align);
-			m_plasmaGrid = new LabelCheckBox(game, screen, labelWidth, align);
-			m_OptionsPanel = new StretchPanel(game, screen);
-			m_gridSize = new LabelTextBox(game, screen, labelWidth, align);
-			m_cycleSpeed = new LabelTextBox(game, screen, labelWidth, align);
-			m_maxTailLength = new LabelTextBox(game, screen, labelWidth, align);
-			m_suicide = new LabelCheckBox(game, screen, labelWidth, align);
-			m_playerName = new LabelTextBox(game, screen, labelWidth, align);
+			int labelWidth = 300;
+			TextAlign align = TextAlign.Left;
+			m_drawGrid = new LabelCheckBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
+            m_plasmaGrid = new LabelCheckBox(game, screen) { LabelWidth = labelWidth, LabelAlign = align };
 
-            m_OptionsPanel.AddItems(m_gridSize, m_cycleSpeed, m_maxTailLength, m_suicide, m_drawGrid, m_plasmaGrid, m_playerName);
+			m_gridSize = new LabelTextBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
+			m_cycleSpeed = new LabelTextBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
+			m_maxTailLength = new LabelTextBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
+			m_suicide = new LabelCheckBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
+			m_playerName = new LabelTextBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
+
+            m_optionsPanel = new StretchPanel(game, screen);
+
+            m_optionsPanel.AddItems(m_gridSize, m_cycleSpeed, m_maxTailLength, m_suicide, m_drawGrid, m_plasmaGrid, m_playerName);
 
             m_okButton = new Button(game, screen);
         }
@@ -94,16 +96,16 @@ namespace Cyclotron2D.UI
         {
             base.Update(gameTime);
 
-            m_OptionsPanel.Rect = RectangleBuilder.Top(Rect, new Vector2(1f, 0.8f));
+            m_optionsPanel.Rect = RectangleBuilder.Top(Rect, new Vector2(1f, 0.8f));
             m_okButton.Rect = RectangleBuilder.BottomRight(Rect, new Vector2(0.2f, 0.17f), new Point(2, 2));
         }
 
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
-            if (m_OptionsPanel.Visible)
+            if (m_optionsPanel.Visible)
             {
-                m_OptionsPanel.Draw(gameTime);
+                m_optionsPanel.Draw(gameTime);
             }
 
             if (m_okButton.Visible)
