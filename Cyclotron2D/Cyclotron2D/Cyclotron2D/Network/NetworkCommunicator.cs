@@ -1,18 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using Cyclotron2D.Components;
 using Cyclotron2D.Core.Players;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Network
 {
+
+    public enum NetworkMode
+    {
+        Tcp, Udp
+    }
+
     public class NetworkCommunicator : CyclotronComponent
     {
+        #region Fields
+
         private TimeSpan lastConnectionCheck;
 
+        #endregion
+
+        #region Properties
+
         public Dictionary<RemotePlayer, NetworkConnection> Connections { get; private set; }
+
+        private Socket UdpSendSocket { get; set; }
+
+        public NetworkMode Mode { get; private set; }
 
         public RemotePlayer Host { get; private set; }
 
@@ -21,12 +40,21 @@ namespace Cyclotron2D.Network
         /// </summary>
         public int LocalId { get; set; }
 
+        #endregion
+
+        #region Constructor
+
         public NetworkCommunicator(Game game)
             : base(game)
         {
             Connections = new Dictionary<RemotePlayer, NetworkConnection>();
             LocalId = 0;
+            Mode = NetworkMode.Tcp;
         }
+
+        #endregion  
+
+        #region Public Methods
 
         public void Add(RemotePlayer player, Socket socket)
         {
@@ -50,24 +78,6 @@ namespace Cyclotron2D.Network
                 }
             }
         }
-
-        private void OnMessageReceived(object sender, MessageEventArgs e)
-        {
-            EventHandler<MessageEventArgs> handler = MessageReceived;
-            if (handler != null) handler(sender, e);
-        }
-
-        public event EventHandler<ConnectionEventArgs> ConnectionLost;
-
-        private void InvokeConnectionLost(ConnectionEventArgs e)
-        {
-            EventHandler<ConnectionEventArgs> handler = ConnectionLost;
-            if (handler != null) handler(this, e);
-        }
-
-
-        public event EventHandler<MessageEventArgs> MessageReceived;
-
 
         public void Remove(RemotePlayer player)
         {
@@ -105,14 +115,14 @@ namespace Cyclotron2D.Network
                 lastConnectionCheck = gameTime.TotalGameTime;
             }
 
-           
+
         }
 
         public void SendDebugMessage(string message)
         {
             foreach (var networkConnection in Connections.Values)
             {
-                networkConnection.Send(new NetworkMessage(MessageType.Debug, message){Source = (byte)LocalId});
+                networkConnection.Send(new NetworkMessage(MessageType.Debug, message) { Source = (byte)LocalId });
             }
         }
 
@@ -132,17 +142,37 @@ namespace Cyclotron2D.Network
             if (Connections.ContainsKey(player))
             {
                 message.Source = source;
-                Connections[player].Send(message);
+
+                switch (Mode)
+                {
+                    case NetworkMode.Tcp:
+                        Connections[player].Send(message);
+                        break;
+                    case NetworkMode.Udp:
+                        {
+                            new Thread(() =>
+                            {
+                                lock(UdpSendSocket)
+                                {
+                                    UdpSendSocket.SendTo(message.Data, Connections[player].RemoteEP);
+                                } 
+
+                            }).Start();
+                        }
+                        break;
+                }
             }
         }
 
-         public void MessageOtherPlayers(RemotePlayer player, NetworkMessage message)
-         {
-             MessageOtherPlayers(player, message, (byte)LocalId);
-         }
+        public void MessageOtherPlayers(RemotePlayer player, NetworkMessage message)
+        {
+            MessageOtherPlayers(player, message, (byte)LocalId);
+        }
 
         public void MessageOtherPlayers(RemotePlayer player, NetworkMessage message, byte source)
         {
+            Debug.Assert(Mode == NetworkMode.Tcp, "This method is not supported in Udp Mode");
+
             message.Source = source;
             foreach (RemotePlayer remotePlayer in Connections.Keys.Where(key => key != player))
             {
@@ -158,32 +188,43 @@ namespace Cyclotron2D.Network
         public void MessageAll(NetworkMessage message, byte source)
         {
             message.Source = source;
-            foreach (RemotePlayer remotePlayer in Connections.Keys)
+
+
+            switch (Mode)
             {
-                Connections[remotePlayer].Send(message);
+                case NetworkMode.Tcp:
+                    {
+                        foreach (RemotePlayer remotePlayer in Connections.Keys)
+                        {
+                            Connections[remotePlayer].Send(message);
+                        }
+                    }
+                    break;
+                case NetworkMode.Udp:
+                    {
+                        new Thread(() =>
+                        {
+                            lock (UdpSendSocket)
+                            {
+                                UdpSendSocket.Send(message.Data, message.Data.Length, SocketFlags.Broadcast);
+                            }
+                        }).Start();
+                    }
+                    break;
             }
+
+           
         }
 
         public RemotePlayer GetPlayer(Socket socket)
         {
-            return (from kvp in Connections where kvp.Value.Socket == socket select kvp.Key).FirstOrDefault();
+            return (from kvp in Connections where kvp.Value.TcpSocket == socket select kvp.Key).FirstOrDefault();
         }
 
         public RemotePlayer GetPlayer(NetworkConnection connection)
         {
             return (from kvp in Connections where kvp.Value == connection select kvp.Key).FirstOrDefault();
         }
-
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                ClearAll();
-            }
-            base.Dispose(disposing);
-        }
-
 
         public void ClearAll()
         {
@@ -194,5 +235,66 @@ namespace Cyclotron2D.Network
                 Remove(key);
             }
         }
+
+        public void SwitchToUdp()
+        {
+
+            EndPoint localEp = null;
+            foreach (NetworkConnection networkConnection in Connections.Values)
+            {
+                networkConnection.SwitchToUdp();
+                localEp = networkConnection.LocalEP;
+            }
+
+            if(localEp != null)
+            {
+                UdpSendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                UdpSendSocket.Bind(localEp);
+            }
+
+            Mode = NetworkMode.Udp;
+
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+        private void OnMessageReceived(object sender, MessageEventArgs e)
+        {
+            EventHandler<MessageEventArgs> handler = MessageReceived;
+            if (handler != null) handler(sender, e);
+        }
+
+        #endregion
+
+        #region Events
+
+        public event EventHandler<ConnectionEventArgs> ConnectionLost;
+
+        private void InvokeConnectionLost(ConnectionEventArgs e)
+        {
+            EventHandler<ConnectionEventArgs> handler = ConnectionLost;
+            if (handler != null) handler(this, e);
+        }
+
+
+        public event EventHandler<MessageEventArgs> MessageReceived;
+
+        #endregion
+
+        #region IDisposable
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                ClearAll();
+            }
+            base.Dispose(disposing);
+        }
+
+        #endregion
+
     }
 }

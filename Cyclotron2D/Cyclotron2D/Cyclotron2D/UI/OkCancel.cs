@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Cyclotron2D.UI
 {
-    public class CancelOk :UIElement
+    public class OkCancel :UIElement
     {
 
         public Action OnCancel { get; set; }
@@ -34,7 +34,7 @@ namespace Cyclotron2D.UI
         protected Button CancelButton { get; private set; }
         protected Button OkButton { get; private set; }
 
-        public CancelOk(Game game, Screen screen) : base(game, screen)
+        public OkCancel(Game game, Screen screen) : base(game, screen)
         {
             OkButton = new Button(game, screen);
             CancelButton = new Button(game, screen);

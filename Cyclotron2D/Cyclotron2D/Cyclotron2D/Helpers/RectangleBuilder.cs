@@ -46,6 +46,13 @@ namespace Cyclotron2D.Helpers
             int w = (int)(source.Width * dimR.X), h = (int)(source.Height * dimR.Y);
             return new Rectangle(   source.X + source.Width - w - padding.X, 
                                     source.Y + source.Height - h - padding.Y, w, h);
+        }   
+
+
+        public static Rectangle BottomLeft(Rectangle source, Vector2 dimR, Point padding)
+        {
+            int w = (int)(source.Width * dimR.X), h = (int)(source.Height * dimR.Y);
+            return new Rectangle(source.X + padding.X, source.Y + source.Height - h - padding.Y, w, h);
         }
 
         public static Rectangle TopLeft(Rectangle source, Vector2 dimR, Point padding)
@@ -53,5 +60,11 @@ namespace Cyclotron2D.Helpers
             int w = (int)(source.Width * dimR.X), h = (int)(source.Height * dimR.Y);
             return new Rectangle(source.X + padding.X, source.Y + padding.Y, w, h);
         }
+
+        public static Rectangle TopRight(Rectangle source, Vector2 dimR, Point padding)
+        {
+            int w = (int)(source.Width * dimR.X), h = (int)(source.Height * dimR.Y);
+            return new Rectangle(source.X + source.Width - w - padding.X, source.Y + padding.Y, w, h);
+        }   
     }
 }

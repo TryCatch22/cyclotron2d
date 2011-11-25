@@ -447,6 +447,8 @@ namespace Cyclotron2D.Core
 					return;
 				}
 
+
+
                 int elapsedDistance = (int)Position.Distance(NextTurnIntersection.Value);
 
                 Direction = m_scheduledDirection;

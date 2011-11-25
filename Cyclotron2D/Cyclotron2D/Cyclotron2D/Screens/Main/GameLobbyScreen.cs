@@ -18,19 +18,29 @@ namespace Cyclotron2D.Screens.Main
 
     public class GameLobbyScreen : MainScreen
     {
+        #region Fields
+
         private PlayerPanel m_playersPanel;
 
+        private LabelCheckBox m_useUdpBox;
+
         private Button LeaveButton;
-        private Button CloseButton;
+        private Button CloseLobbyButton;
         private Button StartGameButton;
 
+        #endregion
 
+        #region Properties
 
         private List<Player> Players { get; set; } 
 
         public GameLobby Lobby { get; private set; }
 
         private GameScreen GameScreen { get; set; }
+
+        #endregion
+
+        #region Constructor
 
         public GameLobbyScreen(Game game)
             : base(game, GameState.GameLobbyHost | GameState.GameLobbyClient)
@@ -40,8 +50,13 @@ namespace Cyclotron2D.Screens.Main
 
             LeaveButton = new Button(game, this);
             StartGameButton = new Button(game, this);
-            CloseButton = new Button(game, this);
+            CloseLobbyButton = new Button(game, this);
+            m_useUdpBox = new LabelCheckBox(game, this);
         }
+
+        #endregion
+
+        #region Public Methods
 
         public Player GetPlayer(int id)
         {
@@ -55,13 +70,17 @@ namespace Cyclotron2D.Screens.Main
 
             m_playersPanel.Background = new Color(20, 0, 90);
 
-
             LeaveButton.Click += OnLeaveButtonClicked;
             LeaveButton.Text = "Leave";
 
+            m_useUdpBox.LabelText = "Use Udp";
+            m_useUdpBox.Label.TextColor = Color.White;
 
-            CloseButton.Click += OnCloseButtonClicked;
-            CloseButton.Text = "Close Lobby";
+            m_useUdpBox.IsChecked = true;
+
+
+            CloseLobbyButton.Click += OnCloseLobbyButtonClicked;
+            CloseLobbyButton.Text = "Close Lobby";
 
             StartGameButton.Text = "Start Game";
             StartGameButton.Click += OnStartGameClicked;
@@ -74,6 +93,34 @@ namespace Cyclotron2D.Screens.Main
 
         }
 
+        public override void Draw(GameTime gameTime)
+        {
+            if (LeaveButton.Visible)
+            {
+                LeaveButton.Draw(gameTime);
+            }
+
+            if (CloseLobbyButton.Visible)
+            {
+                CloseLobbyButton.Draw(gameTime);
+            }
+
+            if (StartGameButton.Visible)
+            {
+                StartGameButton.Draw(gameTime);
+            }
+
+            if (m_playersPanel.Visible)
+            {
+                m_playersPanel.Draw(gameTime);
+            }
+
+            if (m_useUdpBox.Visible)
+            {
+                m_useUdpBox.Draw(gameTime);
+            }
+
+        }
 
 
         public override void Update(GameTime gameTime)
@@ -81,14 +128,22 @@ namespace Cyclotron2D.Screens.Main
             base.Update(gameTime);
             Rectangle win = GraphicsDevice.Viewport.Bounds;
 
-            CloseButton.Visible = CloseButton.Enabled = Game.State == GameState.GameLobbyHost;
+            Vector2 bRatio = new Vector2(0.15f, 0.1f);
+
+            CloseLobbyButton.Visible = CloseLobbyButton.Enabled = Game.State == GameState.GameLobbyHost;
             StartGameButton.Visible = StartGameButton.Enabled = Game.State == GameState.GameLobbyHost;
+            m_useUdpBox.Visible = m_useUdpBox.Enabled = Game.State == GameState.GameLobbyHost;
 
             m_playersPanel.Rect = RectangleBuilder.TopLeft(win, new Vector2(0.35f, 0.5f), new Point(15, 15));
 
-            LeaveButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.1f), new Point(20, 10));
-            CloseButton.Rect = RectangleBuilder.BottomRight(win, new Vector2(0.15f, 0.1f), new Point(25 + LeaveButton.Rect.Width, 10));
-            StartGameButton.Rect = RectangleBuilder.Right(win, new Vector2(0.2f, 0.15f), 30);
+            CloseLobbyButton.Rect = RectangleBuilder.BottomLeft(win, bRatio, new Point(10, 10));
+
+            m_useUdpBox.Rect = RectangleBuilder.TopRight(win, new Vector2(0.35f, 0.07f), new Point(15, 15));
+            m_useUdpBox.LabelWidth = m_useUdpBox.Rect.Width/2;
+
+            StartGameButton.Rect = RectangleBuilder.BottomRight(win, bRatio, new Point(10, 10));
+            LeaveButton.Rect = RectangleBuilder.BottomRight(win, bRatio, new Point(20 + StartGameButton.Rect.Width, 10));
+            
 
 
         }
@@ -108,6 +163,10 @@ namespace Cyclotron2D.Screens.Main
             m_playersPanel.RemovePlayer(player);
             Players.Remove(player);
         }
+
+        #endregion
+
+        #region Private Methods
 
         /// <summary>
         /// for use when leaving a game lobby so that we can return to a clean one next time
@@ -149,6 +208,8 @@ namespace Cyclotron2D.Screens.Main
             }
         }
 
+        #endregion
+
         #region Client Side
 
         public void AddHost(RemotePlayer player, NetworkConnection connection)
@@ -170,7 +231,7 @@ namespace Cyclotron2D.Screens.Main
             Lobby.NewConnection += OnNewConnection;
         }
 
-        private void OnStartGameClicked(object sender, EventArgs e)
+        private void OnStartGameClicked(object sender, EventArgs eventArgs)
         {
             Game.ChangeState(GameState.PlayingAsHost);
         }
@@ -202,7 +263,7 @@ namespace Cyclotron2D.Screens.Main
 
         }
 
-        private void OnCloseButtonClicked(Object sender, EventArgs e)
+        private void OnCloseLobbyButtonClicked(Object sender, EventArgs e)
         {
             Lobby.CloseGameLobby();
         }
@@ -211,7 +272,142 @@ namespace Cyclotron2D.Screens.Main
 
         #region Event Handlers
 
-        private void OnLeaveButtonClicked(Object sender, EventArgs e)
+        private void OnConnectionLost(object sender, ConnectionEventArgs e)
+        {
+            if (!IsValidState)
+            {
+                //only handle connection lost events while in lobby
+                return;
+            }
+
+            if (Game.State == GameState.GameLobbyHost)
+            {
+                var player = Game.Communicator.GetPlayer(e.Connection);
+
+
+                //inform other clients of the disconnect and give them a player ID mapping to update
+                //warning: This method might fail if people join or leave very close together and the messages arrive out of order client side
+
+                string content = "";
+
+                foreach (Player t in Players)
+                {
+                    int id = t.PlayerID;
+                    int newid = id == player.PlayerID ? -1 : (t.PlayerID < player.PlayerID ? t.PlayerID : t.PlayerID - 1);
+                    content += id + " " + newid + "\n";
+                    if (newid != -1)
+                    {
+                        t.PlayerID = newid;
+                    }
+                }
+
+                Game.Communicator.MessageOtherPlayers(player, new NetworkMessage(MessageType.PlayerLeft, content));
+
+                RemovePlayer(player);
+
+                player.Dispose();
+
+            }
+            else
+            {
+                //client side, we lost connection to the host. we can leave the lobby
+                DebugMessages.Add("Lost connection with host");
+                CancelGame();
+                Game.ChangeState(GameState.MainMenu);
+
+            }
+        }
+
+        private void OnMessageReceived(object sender, MessageEventArgs e)
+        {
+            //only handle messages if we are in one of our states
+            if (!IsValidState) return;
+
+
+            var connection = sender as NetworkConnection;
+            if (connection != null)
+            {
+                switch (e.Message.Type)
+                {
+                    //for server side getting the name of the newly connected player
+                    //once it has this it can announce the new player to the other players.
+                    case MessageType.Hello:
+                        {
+                            RemotePlayer player = Game.Communicator.GetPlayer(connection);
+                            player.Name = e.Message.Content;
+                            string content = player.PlayerID + "\n" + player.Name;
+                            Game.Communicator.MessageOtherPlayers(player,
+                                new NetworkMessage(MessageType.PlayerJoined, content));
+
+                            foreach (Player otherPlayer in Players)
+                            {
+                                if (otherPlayer != player && otherPlayer.PlayerID != Game.Communicator.LocalId)
+                                {
+                                    content = otherPlayer.PlayerID + "\n" + otherPlayer.Name;
+                                    Game.Communicator.MessagePlayer(player,
+                                        new NetworkMessage(MessageType.PlayerJoined, content));
+                                }
+                            }
+                        }
+                        break;
+                    //now on client side we can add the new player
+                    case MessageType.PlayerJoined:
+                        {
+                            var lines = e.Message.Content.Split(new[] { '\n' });
+
+                            int id;
+                            if (int.TryParse(lines[0], out id))
+                            {
+                                var player = new RemotePlayer(Game, GameScreen) { PlayerID = id, Name = lines[1] };
+                                AddPlayer(player);
+                                player.SubscribeConnection();
+                                DebugMessages.Add("Player " + player.PlayerID + " Joined");
+                            }
+
+                        }
+                        break;
+                    case MessageType.PlayerLeft:
+                        {
+                            //client got player left notice, now remap player id and remove useless player
+                            var lines = e.Message.Content.Split(new[] { '\n' }).Where(line => !string.IsNullOrEmpty(line));
+                            foreach (var line in lines)
+                            {
+                                var idstrings = line.Split(new[] { ' ' });
+                                int oId, nId;
+
+                                int.TryParse(idstrings[0], out oId);
+                                int.TryParse(idstrings[1], out nId);
+                                Player player = GetPlayer(oId);
+
+                                if (nId == -1)
+                                {
+                                    DebugMessages.Add("Player " + oId + " Left");
+                                    RemovePlayer(player);
+                                    player.Dispose();
+                                }
+                                else
+                                {
+                                    player.PlayerID = nId;
+                                }
+
+                            }
+                        }
+                        break;
+                    case MessageType.SetupGame:
+                        {
+                            GameScreen.SetupMessage = e.Message;
+                            Game.ChangeState(GameState.PlayingAsClient);
+                        }
+                        break;
+                    default:
+                        return;
+                }
+            }
+
+        }
+
+
+        private void OnLeaveButtonClicked(object sender, EventArgs eventArgs)
         {
             CancelGame();
             Game.ChangeState(GameState.MainMenu);
@@ -261,6 +457,7 @@ namespace Cyclotron2D.Screens.Main
 
         #endregion
 
+        #region Subscription
 
         public void SubscribeCommunicator()
         {
@@ -268,139 +465,6 @@ namespace Cyclotron2D.Screens.Main
             Game.Communicator.ConnectionLost += OnConnectionLost;
         }
 
-        private void OnConnectionLost(object sender, ConnectionEventArgs e)
-        {
-            if (!IsValidState)
-            {
-                //only handle connection lost events while in lobby
-                return;
-            }
-
-            if (Game.State == GameState.GameLobbyHost)
-            {
-                var player = Game.Communicator.GetPlayer(e.Connection);
-                    
-
-                //inform other clients of the disconnect and give them a player ID mapping to update
-                //warning: This method might fail if people join or leave very close together and the messages arrive out of order client side
-
-                string content = "";
-
-                foreach (Player t in Players)
-                {
-                    int id = t.PlayerID;
-                    int newid = id == player.PlayerID ? -1 : (t.PlayerID < player.PlayerID ? t.PlayerID : t.PlayerID - 1);
-                    content +=  id + " " + newid + "\n";
-                    if(newid != -1)
-                    {
-                        t.PlayerID = newid;
-                    }
-                }
-
-                Game.Communicator.MessageOtherPlayers(player, new NetworkMessage(MessageType.PlayerLeft, content));
-
-                RemovePlayer(player);
-
-                player.Dispose();
-
-            }
-            else
-            {
-                //client side, we lost connection to the host. we can leave the lobby
-                DebugMessages.Add("Lost connection with host");
-                CancelGame();
-                Game.ChangeState(GameState.MainMenu);
-
-            }
-        }
-
-        private void OnMessageReceived(object sender, MessageEventArgs e)
-        {
-            //only handle messages if we are in one of our states
-            if (!IsValidState) return;
-
-
-            var connection = sender as NetworkConnection;
-            if (connection != null)
-            {
-                switch (e.Message.Type)
-                {
-                    //for server side getting the name of the newly connected player
-                    //once it has this it can announce the new player to the other players.
-                    case MessageType.Hello:
-                        {
-                            RemotePlayer player = Game.Communicator.GetPlayer(connection);
-                            player.Name = e.Message.Content;
-                            string content = player.PlayerID + "\n" + player.Name;
-                            Game.Communicator.MessageOtherPlayers(player, 
-                                new NetworkMessage(MessageType.PlayerJoined, content));
-
-                            foreach (Player otherPlayer in Players)
-                            {
-                                if (otherPlayer != player && otherPlayer.PlayerID != Game.Communicator.LocalId)
-                                {
-                                    content = otherPlayer.PlayerID + "\n" + otherPlayer.Name;
-                                    Game.Communicator.MessagePlayer(player,
-                                        new NetworkMessage(MessageType.PlayerJoined, content));
-                                }
-                            }
-                        }
-                        break;
-                    //now on client side we can add the new player
-                    case MessageType.PlayerJoined:
-                        {
-                            var lines = e.Message.Content.Split(new[] {'\n'});
-
-                            int id;
-                            if(int.TryParse(lines[0], out id))
-                            {
-                                var player = new RemotePlayer(Game, GameScreen) {PlayerID = id, Name = lines[1]};
-                                AddPlayer(player);
-                                player.SubscribeConnection();
-                                DebugMessages.Add("Player " + player.PlayerID + " Joined");
-                            }
-
-                        }
-                        break;
-                    case MessageType.PlayerLeft:
-                        {
-                            //client got player left notice, now remap player id and remove useless player
-                            var lines = e.Message.Content.Split(new[] {'\n'}).Where(line => !string.IsNullOrEmpty(line));
-                            foreach (var line in lines)
-                            {
-                                var idstrings = line.Split(new [] {' '});
-                                int oId, nId;
-
-                                int.TryParse(idstrings[0], out oId);
-                                int.TryParse(idstrings[1], out nId);
-                                Player player = GetPlayer(oId);
-                                
-                                if (nId == -1)
-                                {
-                                    DebugMessages.Add("Player " + oId + " Left");
-                                    RemovePlayer(player);
-                                    player.Dispose();
-                                }
-                                else
-                                {
-                                    player.PlayerID = nId;
-                                }
-
-                            }
-                        }
-                        break;
-                    case MessageType.SetupGame:
-                        {
-                            GameScreen.SetupMessage = e.Message;
-                            Game.ChangeState(GameState.PlayingAsClient);
-                        }
-                        break;
-                    default:
-                        return;
-                }
-            }
-            
-        }
 
 
         public void UnsubscribeCommunicator()
@@ -409,29 +473,9 @@ namespace Cyclotron2D.Screens.Main
             Game.Communicator.ConnectionLost -= OnConnectionLost;
         }
 
-        public override void Draw(GameTime gameTime)
-        {
-            if (LeaveButton.Visible)
-            {
-                LeaveButton.Draw(gameTime);
-            }
+        #endregion
 
-            if (CloseButton.Visible)
-            {
-                CloseButton.Draw(gameTime);
-            }
-
-            if (StartGameButton.Visible)
-            {
-                StartGameButton.Draw(gameTime);
-            }
-
-            if (m_playersPanel.Visible)
-            {
-                m_playersPanel.Draw(gameTime);
-            }
-
-        }
+        #region IDisposable
 
         protected override void Dispose(bool disposing)
         {
@@ -444,6 +488,6 @@ namespace Cyclotron2D.Screens.Main
             base.Dispose(disposing);
         }
 
-
+        #endregion
     }
 }

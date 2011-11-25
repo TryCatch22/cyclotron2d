@@ -45,9 +45,17 @@ namespace Cyclotron2D.Network
 
         #region Properties
 
-        public Socket Socket { get; private set; }
+        public Socket TcpSocket { get; private set; }
 
-        public bool IsConnected { get { return SocketProbe.IsConnected(Socket); } }
+        public Socket UdpListenSocket { get; private set; }
+
+        public bool IsConnected { get { return SocketProbe.IsConnected(TcpSocket); } }
+
+        public EndPoint LocalEP { get; private set; }
+
+        public EndPoint RemoteEP { get; private set; }
+
+        public NetworkMode Mode { get; private set; }
 
         #endregion
 
@@ -69,15 +77,17 @@ namespace Cyclotron2D.Network
         /// <param name="socket">an already connected socket</param>
         public NetworkConnection(Socket socket)
         {
-            Socket = socket;
+            TcpSocket = socket;
             if(SocketProbe.IsConnected(socket))
             {
                 StartReceiving();
             }
+            Mode = NetworkMode.Tcp;
         }
 
         public NetworkConnection()
         {
+            Mode = NetworkMode.Tcp;
         }
 
         #endregion
@@ -103,22 +113,46 @@ namespace Cyclotron2D.Network
 
         #region Public Methods
 
+        public void SwitchToUdp()
+        {
+
+            LocalEP = TcpSocket.LocalEndPoint;
+            RemoteEP = TcpSocket.RemoteEndPoint;
+
+            Disconnect();
+
+            Mode = NetworkMode.Udp;
+
+            UdpListenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+
+            UdpListenSocket.Bind(LocalEP);
+
+            ListenUdp();
+
+        }
+
+
         /// <summary>
         /// Sends the message async
         /// </summary>
         /// <param name="message"></param>
         public void Send(NetworkMessage message)
         {
-            new Thread(() =>
+            if (TcpSocket != null)
             {
-                //so that second messages on the socket have to wait
-                lock (this)
+                new Thread(() =>
                 {
-                    Socket.Send(message.Data);
-                }
-            }).Start();
-
-            
+                    //so that second messages on the socket have to wait
+                    lock (this)
+                    {
+                        TcpSocket.Send(message.Data);
+                    }
+                }).Start();
+            }
+            else
+            {
+                throw new InvalidOperationException("Can only use this method in TCP mode");
+            }
         }
 
 
@@ -129,16 +163,15 @@ namespace Cyclotron2D.Network
         {
 
             bool connected = false;
-            if (Socket != null && Socket.Connected)
-            {
-                
+            if (TcpSocket != null && TcpSocket.Connected)
+            {              
                 throw new AlreadyConnectedException("Socket is Already Connected.");
             }
 
             try
             {
-                Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                Socket.Connect(address, GameLobby.GAME_PORT);
+                TcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                TcpSocket.Connect(address, GameLobby.GAME_PORT);
 
                 Print("Client Connected");
 
@@ -164,7 +197,8 @@ namespace Cyclotron2D.Network
             m_stayAlive = false;
             m_receivingThread.Abort();
             m_receivingThread = null;
-            if (Socket != null) Socket.Close();
+            if (TcpSocket != null) TcpSocket.Close();
+            TcpSocket = null;
 
         }
 
@@ -187,7 +221,7 @@ namespace Cyclotron2D.Network
                 //Wait for messages
                 try
                 {
-                    while (m_stayAlive && Socket.Available == 0) Thread.Yield();
+                    while (m_stayAlive && TcpSocket.Available == 0) Thread.Yield();
                 }
                 catch (ObjectDisposedException)
                 {
@@ -199,14 +233,14 @@ namespace Cyclotron2D.Network
 
                 if (!m_stayAlive) break;//exit and let thread die
 
-                Socket.Receive(buffer);
+                TcpSocket.Receive(buffer);
 
                 NetworkMessage message = NetworkMessage.Build(buffer);
 
                 while (message.Length > message.Content.Length)
                 {
                     Array.Clear(buffer, 0, MAX_BUFFER_SIZE);
-                    Socket.Receive(buffer);
+                    TcpSocket.Receive(buffer);
                     message.AddContent(buffer);
                 }
 
@@ -226,6 +260,36 @@ namespace Cyclotron2D.Network
 
         #endregion
 
+
+        private void ListenUdp()
+        {
+            byte[] buffer = new byte[MAX_BUFFER_SIZE];
+            EndPoint remote = RemoteEP;
+            UdpListenSocket.BeginReceiveFrom(buffer, 0, buffer.Length, SocketFlags.Broadcast | SocketFlags.None,
+                                             ref remote, OnUdpReceive, buffer);
+        }
+
+        private void OnUdpReceive(IAsyncResult ar)
+        {
+            var buffer = ar.AsyncState as byte[];
+
+            EndPoint remote = RemoteEP;
+
+            UdpListenSocket.EndReceiveFrom(ar, ref  remote);
+
+            var msg = NetworkMessage.Build(buffer);
+
+            buffer = new byte[MAX_BUFFER_SIZE];
+
+            while (msg.Length > msg.Content.Length)
+            {
+                UdpListenSocket.ReceiveFrom(buffer, 0, buffer.Length, SocketFlags.Broadcast | SocketFlags.None, ref remote);
+                msg.AddContent(buffer);
+            }
+
+            InvokeMessageReceived(new MessageEventArgs(msg));
+
+        }
 
         private void StartReceiving()
         {
@@ -251,10 +315,10 @@ namespace Cyclotron2D.Network
         /// </summary>
         private void ClearReceiveBuffer()
         {
-            if (Socket.Available > 0)
+            if (TcpSocket.Available > 0)
             {
-                Byte[] throwaway = new Byte[Socket.Available];
-                Socket.Receive(throwaway);
+                Byte[] throwaway = new Byte[TcpSocket.Available];
+                TcpSocket.Receive(throwaway);
             }
         }
 
@@ -266,11 +330,6 @@ namespace Cyclotron2D.Network
     public class AlreadyConnectedException : Exception
     {
         public AlreadyConnectedException(string message):base(message)
-        {
-            
-        }
-
-        public AlreadyConnectedException()
         {
             
         }

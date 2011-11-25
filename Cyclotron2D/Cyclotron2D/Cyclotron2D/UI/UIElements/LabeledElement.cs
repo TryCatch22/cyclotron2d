@@ -19,13 +19,14 @@ namespace Cyclotron2D.UI.UIElements
 
 		// In case of forced label width, so that a list of elements looks pretty.
 		// If null, text size determines width of label.
-		public int? LabelWidth { get; private set; }
+		public int? LabelWidth { get; set; }
 
-        public LabeledElement(Game game, Screen screen, int? labelWidth = null, TextAlign labelTextAlign = TextAlign.Center)
+        public TextAlign LabelAlign { get { return Label.TextAlign; } set { Label.TextAlign = value; } }
+
+        public LabeledElement(Game game, Screen screen)
 			: base(game, screen)
         {
-			Label = new TextElement(game, screen) { TextAlign = labelTextAlign };
-			LabelWidth = labelWidth;
+			Label = new TextElement(game, screen) { TextAlign = TextAlign.Center };
         }
 
         public override void Update(GameTime gameTime)

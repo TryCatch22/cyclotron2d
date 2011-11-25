@@ -135,7 +135,7 @@
     <Compile Include="Mod\Setting.cs" />
     <Compile Include="Mod\Settings.cs" />
     <Compile Include="Graphics\Animation.cs" />
-    <Compile Include="UI\CancelOk.cs" />
+    <Compile Include="UI\OkCancel.cs" />
     <Compile Include="UI\UIElements\Countdown.cs" />
     <Compile Include="UI\IpTextBox.cs" />
     <Compile Include="UI\LabelCheckBox.cs" />
