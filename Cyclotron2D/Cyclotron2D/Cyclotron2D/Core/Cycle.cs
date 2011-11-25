@@ -6,6 +6,7 @@ using Cyclotron2D.Components;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Graphics;
 using Cyclotron2D.Helpers;
+using Cyclotron2D.Network;
 using Cyclotron2D.Screens.Base;
 using Cyclotron2D.Screens.Main;
 using Cyclotron2D.UI.UIElements;
@@ -95,7 +96,7 @@ namespace Cyclotron2D.Core
         /// </summary>
         public int MaxTailLength { get { return (Screen as GameScreen).GameSettings.MaxTailLength.Value; } }
 
-
+        private GameScreen GameScreen { get { return Screen as GameScreen; } }
 
         #endregion
 
@@ -335,7 +336,7 @@ namespace Cyclotron2D.Core
                 CheckScheduledTurn();
             }
             
-            
+            NotifyPeers();
            
         }
 
@@ -367,6 +368,26 @@ namespace Cyclotron2D.Core
         #endregion
 
         #region Private Methods
+
+
+        private void NotifyPeers()
+        {
+            if (!GameScreen.UseUdp) return;
+
+            string content = "";
+
+            content += Position + "\n";
+
+            for (int i = m_vertices.Count -1; i > 0 && i > m_vertices.Count - 4; i--)
+            {
+                content += m_vertices[i] + "\n";
+            }
+
+            Game.Communicator.MessageAll(new NetworkMessage(MessageType.PlayerInfoUpdate, content));
+
+        }
+           
+
 
         private Vector2 DirectionToVelocity(Direction direction)
         {

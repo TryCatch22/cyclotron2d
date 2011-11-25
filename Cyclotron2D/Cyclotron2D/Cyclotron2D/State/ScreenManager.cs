@@ -131,10 +131,6 @@ namespace Cyclotron2D.State
             if (screen is MainScreen)
             {
                 Screens.Add(screen as MainScreen, new List<PopupScreen>());
-//                if (screen is GameScreen)
-//                {
-//                    GameScreen = screen as GameScreen;
-//                }
             }
             else
             {

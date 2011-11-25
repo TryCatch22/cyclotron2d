@@ -29,7 +29,7 @@ namespace Cyclotron2D.Screens.Main
 
         private bool isGameSetup;
 
-        public bool useUdp;
+        public bool UseUdp { get; set; }
 
         public Settings GameSettings { get; set; }
 
@@ -175,7 +175,7 @@ namespace Cyclotron2D.Screens.Main
                             content += (int) startCondition.Dir + " " + startCondition.Position + "\n";
                         }
 
-                        if (useUdp)
+                        if (UseUdp)
                         {
                             foreach (var kvp in Game.Communicator.Connections)
                             {
@@ -194,11 +194,11 @@ namespace Cyclotron2D.Screens.Main
                     {
                         Debug.Assert(SetupMessage != null, "there should be a setup message ready for client play.");
 
+                        UseUdp = SetupMessage.Type == MessageType.SetupGameUdp;
+
                         var lines = SetupMessage.ContentLines;
-
+                        var localEp = Game.Communicator.Connections[Game.Communicator.Host].LocalEP;
                         List<StartCondition> conditions = new List<StartCondition>();
-
-                        bool usingUdp = false;
 
                         for (int i = 0; i < lines.Count; i++)
                         {
@@ -210,14 +210,14 @@ namespace Cyclotron2D.Screens.Main
                             string ipString, portString;
 
 
-                             if(i < players.Count)
+                             if(i < players.Count || !UseUdp)
                              {
                                  sep = lines[i].IndexOf(' ');
                                  direction = lines[i].Substring(0, sep);
                                 vector = lines[i].Substring(sep + 1);
                                 conditions.Add(new StartCondition(Vector2Extention.FromString(vector), (Direction)int.Parse(direction)));
                              }
-                             else
+                             else if (UseUdp)
                              {
                                 sep = lines[i].IndexOf(' ');
                                 sep2 = lines[i].IndexOf(':');
@@ -228,20 +228,17 @@ namespace Cyclotron2D.Screens.Main
                                 ipString = lines[i].Substring(sep + 1, sep2);
                                 portString = lines[i].Substring(sep2 + 1);
 
-                                 var ip = IPAddress.Parse(ipString);
-                                 int port = int.Parse(portString);
-
-                                 var localEp = Game.Communicator.Connections[Game.Communicator.Host].LocalEP;
+                                var ip = IPAddress.Parse(ipString);
+                                int port = int.Parse(portString);
 
                                 Game.Communicator.Add(GetPlayer(playerId) as RemotePlayer, new NetworkConnection(localEp, ip, port));
-                                 usingUdp = true;
 
                              }
                         }
 
                         m_engine.SetupGame(players, conditions);
 
-                       if(usingUdp) Game.Communicator.SwitchToUdp();
+                       if(UseUdp) Game.Communicator.SwitchToUdp();
 
                         Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
                         
