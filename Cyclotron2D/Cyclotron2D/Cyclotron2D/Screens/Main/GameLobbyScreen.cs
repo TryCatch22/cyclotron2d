@@ -24,6 +24,8 @@ namespace Cyclotron2D.Screens.Main
 
         private LabelCheckBox m_useUdpBox;
 
+
+
         private Button LeaveButton;
         private Button CloseLobbyButton;
         private Button StartGameButton;
@@ -179,13 +181,10 @@ namespace Cyclotron2D.Screens.Main
                 Lobby = null;
             }
 
-
             foreach (var player in m_playersPanel.Players)
             {
                 RemovePlayer(player);
-
                 player.Dispose();
-
             }
         }
 
@@ -233,6 +232,7 @@ namespace Cyclotron2D.Screens.Main
 
         private void OnStartGameClicked(object sender, EventArgs eventArgs)
         {
+            GameScreen.useUdp = m_useUdpBox.IsChecked;
             Game.ChangeState(GameState.PlayingAsHost);
         }
 
