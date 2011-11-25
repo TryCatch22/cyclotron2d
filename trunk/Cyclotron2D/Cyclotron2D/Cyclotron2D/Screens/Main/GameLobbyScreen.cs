@@ -232,7 +232,7 @@ namespace Cyclotron2D.Screens.Main
 
         private void OnStartGameClicked(object sender, EventArgs eventArgs)
         {
-            GameScreen.useUdp = m_useUdpBox.IsChecked;
+            GameScreen.UseUdp = m_useUdpBox.IsChecked;
             Game.ChangeState(GameState.PlayingAsHost);
         }
 

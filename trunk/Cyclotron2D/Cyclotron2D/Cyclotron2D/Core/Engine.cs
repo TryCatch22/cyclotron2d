@@ -6,6 +6,7 @@ using Cyclotron2D.Core.Players;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Network;
 using Cyclotron2D.Screens.Base;
+using Cyclotron2D.Screens.Main;
 using Cyclotron2D.State;
 using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
@@ -56,6 +57,8 @@ namespace Cyclotron2D.Core
         #endregion
 
         #region Properties
+
+        public GameScreen GameScreen { get { return Screen as GameScreen;  } }
 
         public List<Player> Players { get { return m_playerCycleMap.Keys.ToList(); } }
 
@@ -193,21 +196,25 @@ namespace Cyclotron2D.Core
             {
                 string content = (int)e.Direction + " " + e.Position;
                 
-                if(Game.State == GameState.PlayingAsHost)
+                if(!GameScreen.UseUdp)
                 {
-                    if (player is RemotePlayer)
+                    if(Game.State == GameState.PlayingAsHost)
                     {
-                        Game.Communicator.MessageOtherPlayers(player as RemotePlayer, new NetworkMessage(MessageType.SignalTurn, content), (byte)player.PlayerID);
+                        if (player is RemotePlayer)
+                        {
+                            Game.Communicator.MessageOtherPlayers(player as RemotePlayer, new NetworkMessage(MessageType.SignalTurn, content), (byte)player.PlayerID);
+                        }
+                        else
+                        {
+                            Game.Communicator.MessageAll(new NetworkMessage(MessageType.SignalTurn, content), (byte)player.PlayerID);
+                        }
                     }
-                    else
+                    else if (Game.State == GameState.PlayingAsClient && player is LocalPlayer)
                     {
-                        Game.Communicator.MessageAll(new NetworkMessage(MessageType.SignalTurn, content), (byte)player.PlayerID);
+                        Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.SignalTurn, content));
                     }
                 }
-                else if (Game.State == GameState.PlayingAsClient && player is LocalPlayer)
-                {
-                    Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.SignalTurn, content));
-                }
+
 
 
                 m_playerCycleMap[player].TurnAt(e.Direction, e.Position);
@@ -220,6 +227,12 @@ namespace Cyclotron2D.Core
             if (cycle != null)
             {
                 cycle.Enabled = false;
+
+                if (GameScreen.UseUdp && Game.IsState(GameState.PlayingAsHost))
+                {
+                    //todo tell people about the colision
+                }
+
             }
         }
 
