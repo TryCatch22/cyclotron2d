@@ -17,6 +17,8 @@ namespace Cyclotron2D.Network
 
         SetupGame,
 
+        SetupGameUdp,
+
         PlayerJoined,
 
         PlayerLeft,
@@ -25,7 +27,9 @@ namespace Cyclotron2D.Network
 
         AllReady,
 
-        SignalTurn
+        SignalTurn,
+
+        PlayerInfoUpdate    
     }
 
 

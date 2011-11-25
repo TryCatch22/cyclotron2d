@@ -64,8 +64,6 @@ namespace Cyclotron2D.Graphics
 			return new Rectangle(x, y, Size.X, Size.Y);
 		}
 
-
-
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -89,8 +87,6 @@ namespace Cyclotron2D.Graphics
                 m_lastUpdate = gameTime.TotalGameTime;
             }
         }
-
-
 
         public override void Draw(GameTime gameTime)
         {

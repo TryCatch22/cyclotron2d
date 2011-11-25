@@ -80,6 +80,9 @@ namespace Cyclotron2D.Network
             TcpSocket = socket;
             if(SocketProbe.IsConnected(socket))
             {
+
+                LocalEP = TcpSocket.LocalEndPoint;
+                RemoteEP = TcpSocket.RemoteEndPoint;
                 StartReceiving();
             }
             Mode = NetworkMode.Tcp;
@@ -87,6 +90,14 @@ namespace Cyclotron2D.Network
 
         public NetworkConnection()
         {
+            Mode = NetworkMode.Tcp;
+        }
+
+
+        public NetworkConnection(EndPoint localEp, IPAddress ip, int port)
+        {
+            LocalEP = localEp;
+            RemoteEP = new IPEndPoint(ip, port);
             Mode = NetworkMode.Tcp;
         }
 
@@ -115,9 +126,9 @@ namespace Cyclotron2D.Network
 
         public void SwitchToUdp()
         {
-
-            LocalEP = TcpSocket.LocalEndPoint;
-            RemoteEP = TcpSocket.RemoteEndPoint;
+//
+//            LocalEP = TcpSocket.LocalEndPoint;
+//            RemoteEP = TcpSocket.RemoteEndPoint;
 
             Disconnect();
 
@@ -176,6 +187,10 @@ namespace Cyclotron2D.Network
                 Print("Client Connected");
 
                 connected = true;
+
+
+                LocalEP = TcpSocket.LocalEndPoint;
+                RemoteEP = TcpSocket.RemoteEndPoint;
 
 
                 StartReceiving();
