@@ -195,7 +195,7 @@ namespace Cyclotron2D
                 ScreenManager = null;
                 InputState.Dispose();
                 InputState = null;
-				DebugMessages.WriteLog();
+				DebugMessages.FinishWriteLog();
             }
             base.Dispose(disposing);
         }
