@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using Cyclotron2D.Mod;
+using Cyclotron2D.Network;
 using Cyclotron2D.Screens.Base;
 using Cyclotron2D.Screens.Main;
 using Cyclotron2D.Screens.Popup;
@@ -23,6 +24,8 @@ namespace Cyclotron2D.Core.Players
             Name = Settings.SinglePlayer.PlayerName.Value;
 
         }
+
+        private GameScreen GameScreen { get { return Screen as GameScreen; } }
 
         public override string Name { get; set; }
 
@@ -72,7 +75,25 @@ namespace Cyclotron2D.Core.Players
                 Game.ScreenManager.AddScreen(new EndGamePopup(Game, Screen as MainScreen, "Victory"));
                 m_gameEnded = true;
             }
+            else if (Cycle != null && !m_gameEnded && gameTime.TotalGameTime > Cycle.GameStart)
+            {
+                NotifyPeers();
+            }
         }
+
+
+        #region Private Methods
+
+
+        private void NotifyPeers()
+        {
+            if (!GameScreen.UseUdp) return;
+            Game.Communicator.MessageAll(Cycle.GetInfoMessage());
+
+        }
+           
+        
+        #endregion
 
         #region Subscription
 

@@ -341,7 +341,10 @@ namespace Cyclotron2D.Network
                 //disconnected, stop receive loop
                 return;
             }
-           
+           catch(SocketException e)
+           {
+               DebugMessages.Add("Udp Socket Exception: " + e.Message);
+           }
 
 
 

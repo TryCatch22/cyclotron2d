@@ -138,6 +138,98 @@ namespace Cyclotron2D.Core
             return position.X < 0 || position.Y < 0 || position.X > Game.GraphicsDevice.Viewport.Width || position.Y > Game.GraphicsDevice.Viewport.Height;
         }
 
+
+        public void HandleUpdateInfo(List<Point> vertices)
+        {
+            Point last = m_vertices[m_vertices.Count - 1];
+            int i = 0;
+            while(i < vertices.Count && vertices[i] != last) i++;
+
+
+
+            Debug.Assert(i < vertices.Count, "have we missed more than 4 turns since the last message ??");
+            
+
+            switch (i)
+            {
+                case 0:
+                    //this will most likely never happen maybe at the very start...
+                    break;
+                case 1:
+                    {
+                        Debug.Assert(
+                            ((Direction == Direction.Down || Direction == Direction.Up) && Position.X == vertices[0].X && Position.X == vertices[1].X) ||
+                            ((Direction == Direction.Left || Direction == Direction.Right) && Position.Y == vertices[0].Y && Position.Y == vertices[1].Y), "Something is wrong noob.");
+                    }
+                    break;
+                case 2:
+                    {
+                        // the player must have turned since the last message.
+
+                        Line l = new Line(vertices[1], vertices[0]);
+
+                        TurnAt(l.Direction, l.Start);
+                    }
+                    break;
+                case 3:
+                    {
+                        DebugMessages.Add("Missed a turn, trying to catching up ...");
+                        int length =(int)Position.Distance(vertices[3]);
+
+                        var line = new Line(vertices[1], vertices[0]);
+
+                        int offset = (int) (length - vertices[0].Distance(vertices[1]) - vertices[1].Distance(vertices[2]) - vertices[2].Distance(vertices[3]));
+
+                        m_vertices.Add(vertices[2]);
+                        m_vertices.Add(vertices[1]);
+                        Position = vertices[1].AddOffset(line.Direction, offset);
+                        Direction = line.Direction;
+
+
+                    }
+                    break;
+                case 4:
+                    {
+                        DebugMessages.Add("Missed two turns!! pls lag less");
+                        int length = (int)Position.Distance(vertices[4]);
+
+                        var line = new Line(vertices[1], vertices[0]);
+
+                        int offset = (int)(length - vertices[0].Distance(vertices[1]) - vertices[1].Distance(vertices[2]) - vertices[2].Distance(vertices[3]) - vertices[3].Distance(vertices[4]));
+
+                        m_vertices.Add(vertices[3]);
+                        m_vertices.Add(vertices[2]);
+                        m_vertices.Add(vertices[1]);
+
+                        Position = vertices[1].AddOffset(line.Direction, offset);
+                        Direction = line.Direction;
+                    }
+                    break;
+                default:
+                    DebugMessages.Add("we are in SERIOUS trouble here");
+                    break;
+
+            }
+
+
+
+            
+        }
+
+        public NetworkMessage GetInfoMessage()
+        {
+            string content = "";
+
+            content += Position + "\n";
+
+            for (int i = m_vertices.Count - 1; i >= 0 && i >= m_vertices.Count - 4; i--)
+            {
+                content += m_vertices[i] + "\n";
+            }
+
+            return new NetworkMessage(MessageType.PlayerInfoUpdate, content);
+        }
+
         public bool CheckHeadLine(Line myline, out Player killer)
         {
             //hiding the class scope position Vector here caus this method can be used to check for future colisions.
@@ -281,12 +373,20 @@ namespace Cyclotron2D.Core
             {
                 case Orientation.Horizontal:
                     {
-                        Debug.Assert(gridCrossing.Y == headLine.End.Y, "Missed turn message detected");
+                        if(gridCrossing.Y != headLine.End.Y)
+                        {
+                            DebugMessages.Add("Missed turn message detected");
+                        }
+
                     }
                     break;
                 case Orientation.Vertical:
                     {
-                        Debug.Assert(gridCrossing.X == headLine.End.X, "Missed turn message detected");
+                        if (gridCrossing.X != headLine.End.X)
+                        {
+                            DebugMessages.Add("Missed turn message detected");
+                        }
+
                     }
                     break;
 
@@ -336,7 +436,6 @@ namespace Cyclotron2D.Core
                 CheckScheduledTurn();
             }
             
-            NotifyPeers();
            
         }
 
@@ -368,26 +467,6 @@ namespace Cyclotron2D.Core
         #endregion
 
         #region Private Methods
-
-
-        private void NotifyPeers()
-        {
-            if (!GameScreen.UseUdp) return;
-
-            string content = "";
-
-            content += Position + "\n";
-
-            for (int i = m_vertices.Count -1; i > 0 && i > m_vertices.Count - 4; i--)
-            {
-                content += m_vertices[i] + "\n";
-            }
-
-            Game.Communicator.MessageAll(new NetworkMessage(MessageType.PlayerInfoUpdate, content));
-
-        }
-           
-
 
         private Vector2 DirectionToVelocity(Direction direction)
         {
@@ -574,6 +653,8 @@ namespace Cyclotron2D.Core
         }
 
         #endregion
+
+
     }
 
 

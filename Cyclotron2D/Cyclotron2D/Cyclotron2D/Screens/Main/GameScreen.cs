@@ -227,8 +227,6 @@ namespace Cyclotron2D.Screens.Main
                                 sep = lines[i].IndexOf(' ');
                                 sep2 = lines[i].IndexOf(':');
 
-
-
                                 int playerId = int.Parse(lines[i].Substring(0, sep));
                                 ipString = lines[i].Substring(sep + 1, sep2 - (sep + 1));
                                 portString = lines[i].Substring(sep2 + 1);
@@ -236,12 +234,12 @@ namespace Cyclotron2D.Screens.Main
                                 var ip = IPAddress.Parse(ipString);
                                 int port = int.Parse(portString);
 
-                                 var player = GetPlayer(playerId);
+                                var player = GetPlayer(playerId);
 
-                                 if(player is RemotePlayer)
-                                 {
-                                      Game.Communicator.Add(player as RemotePlayer, new NetworkConnection(localEp, ip, port));
-                                 }
+                                if(player is RemotePlayer)
+                                {
+                                    Game.Communicator.Add(player as RemotePlayer, new NetworkConnection(localEp, ip, port));
+                                }
                                
                              }
                         }
