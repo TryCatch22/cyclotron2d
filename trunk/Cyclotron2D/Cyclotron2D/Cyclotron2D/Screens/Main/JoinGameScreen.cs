@@ -39,7 +39,7 @@ namespace Cyclotron2D.Screens.Main {
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            if (!Host.IsConnected && Host.TcpSocket!= null && Host.TcpSocket.Connected)
+            if (!Host.IsConnected && Host.Socket!= null && Host.Socket.Connected)
             {
                 Host.Disconnect();
                 DebugMessages.Add("Connection Lost");

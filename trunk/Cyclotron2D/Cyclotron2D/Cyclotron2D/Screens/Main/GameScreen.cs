@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using Cyclotron2D.Core;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Helpers;
@@ -187,6 +188,10 @@ namespace Cyclotron2D.Screens.Main
 
                         Game.Communicator.MessageAll(new NetworkMessage(type, content));
 
+                        Thread.Sleep(500);
+
+                        if(UseUdp)Game.Communicator.SwitchToUdp();
+
 
                     }
                     break;
@@ -212,8 +217,8 @@ namespace Cyclotron2D.Screens.Main
 
                              if(i < players.Count || !UseUdp)
                              {
-                                 sep = lines[i].IndexOf(' ');
-                                 direction = lines[i].Substring(0, sep);
+                                sep = lines[i].IndexOf(' ');
+                                direction = lines[i].Substring(0, sep);
                                 vector = lines[i].Substring(sep + 1);
                                 conditions.Add(new StartCondition(Vector2Extention.FromString(vector), (Direction)int.Parse(direction)));
                              }
@@ -225,20 +230,29 @@ namespace Cyclotron2D.Screens.Main
 
 
                                 int playerId = int.Parse(lines[i].Substring(0, sep));
-                                ipString = lines[i].Substring(sep + 1, sep2);
+                                ipString = lines[i].Substring(sep + 1, sep2 - (sep + 1));
                                 portString = lines[i].Substring(sep2 + 1);
 
                                 var ip = IPAddress.Parse(ipString);
                                 int port = int.Parse(portString);
 
-                                Game.Communicator.Add(GetPlayer(playerId) as RemotePlayer, new NetworkConnection(localEp, ip, port));
+                                 var player = GetPlayer(playerId);
 
+                                 if(player is RemotePlayer)
+                                 {
+                                      Game.Communicator.Add(player as RemotePlayer, new NetworkConnection(localEp, ip, port));
+                                 }
+                               
                              }
                         }
 
                         m_engine.SetupGame(players, conditions);
 
-                       if(UseUdp) Game.Communicator.SwitchToUdp();
+                       if(UseUdp)
+                       {
+                           Thread.Sleep(500);
+                           Game.Communicator.SwitchToUdp();
+                       }
 
                         Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
                         

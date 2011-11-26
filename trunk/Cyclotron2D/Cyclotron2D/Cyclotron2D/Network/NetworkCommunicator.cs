@@ -29,7 +29,7 @@ namespace Cyclotron2D.Network
 
         public Dictionary<RemotePlayer, NetworkConnection> Connections { get; private set; }
 
-        private Socket UdpSendSocket { get; set; }
+        private Socket UdpSocket { get; set; }
 
         public NetworkMode Mode { get; private set; }
 
@@ -145,21 +145,22 @@ namespace Cyclotron2D.Network
 
                 switch (Mode)
                 {
+                    case NetworkMode.Udp:
                     case NetworkMode.Tcp:
                         Connections[player].Send(message);
                         break;
-                    case NetworkMode.Udp:
-                        {
-                            new Thread(() =>
-                            {
-                                lock(UdpSendSocket)
-                                {
-                                    UdpSendSocket.SendTo(message.Data, Connections[player].RemoteEP);
-                                } 
-
-                            }).Start();
-                        }
-                        break;
+//                    case NetworkMode.Udp:
+//                        {
+//                            new Thread(() =>
+//                            {
+//                                lock(UdpSendSocket)
+//                                {
+//                                    UdpSendSocket.SendTo(message.Data, Connections[player].RemoteEP);
+//                                } 
+//
+//                            }).Start();
+//                        }
+//                        break;
                 }
             }
         }
@@ -171,7 +172,7 @@ namespace Cyclotron2D.Network
 
         public void MessageOtherPlayers(RemotePlayer player, NetworkMessage message, byte source)
         {
-            Debug.Assert(Mode == NetworkMode.Tcp, "This method is not supported in Udp Mode");
+            //Debug.Assert(Mode == NetworkMode.Tcp, "This method is not supported in Udp Mode");
 
             message.Source = source;
             foreach (RemotePlayer remotePlayer in Connections.Keys.Where(key => key != player))
@@ -188,38 +189,44 @@ namespace Cyclotron2D.Network
         public void MessageAll(NetworkMessage message, byte source)
         {
             message.Source = source;
-
-
-            switch (Mode)
+            foreach (RemotePlayer remotePlayer in Connections.Keys)
             {
-                case NetworkMode.Tcp:
-                    {
-                        foreach (RemotePlayer remotePlayer in Connections.Keys)
-                        {
-                            Connections[remotePlayer].Send(message);
-                        }
-                    }
-                    break;
-                case NetworkMode.Udp:
-                    {
-                        new Thread(() =>
-                        {
-                            lock (UdpSendSocket)
-                            {
-                                UdpSendSocket.Send(message.Data, message.Data.Length, SocketFlags.Broadcast);
-                            }
-                        }).Start();
-                    }
-                    break;
+                Connections[remotePlayer].Send(message);
             }
+
+//            switch (Mode)
+//            {
+//                case NetworkMode.Tcp:
+//                    {
+//                       
+//                    }
+//                    break;
+//                case NetworkMode.Udp:
+//                    {
+//                        new Thread(() =>
+//                        {
+//                            lock (UdpSendSocket)
+//                            {
+//                                UdpSendSocket.Send(message.Data, message.Data.Length, SocketFlags.Broadcast);
+//                            }
+//                        }).Start();
+//                    }
+//                    break;
+//            }
 
            
         }
 
         public RemotePlayer GetPlayer(Socket socket)
         {
-            return (from kvp in Connections where kvp.Value.TcpSocket == socket select kvp.Key).FirstOrDefault();
+            return (from kvp in Connections where kvp.Value.Socket == socket select kvp.Key).FirstOrDefault();
         }
+
+        public NetworkConnection GetConnection(int playerId)
+        {
+            return (from kvp in Connections where kvp.Key.PlayerID == playerId select kvp.Value).FirstOrDefault();
+        }
+
 
         public RemotePlayer GetPlayer(NetworkConnection connection)
         {
@@ -239,18 +246,35 @@ namespace Cyclotron2D.Network
         public void SwitchToUdp()
         {
 
-            EndPoint localEp = null;
+//            EndPoint localEp = null;
+//            RemotePlayer first = null;
+//
+//
+//            if(Connections.Count > 0)
+//            {
+//                first = Connections.Keys.ToList()[0];
+//            }
+//            
+//
+//            foreach (var kvp in Connections)
+//            {
+//                kvp.Value.SwitchToUdp(kvp.Key == first);
+                //localEp = networkConnection.LocalEP;
+//            }
+//
+//            if(localEp != null)
+//            {
+//                UdpSendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+//                UdpSendSocket.Bind(localEp);
+//                UdpSendSocket.EnableBroadcast = true;
+//            }
+
+            SetupUdpSocket();
             foreach (NetworkConnection networkConnection in Connections.Values)
             {
-                networkConnection.SwitchToUdp();
-                localEp = networkConnection.LocalEP;
+                networkConnection.SwitchToUdp(UdpSocket);
             }
 
-            if(localEp != null)
-            {
-                UdpSendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                UdpSendSocket.Bind(localEp);
-            }
 
             Mode = NetworkMode.Udp;
 
@@ -266,6 +290,76 @@ namespace Cyclotron2D.Network
             if (handler != null) handler(sender, e);
         }
 
+        #endregion
+
+        #region Private Methods
+
+        private void SetupUdpSocket()
+        {
+            if (UdpSocket != null) return;
+
+            UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+
+            if(Connections.Count > 0)
+            {
+                
+                var first = Connections.Values.ToArray()[0];
+
+                UdpSocket.Bind(first.LocalEP);
+
+                StartReceivingUdp();
+            }
+
+           
+        }
+
+        private void ReceiveCallbackUdp(IAsyncResult ar)
+        {
+            var buffer = ar.AsyncState as byte[];
+
+            Debug.Assert(buffer != null, "Did the state object for the async receive callback change type?");
+
+            EndPoint remote = new IPEndPoint(IPAddress.Any, 0);
+
+            NetworkMessage msg = null;
+
+            try
+            {
+                UdpSocket.EndReceiveFrom(ar, ref  remote);
+
+                msg = NetworkMessage.Build(buffer);
+
+                while (msg.Length > msg.Content.Length)
+                {
+                    Array.Clear(buffer, 0, NetworkConnection.MAX_BUFFER_SIZE);
+                    UdpSocket.ReceiveFrom(buffer, ref remote);
+                    msg.AddContent(buffer);
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                //disconnected, stop receive loop
+                return;
+            }
+           
+
+
+
+            StartReceivingUdp();
+
+            
+            OnMessageReceived(GetConnection(msg.Source), new MessageEventArgs(msg));
+
+        }
+
+        private void StartReceivingUdp()
+        {
+            byte[] buffer = new byte[NetworkConnection.MAX_BUFFER_SIZE];
+            EndPoint endpoint = new IPEndPoint(IPAddress.Any, 0);
+            UdpSocket.BeginReceiveFrom(buffer, 0, NetworkConnection.MAX_BUFFER_SIZE, SocketFlags.None, ref endpoint, ReceiveCallbackUdp, buffer);
+        }
+
+        
         #endregion
 
         #region Events
