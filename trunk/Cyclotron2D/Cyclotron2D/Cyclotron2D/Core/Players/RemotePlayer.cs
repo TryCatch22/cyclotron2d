@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Network;
 using Cyclotron2D.Screens.Base;
@@ -39,7 +41,7 @@ namespace Cyclotron2D.Core.Players
 
         private void OnMessageReceived(object sender, MessageEventArgs e)
         {
-
+            //handle only messages from the player this instance represents
             if (e.Message.Source != PlayerID) return;
 
             switch (e.Message.Type)
@@ -52,6 +54,12 @@ namespace Cyclotron2D.Core.Players
                         string point = e.Message.Content.Substring(sep + 1);
 
                         InvokeDirectionChange(new DirectionChangeEventArgs((Direction)int.Parse(direction), PointExtention.FromString(point)));
+                    }
+                    break;
+                case MessageType.PlayerInfoUpdate:
+                    {
+                        List<Point> vertices = e.Message.ContentLines.Select(line => PointExtention.FromString(line)).ToList();
+                        Cycle.HandleUpdateInfo(vertices);
                     }
                     break;
                 default:

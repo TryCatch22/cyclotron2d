@@ -1,4 +1,5 @@
 ﻿using System;
+using Cyclotron2D.Core;
 using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
 
@@ -21,6 +22,18 @@ namespace Cyclotron2D.Helpers
         }
 
         public Orientation Orientation { get { return Start.X == End.X ? Orientation.Vertical : Orientation.Horizontal; }}
+
+        public Direction Direction
+        {
+            get
+            {
+                if(Orientation == Orientation.Horizontal)
+                {
+                    return End.X > Start.X ? Direction.Right : Direction.Left;
+                }
+                return End.Y > Start.Y ? Direction.Down : Direction.Up; 
+            }
+        }
 
         public Point Start { get; set; }
         public Point End { get; set; }
