@@ -78,7 +78,7 @@ namespace Cyclotron2D.Screens.Main
             m_useUdpBox.LabelText = "Use Udp";
             m_useUdpBox.Label.TextColor = Color.White;
 
-            m_useUdpBox.IsChecked = false;
+            m_useUdpBox.IsChecked = true;
 
 
             CloseLobbyButton.Click += OnCloseLobbyButtonClicked;

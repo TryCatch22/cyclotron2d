@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Cyclotron2D.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -21,7 +23,9 @@ namespace Cyclotron2D {
 
 		#region Fields
 
-		private static readonly object s_lock;
+		private static readonly object s_fileLock;
+
+        private static readonly object s_msgLock;
 
 		private static readonly List<Message> s_messages;
 
@@ -32,9 +36,17 @@ namespace Cyclotron2D {
 		#region Constructor
 
 		static DebugMessages() {
-			s_lock = new object();
+			s_msgLock = new object();
+            s_fileLock = new object();
 			s_messages = new List<Message>();
 			s_logFile = "log.txt";
+
+
+		    if (File.Exists(s_logFile))
+		    {
+		        File.Delete(s_logFile);
+		    }
+
 		}
 
 		#endregion
@@ -45,7 +57,7 @@ namespace Cyclotron2D {
 
 		public static void Add(string message) {
 #if DEBUG
-			lock (s_lock)
+			lock (s_msgLock)
 				s_messages.Add(new Message(message, DisplayTime));
 #endif
 		}
@@ -57,15 +69,24 @@ namespace Cyclotron2D {
 				message.TimeLeft -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 			}
 
-			s_messages.RemoveAll(msg => msg.TimeLeft <= 0);
+		    Cleanup();
 #endif
 		}
+
+
+        private static void Cleanup()
+        {
+            List<Message> logs = s_messages.Where(msg => msg.TimeLeft <= 0).ToList();
+            s_messages.RemoveAll(msg => msg.TimeLeft <= 0);
+            WriteLog(logs);
+
+        }
 
 		public static void Draw(SpriteBatch spriteBatch, GameTime gameTime) {
 #if DEBUG
 			int i = 0;
 
-			lock (s_lock) {
+			lock (s_msgLock) {
 				foreach (var message in s_messages) {
 					var alpha = message.TimeLeft < 1f ? message.TimeLeft : 1f;
 					var pos = new Vector2(5, message.Size.Y * i + 5);
@@ -78,19 +99,28 @@ namespace Cyclotron2D {
 #endif
 		}
 
-		public static void WriteLog()
+        public static void FinishWriteLog()
+        {
+        	  WriteLog(s_messages);
+        }
+
+		private static void WriteLog(List<Message> logs)
 		{
 #if DEBUG
-			lock (s_lock)
-			{
-				using (StreamWriter writer = new StreamWriter(s_logFile, false))
-				{
-					foreach (var message in s_messages)
-					{
-						writer.WriteLine(message.ToString());
-					}
-				}
-			}
+		    (new Thread(() =>
+		                    {
+                                lock (s_fileLock)
+                                {
+                                    using (StreamWriter writer = new StreamWriter(s_logFile,true))
+                                    {
+                                        foreach (var message in logs)
+                                        {
+                                            writer.WriteLine(message.ToString());
+                                        }
+                                    }
+                                }
+		                    })).Start();
+			
 #endif
 		}
 
