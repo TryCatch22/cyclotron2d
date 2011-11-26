@@ -78,7 +78,7 @@ namespace Cyclotron2D.Screens.Main
             m_useUdpBox.LabelText = "Use Udp";
             m_useUdpBox.Label.TextColor = Color.White;
 
-            m_useUdpBox.IsChecked = true;
+            m_useUdpBox.IsChecked = false;
 
 
             CloseLobbyButton.Click += OnCloseLobbyButtonClicked;
@@ -312,7 +312,7 @@ namespace Cyclotron2D.Screens.Main
             {
                 //client side, we lost connection to the host. we can leave the lobby
                 DebugMessages.Add("Lost connection with host");
-                CancelGame();
+                CancelGame(); //todo make sure this is not trigered by hosts switch to udp
                 Game.ChangeState(GameState.MainMenu);
 
             }
@@ -393,6 +393,7 @@ namespace Cyclotron2D.Screens.Main
                             }
                         }
                         break;
+                    case MessageType.SetupGameUdp:
                     case MessageType.SetupGame:
                         {
                             GameScreen.SetupMessage = e.Message;

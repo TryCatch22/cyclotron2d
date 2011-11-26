@@ -45,12 +45,14 @@ namespace Cyclotron2D.Core
             var list = new List<StartCondition>();
             int i = 0;
 
-            int w = (int) Math.Ceiling(count/2f);
+            //int w = (int) Math.Ceiling(count/2f);
+            int w = 3;
 
             int dx = (Game.GraphicsDevice.Viewport.Bounds.Width / gridRatio) / w ;
             int dy = (Game.GraphicsDevice.Viewport.Bounds.Height / gridRatio) / 2;
+            
             List<int> p = new List<int>();
-            for (int j = 0; j < count; j++)
+            for (int j = 0; j < 2*w; j++)
             {
                 p.Add(j);
             }

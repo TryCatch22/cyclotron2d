@@ -1,10 +1,20 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace Cyclotron2D.Network 
+namespace Cyclotron2D.Network
 {
+
+
+    internal class AsyncSocketState
+    {
+        public Socket Socket { get; set; }
+        public byte[] Buffer { get; set; }
+        public EndPoint RemoteEP { get; set; }
+
+    }
 
     /// <summary>
     /// little helper class that checks if a socket is still connected. 
@@ -13,7 +23,7 @@ namespace Cyclotron2D.Network
     /// </summary>
     public static class SocketProbe
     {
-        public static bool IsConnected(Socket socket)
+        public static bool IsConnectedTcp(Socket socket)
         {
             if (socket != null && socket.Connected)
             {
@@ -34,7 +44,7 @@ namespace Cyclotron2D.Network
     /// <summary>
     /// Wrapper for Socket that handles received messages on a seperate thread.
     /// </summary>
-	public class NetworkConnection
+    public class NetworkConnection
     {
 
         #region Constants
@@ -45,27 +55,17 @@ namespace Cyclotron2D.Network
 
         #region Properties
 
-        public Socket TcpSocket { get; private set; }
+        public Socket Socket { get; private set; }
 
-        public Socket UdpListenSocket { get; private set; }
+//        public static Socket UdpListenSocket { get; private set; }
 
-        public bool IsConnected { get { return SocketProbe.IsConnected(TcpSocket); } }
+        public bool IsConnected { get { return SocketProbe.IsConnectedTcp(Socket); } }
 
         public EndPoint LocalEP { get; private set; }
 
         public EndPoint RemoteEP { get; private set; }
 
         public NetworkMode Mode { get; private set; }
-
-        #endregion
-
-        #region Fields
-
-        private bool m_stayAlive;
-
-        private static readonly object MessageHandleLock = new Object();
-
-        private Thread m_receivingThread;
 
         #endregion
 
@@ -77,12 +77,13 @@ namespace Cyclotron2D.Network
         /// <param name="socket">an already connected socket</param>
         public NetworkConnection(Socket socket)
         {
-            TcpSocket = socket;
-            if(SocketProbe.IsConnected(socket))
+            Socket = socket;
+            if (SocketProbe.IsConnectedTcp(socket))
             {
 
-                LocalEP = TcpSocket.LocalEndPoint;
-                RemoteEP = TcpSocket.RemoteEndPoint;
+                LocalEP = Socket.LocalEndPoint;
+                RemoteEP = Socket.RemoteEndPoint;
+               // ClearReceiveBuffer();
                 StartReceiving();
             }
             Mode = NetworkMode.Tcp;
@@ -113,34 +114,36 @@ namespace Cyclotron2D.Network
 
         private void InvokeMessageReceived(MessageEventArgs e)
         {
-            lock (MessageHandleLock)
-            {
-                EventHandler<MessageEventArgs> handler = MessageReceived;
-                if (handler != null) handler(this, e);
-            }
+            EventHandler<MessageEventArgs> handler = MessageReceived;
+            if (handler != null) handler(this, e);
         }
 
         #endregion
 
         #region Public Methods
 
-        public void SwitchToUdp()
+        public void SwitchToUdp(Socket UdpSocket)
         {
-//
-//            LocalEP = TcpSocket.LocalEndPoint;
-//            RemoteEP = TcpSocket.RemoteEndPoint;
-
             Disconnect();
+
+            Thread.Sleep(10);
 
             Mode = NetworkMode.Udp;
 
-            UdpListenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-            UdpListenSocket.Bind(LocalEP);
-
-            ListenUdp();
+            Socket = UdpSocket;
 
         }
+
+//        public static void KillUdpListen()
+//        {
+//            if(UdpListenSocket != null)
+//            {
+//                UdpListenSocket.Close();
+//                UdpListenSocket = null;
+//            }
+//        }
+
+
 
 
         /// <summary>
@@ -149,22 +152,21 @@ namespace Cyclotron2D.Network
         /// <param name="message"></param>
         public void Send(NetworkMessage message)
         {
-            if (TcpSocket != null)
+            switch (Mode)
             {
-                new Thread(() =>
-                {
-                    //so that second messages on the socket have to wait
-                    lock (this)
+                case NetworkMode.Tcp:
                     {
-                        TcpSocket.Send(message.Data);
+                        Socket.BeginSend(message.Data, 0, message.Data.Length, SocketFlags.None, (ar => Socket.EndSend(ar)), null);
                     }
-                }).Start();
-            }
-            else
-            {
-                throw new InvalidOperationException("Can only use this method in TCP mode");
+                    break;
+                case NetworkMode.Udp:
+                    {
+                        Socket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, (ar => Socket.EndSend(ar)), null);
+                    }
+                    break;
             }
         }
+
 
 
         /// <summary>
@@ -174,31 +176,31 @@ namespace Cyclotron2D.Network
         {
 
             bool connected = false;
-            if (TcpSocket != null && TcpSocket.Connected)
-            {              
+            if (Socket != null && Socket.Connected)
+            {
                 throw new AlreadyConnectedException("Socket is Already Connected.");
             }
 
             try
             {
-                TcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                TcpSocket.Connect(address, GameLobby.GAME_PORT);
+                Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                Socket.Connect(address, GameLobby.GAME_PORT);
 
-                Print("Client Connected");
+                DebugMessages.Add("Client Connected");
 
                 connected = true;
 
 
-                LocalEP = TcpSocket.LocalEndPoint;
-                RemoteEP = TcpSocket.RemoteEndPoint;
+                LocalEP = Socket.LocalEndPoint;
+                RemoteEP = Socket.RemoteEndPoint;
 
-
+               // ClearReceiveBuffer();
                 StartReceiving();
 
             }
             catch (Exception ex)
             {
-                Print(ex.Message);
+                DebugMessages.Add(ex.Message);
             }
 
             return connected;
@@ -207,146 +209,102 @@ namespace Cyclotron2D.Network
 
         public void Disconnect()
         {
-            if (m_receivingThread == null) return;
-
-            m_stayAlive = false;
-            m_receivingThread.Abort();
-            m_receivingThread = null;
-            if (TcpSocket != null) TcpSocket.Close();
-            TcpSocket = null;
-
+            if (Socket != null)
+            {
+                Socket.Close();
+            }
+            
         }
 
         #endregion
 
         #region Private Methods
 
-        #region Receive Thread
-
-        /// <summary>
-        /// When connected to a game lobby, listens to messages sent by the lobby.
-        /// Runs until the thread dies.
-        /// </summary>
-        private void Receive()
-        {
-
-            byte[] buffer = new byte[MAX_BUFFER_SIZE];
-            while (true)
-            {
-                //Wait for messages
-                try
-                {
-                    while (m_stayAlive && TcpSocket.Available == 0) Thread.Yield();
-                }
-                catch (ObjectDisposedException)
-                {
-                   Disconnect();
-                    return;
-                }
-
-               
-
-                if (!m_stayAlive) break;//exit and let thread die
-
-                TcpSocket.Receive(buffer);
-
-                NetworkMessage message = NetworkMessage.Build(buffer);
-
-                while (message.Length > message.Content.Length)
-                {
-                    Array.Clear(buffer, 0, MAX_BUFFER_SIZE);
-                    TcpSocket.Receive(buffer);
-                    message.AddContent(buffer);
-                }
-
-                if (message.Type == MessageType.Debug)
-                {
-                    DebugMessages.Add(message.Content);
-                }
-
-                else
-                {
-                    new Thread(() => InvokeMessageReceived(new MessageEventArgs(message))).Start();
-                }
-
-                Array.Clear(buffer, 0, MAX_BUFFER_SIZE);
-            }
-        }
-
-        #endregion
-
-
-        private void ListenUdp()
-        {
-            byte[] buffer = new byte[MAX_BUFFER_SIZE];
-            EndPoint remote = RemoteEP;
-            UdpListenSocket.BeginReceiveFrom(buffer, 0, buffer.Length, SocketFlags.Broadcast | SocketFlags.None,
-                                             ref remote, OnUdpReceive, buffer);
-        }
-
-        private void OnUdpReceive(IAsyncResult ar)
-        {
-            var buffer = ar.AsyncState as byte[];
-
-            EndPoint remote = RemoteEP;
-
-            UdpListenSocket.EndReceiveFrom(ar, ref  remote);
-
-            var msg = NetworkMessage.Build(buffer);
-
-            buffer = new byte[MAX_BUFFER_SIZE];
-
-            while (msg.Length > msg.Content.Length)
-            {
-                UdpListenSocket.ReceiveFrom(buffer, 0, buffer.Length, SocketFlags.Broadcast | SocketFlags.None, ref remote);
-                msg.AddContent(buffer);
-            }
-
-            InvokeMessageReceived(new MessageEventArgs(msg));
-
-        }
-
+     
         private void StartReceiving()
         {
-            m_receivingThread = new Thread(Receive) { IsBackground = true };
-            m_stayAlive = true;
+            Debug.Assert(Mode == NetworkMode.Tcp, "wtf wrong mode on connection");
+            byte[] buffer = new byte[MAX_BUFFER_SIZE];
 
-            ClearReceiveBuffer();
-            m_receivingThread.Start();
-        }
-
-        /// <summary>
-        /// Temporary Debug Print Method
-        /// </summary>
-        /// <param name="msg"></param>
-        private static void Print(String msg)
-        {
-            Console.WriteLine(msg);
-            DebugMessages.Add(msg);
-        }
-
-        /// <summary>
-        /// Clears the receive buffer of the socket.
-        /// </summary>
-        private void ClearReceiveBuffer()
-        {
-            if (TcpSocket.Available > 0)
+            try
             {
-                Byte[] throwaway = new Byte[TcpSocket.Available];
-                TcpSocket.Receive(throwaway);
+//                switch (Mode)
+//                {
+//                    case NetworkMode.Tcp:
+//                        {
+                            Socket.BeginReceive(buffer, 0, MAX_BUFFER_SIZE, SocketFlags.None, ReceiveCallback, buffer);
+//                        }
+//                        break;
+//                    case NetworkMode.Udp:
+//                        {
+//                           /* var endpoint = RemoteEP;
+//                            Socket.BeginReceiveFrom(buffer, 0, MAX_BUFFER_SIZE, SocketFlags.None, ref endpoint, ReceiveCallback, buffer);*/
+//                        }
+//                        break;
+//                }
             }
+            catch (ObjectDisposedException)
+            {
+                //disconnected, stop receive loop
+                return;
+            }
+        }
+
+       
+
+        private void ReceiveCallback(IAsyncResult ar)
+        {
+
+            var buffer = ar.AsyncState as byte[];
+
+            Debug.Assert(buffer != null, "Did the state object for the async receive callback change type?");
+
+            NetworkMessage msg = null;
+
+            try
+            {
+                Socket.EndReceive(ar);
+
+                msg = NetworkMessage.Build(buffer);
+
+                while (msg.Length > msg.Content.Length)
+                {
+                    Array.Clear(buffer, 0, MAX_BUFFER_SIZE);
+                    Socket.Receive(buffer);
+                    msg.AddContent(buffer);
+                }
+
+            }
+            catch (ObjectDisposedException)
+            {
+                //disconnected, stop receive loop
+                return;
+            }
+            catch(SocketException ex)
+            {
+                //forcibly disconnected from remote host?
+                DebugMessages.Add(ex.Message);
+                return;
+            }
+
+            
+
+            StartReceiving();
+
+            InvokeMessageReceived(new MessageEventArgs(msg));
         }
 
         #endregion
 
-	}
+    }
 
 
     public class AlreadyConnectedException : Exception
     {
-        public AlreadyConnectedException(string message):base(message)
+        public AlreadyConnectedException(string message)
+            : base(message)
         {
-            
+
         }
     }
 }

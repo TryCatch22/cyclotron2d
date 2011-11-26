@@ -29,11 +29,6 @@ namespace Cyclotron2D.State
         /// </summary>
         public MainScreen ActiveScreen { get; private set; }
 
-//        /// <summary>
-//        /// was needed for initializing players outside of the game
-//        /// </summary>
-//        public GameScreen GameScreen { get; private set; }
-
         /// <summary>
         /// Screen with Focus (Topmost screen)
         /// </summary>

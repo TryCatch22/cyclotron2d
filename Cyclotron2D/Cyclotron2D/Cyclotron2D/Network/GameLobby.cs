@@ -139,7 +139,7 @@ namespace Cyclotron2D.Network {
 
             lock (Clients)
             {
-                Clients.RemoveAll(socket => !SocketProbe.IsConnected(socket));
+                Clients.RemoveAll(socket => !SocketProbe.IsConnectedTcp(socket));
             }
         }
 
