@@ -10,7 +10,8 @@ namespace Cyclotron2D.UI.UIElements
         protected UIElement(Game game, Screen screen) : base(game, screen)
         {
             Background = Color.Transparent;
-        }
+			UpdateOrder = 200; //generally update ui after the rest
+		}
 
         public Rectangle Rect { get; set; }
 
@@ -22,7 +23,6 @@ namespace Cyclotron2D.UI.UIElements
         {
             base.HandleInput(gameTime);
             IsMouseOver = Rect.Contains(Game.InputState.MousePosition);
-            UpdateOrder = 200; //generally update ui after the rest
         }
 
         public override void Draw(GameTime gameTime)

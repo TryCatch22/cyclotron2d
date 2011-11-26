@@ -2,6 +2,7 @@
 using Cyclotron2D.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO;
 
 namespace Cyclotron2D {
 	internal class DebugMessages {
@@ -12,11 +13,19 @@ namespace Cyclotron2D {
 
 		#endregion
 
+		#region Properties
+
+		public static bool LogMessages { get; set; }
+
+		#endregion
+
 		#region Fields
 
 		private static readonly object s_lock;
 
 		private static readonly List<Message> s_messages;
+
+		private static string s_logFile;
 
 		#endregion
 
@@ -25,6 +34,7 @@ namespace Cyclotron2D {
 		static DebugMessages() {
 			s_lock = new object();
 			s_messages = new List<Message>();
+			s_logFile = "log.txt";
 		}
 
 		#endregion
@@ -68,6 +78,22 @@ namespace Cyclotron2D {
 #endif
 		}
 
+		public static void WriteLog()
+		{
+#if DEBUG
+			lock (s_lock)
+			{
+				using (StreamWriter writer = new StreamWriter(s_logFile, false))
+				{
+					foreach (var message in s_messages)
+					{
+						writer.WriteLine(message.ToString());
+					}
+				}
+			}
+#endif
+		}
+
 		#endregion
 	}
 
@@ -84,6 +110,8 @@ namespace Cyclotron2D {
 		public float TimeLeft { get; set; }
 
 		public Vector2 Size { get { return Art.Font.MeasureString(Text); } }
+
+		public override string ToString() { return Text; }
 	}
 
 	#endregion

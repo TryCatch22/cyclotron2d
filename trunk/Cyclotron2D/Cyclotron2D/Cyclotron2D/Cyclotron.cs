@@ -46,7 +46,7 @@ namespace Cyclotron2D
 
         public Cyclotron()
         {
-
+			DebugMessages.LogMessages = true;
             IsFixedTimeStep = true;
             Content.RootDirectory = "Content";
 
@@ -195,6 +195,7 @@ namespace Cyclotron2D
                 ScreenManager = null;
                 InputState.Dispose();
                 InputState = null;
+				DebugMessages.WriteLog();
             }
             base.Dispose(disposing);
         }
