@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cyclotron2D.Graphics;
@@ -39,7 +40,8 @@ namespace Cyclotron2D {
 			s_msgLock = new object();
             s_fileLock = new object();
 			s_messages = new List<Message>();
-			s_logFile = "log.txt";
+			s_logFile = ("log-"+@DateTime.Now.ToString("s")+".txt").Replace(':', '.');
+
 
 
 		    if (File.Exists(s_logFile))
@@ -111,7 +113,7 @@ namespace Cyclotron2D {
 		                    {
                                 lock (s_fileLock)
                                 {
-                                    using (StreamWriter writer = new StreamWriter(s_logFile,true))
+                                    using (StreamWriter writer = new StreamWriter(@s_logFile,true))
                                     {
                                         foreach (var message in logs)
                                         {
