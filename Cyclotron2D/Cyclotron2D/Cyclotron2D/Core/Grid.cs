@@ -198,7 +198,7 @@ namespace Cyclotron2D.Core
 				// Because we define velocity solely in terms of direction (and not whether the cycle is
 				// actually moving), we need to check whether the game has started in order to determine 
 				// if the cycle is moving.
-				var cycleVelocity = (gameTime.TotalGameTime < cycle.GameStart) ? Vector2.Zero : cycle.Velocity;
+				var cycleVelocity = (gameTime.TotalGameTime < cycle.GameStart || !cycle.Enabled) ? Vector2.Zero : cycle.Velocity;
 
 				var velocities = cycleVelocities[cycle];
 				velocities.Enqueue(cycleVelocity);
