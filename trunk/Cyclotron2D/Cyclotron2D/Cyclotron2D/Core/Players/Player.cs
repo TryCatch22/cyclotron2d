@@ -80,15 +80,17 @@ namespace Cyclotron2D.Core.Players
             {
                 SurvivalTime = gameTime.TotalGameTime - Cycle.GameStart;
 
-                if (Game.IsState(GameState.PlayingAsClient | GameState.PlayingAsHost))
-                {
-                    if (!Cycle.Enabled && !Cycle.Dead)
-                    {
-                        if (gameTime.TotalGameTime > Cycle.FeigningDeathStart + new TimeSpan(CollisionNotifier.MaxAckDelay.Ticks * 2))
-                        {
-                            Cycle.Revive();
-                        }
+                
 
+            }
+
+            if (Cycle != null && gameTime.TotalGameTime > Cycle.GameStart && Game.IsState(GameState.PlayingAsClient | GameState.PlayingAsHost))
+            {
+                if (!Cycle.Enabled && !Cycle.Dead)
+                {
+                    if (gameTime.TotalGameTime > Cycle.FeigningDeathStart + new TimeSpan(GameScreen.CollisionNotifier.MaxAckDelay.Ticks * 2))
+                    {
+                        Cycle.Revive();
                     }
 
                 }

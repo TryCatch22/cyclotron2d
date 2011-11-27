@@ -118,6 +118,8 @@ namespace Cyclotron2D.Screens.Main
                             {
                                 string content = (DateTime.UtcNow + new TimeSpan(0, 0, 0, 2)).ToString("r");
                                 Game.Communicator.MessageAll(new NetworkMessage(MessageType.AllReady, content));
+                                m_startTimeUtc = DateTime.Parse(content);
+
                             }
 
                         }
