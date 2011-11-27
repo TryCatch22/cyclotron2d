@@ -30,6 +30,8 @@ namespace Cyclotron2D {
 
 		private static readonly List<Message> s_messages;
 
+	    private static readonly Queue<string> s_logMessages;
+
 		private static string s_logFile;
 
 		#endregion
@@ -37,17 +39,42 @@ namespace Cyclotron2D {
 		#region Constructor
 
 		static DebugMessages() {
+#if DEBUG
+
 			s_msgLock = new object();
             s_fileLock = new object();
 			s_messages = new List<Message>();
-			s_logFile = ("log-"+@DateTime.Now.ToString("s")+".txt").Replace(':', '.');
+            s_logMessages = new Queue<string>();
+            
+            SetupLog();
 
 		    if (File.Exists(s_logFile))
 		    {
 		        File.Delete(s_logFile);
 		    }
-
+#endif
 		}
+
+
+        private static void SetupLog()
+        {
+             s_logFile = @"logs\";
+
+            if(!Directory.Exists(s_logFile))
+            {
+                Directory.CreateDirectory(s_logFile);
+            }
+
+		    s_logFile += DateTime.Now.ToString("d").Replace('/', '.') + @"\";
+
+            if (!Directory.Exists(s_logFile))
+            {
+                Directory.CreateDirectory(s_logFile);
+            }
+
+
+		    s_logFile += "log_" + DateTime.Now.ToString("T").Replace(':', '.').Replace(' ', '_') + ".txt";
+        }
 
 		#endregion
 
@@ -59,28 +86,31 @@ namespace Cyclotron2D {
 #if DEBUG
 			lock (s_msgLock)
 				s_messages.Add(new Message(message, DisplayTime));
+
+            AddLogOnly(message);
 #endif
 		}
 
+        public static void AddLogOnly(string message)
+        {
+#if DEBUG
+
+            if (LogMessages)
+            {
+                s_logMessages.Enqueue(message);
+            }
+#endif
+        }
 
 		public static void Update(GameTime gameTime) {
 #if DEBUG
 			foreach (var message in s_messages) {
 				message.TimeLeft -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 			}
-
-		    Cleanup();
+            s_messages.RemoveAll(msg => msg.TimeLeft <= 0);
 #endif
 		}
 
-
-        private static void Cleanup()
-        {
-            List<Message> logs = s_messages.Where(msg => msg.TimeLeft <= 0).ToList();
-            s_messages.RemoveAll(msg => msg.TimeLeft <= 0);
-            if(LogMessages)WriteLog(logs);
-
-        }
 
 		public static void Draw(SpriteBatch spriteBatch, GameTime gameTime) {
 #if DEBUG
@@ -99,33 +129,28 @@ namespace Cyclotron2D {
 #endif
 		}
 
-        public static void FinishWriteLog()
-        {
-        	  if(LogMessages)WriteLog(s_messages);
-        }
-
-		private static void WriteLog(List<Message> logs)
+		public static void FlushLog()
 		{
 #if DEBUG
 			if (!LogMessages)
 				return;
 
 		    (new Thread(() =>
-		                    {
-                                lock (s_fileLock)
-                                {
-                                    using (StreamWriter writer = new StreamWriter(@s_logFile,true))
-                                    {
-                                        foreach (var message in logs)
-                                        {
-                                            writer.WriteLine(message.ToString());
-                                        }
-                                    }
-                                }
-		                    })).Start();
-			
+		        {
+                    lock (s_fileLock)
+                    {
+                        using (StreamWriter writer = new StreamWriter(@s_logFile,true))
+                        {
+                            while(s_logMessages.Count > 0)
+                            {
+                                writer.WriteLine(s_logMessages.Dequeue());
+                            }
+                        }
+                    }
+		        })).Start();
+
 #endif
-		}
+        }
 
 		#endregion
 	}

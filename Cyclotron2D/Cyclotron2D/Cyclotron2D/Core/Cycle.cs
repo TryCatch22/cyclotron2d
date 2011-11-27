@@ -27,12 +27,8 @@ namespace Cyclotron2D.Core
     {
         #region Fields
 
-        // We only turn on grid lines, so if the input is received early, we have to keep track of it.
-        public Point? NextTurnIntersection { get; private set; }
         private Player m_player;
         private Direction m_scheduledDirection;
-
-
 
         /// <summary>
         /// The list of positions on the map at which we've made turns.
@@ -49,6 +45,10 @@ namespace Cyclotron2D.Core
 
         #region Properties
 
+
+        // We only turn on grid lines, so if the input is received early, we have to keep track of it.
+        public Point? NextTurnIntersection { get; private set; }
+
         public float Speed { get { return (Screen as GameScreen).GameSettings.CycleSpeed.Value; } }
 
         public bool AllowSuicide { get { return (Screen as GameScreen).GameSettings.AllowSuicide.Value; } }
@@ -57,6 +57,10 @@ namespace Cyclotron2D.Core
         /// Screen position of Head in Pixels
         /// </summary>
         public Point Position { get; set; }
+
+        public bool Dead { get; set; }
+
+        public TimeSpan FeigningDeathStart { get; private set; }
 
         public Color TrailColor { get; set; }
 
@@ -103,13 +107,16 @@ namespace Cyclotron2D.Core
         /// </summary>
         public int MaxTailLength { get { return (Screen as GameScreen).GameSettings.MaxTailLength.Value; } }
 
-        private GameScreen GameScreen { get { return Screen as GameScreen; } }
+
+        private List<Animation> m_explosionsList;
+
+     //   private GameScreen GameScreen { get { return Screen as GameScreen; } }
 
         #endregion
 
         #region Constructor
 
-        public Cycle(Game game, Screen screen, Grid grid, StartCondition info, Player player)
+        public Cycle(Game game, Screen screen, Grid grid, StartCondition info, Player player, List<Animation> explosionsList)
             : base(game, screen)
         {
             GameStart = TimeSpan.MaxValue;
@@ -119,6 +126,7 @@ namespace Cyclotron2D.Core
             Position = grid.ToWorldCoords(info.Position);
             Direction = info.Dir;
             m_player = player;
+            m_explosionsList = explosionsList;
             //add start position
             m_vertices.Add(Position);
         }
@@ -147,6 +155,13 @@ namespace Cyclotron2D.Core
 
         public void HandleUpdateInfo(List<Point> vertices)
         {
+
+            if(!Enabled)
+            {
+                //we are currently feigning death, and not updating the cycle for the moment
+                return;
+            }
+
             Point last = m_vertices[m_vertices.Count - 1];
             int i = 0;
             while(i < vertices.Count && vertices[i] != last) i++;
@@ -181,42 +196,30 @@ namespace Cyclotron2D.Core
                     }
                     break;
                 case 3:
-                    {
-                        DebugMessages.Add(" Missed a turn from player "+m_player.PlayerID+" trying to catch up ...");
-                        int length =(int)Position.Distance(vertices[3]);
-
-                        var line = new Line(vertices[1], vertices[0]);
-
-                        int offset = (int) (length - vertices[0].Distance(vertices[1]) - vertices[1].Distance(vertices[2]) - vertices[2].Distance(vertices[3]));
-
-                        m_vertices.Add(vertices[2]);
-                        m_vertices.Add(vertices[1]);
-
-                        Position = offset > 0 ? vertices[1].AddOffset(line.Direction, offset) : vertices[0].AddOffset(line.Direction, m_averageLag);
-
-
-                        Direction = line.Direction;
-
-
-                    }
-                    break;
                 case 4:
                     {
-                        DebugMessages.Add("Missed two turns from player " + m_player.PlayerID + " pls lag less");
-                        int length = (int)Position.Distance(vertices[4]);
+                        string msg = i == 3 ? "Missed a turn from " + m_player + " trying to catch up ..." 
+                                            : "Missed two turns from " + m_player + " pls lag less";
+
+                        DebugMessages.Add(msg);
+                        int length =(int)Position.Distance(vertices[i]);
 
                         var line = new Line(vertices[1], vertices[0]);
 
-                        int offset = (int)(length - vertices[0].Distance(vertices[1]) - vertices[1].Distance(vertices[2]) - vertices[2].Distance(vertices[3]) - vertices[3].Distance(vertices[4]));
+                        int offset = length;
 
-                        m_vertices.Add(vertices[3]);
-                        m_vertices.Add(vertices[2]);
-                        m_vertices.Add(vertices[1]);
+                        for (int j = 0; j < i; j++)
+                        {
+                            offset -= (int)vertices[j].Distance(vertices[j + 1]);
+                            if(i-j-1 > 0)m_vertices.Add(vertices[i-j-1]);
+                        }
 
                         Position = offset > 0 ? vertices[1].AddOffset(line.Direction, offset) : vertices[0].AddOffset(line.Direction, m_averageLag);
 
-                        
+
                         Direction = line.Direction;
+
+
                     }
                     break;
                 default:
@@ -309,8 +312,6 @@ namespace Cyclotron2D.Core
                      if(lines.Count > 0)lines.RemoveAt(lines.Count - 1);
                      if (lines.Count > 0) lines.RemoveAt(lines.Count - 1);
                 }
-
-              //  headlineCollision = hasCollision;
 
 
                 if (lines.Aggregate(false, (current, line) => current || Line.FindIntersection(line, myline) != IntersectionType.None))
@@ -414,9 +415,58 @@ namespace Cyclotron2D.Core
             m_scheduledDirection = direction;
         }
 
-        public void FakeDeath()
+        /// <summary>
+        /// to kill a player and update the clients with a final position info
+        /// </summary>
+        /// <param name="vertices"></param>
+        public void Kill(List<Point> vertices)
         {
-            
+            Point last = m_vertices[m_vertices.Count - 1];
+            int i = 0;
+            while (i < vertices.Count && vertices[i] != last) i++;
+
+            if(i > vertices.Count)
+            {
+                DebugMessages.Add(m_player + " SERIOUS Problem on kill");
+            }
+            else if (i > 1)
+            {
+                for (int j = i-1; j > 0; j--)
+                {
+                    m_vertices.Add(vertices[j]);
+                }
+
+                Position = vertices[0];
+            }
+            else if (i == 1)
+            {
+                Position = vertices[0];
+            }
+
+            Kill();
+
+        }
+
+        /// <summary>
+        /// final kill for confirmed dead players
+        /// </summary>
+        public void Kill()
+        {
+            Dead = true;
+            Enabled = false;
+            CreateExplosion();
+
+            DebugMessages.Add(m_player + " confirmed dead.");
+        }
+
+        /// <summary>
+        /// used for ambiguous collisions while waiting for revive or death confirmation
+        /// </summary>
+        public void FeignDeath()
+        {
+            FeigningDeathStart = Game.GameTime.TotalGameTime;
+            Enabled = false;
+            DebugMessages.Add(m_player + " feigns death.");
         }
 
 		public override void Draw(GameTime gameTime)
@@ -433,7 +483,7 @@ namespace Cyclotron2D.Core
 
 			DrawLine(m_vertices.Last(), Position);
 
-			if (Enabled)
+			if (!Dead)
 				Game.SpriteBatch.Draw(Art.Bike, Position.ToVector(), null, BikeColor, (float)Math.PI + Velocity.Orientation(), new Vector2(Art.Bike.Width / 2, Art.Bike.Height / 2), 1f, SpriteEffects.None, 0);
 		}
 
@@ -485,20 +535,33 @@ namespace Cyclotron2D.Core
             return false;
         }
 
-		public Animation CreateExplosion()
-		{
-			return new Animation(Game, Screen, Art.ExplosionSheet, new Point(3, 4))
-			{
-				Position = Position.ToVector(),
-				Color = BikeColor,
-		        Scale = 2f,
-                UpdateDelay = new TimeSpan(0, 0, 0, 0, 30)
-			};
-		}
+        public void Revive()
+        {
+            if (!Dead && !Enabled)
+            {
+                Enabled = true;
+                DebugMessages.Add(m_player + " Reviving");
+            }
+
+        }
+
+	
 
         #endregion
 
         #region Private Methods
+
+
+        private void CreateExplosion()
+        {
+            m_explosionsList.Add(new Animation(Game, Screen, Art.ExplosionSheet, new Point(3, 4))
+            {
+                Position = Position.ToVector(),
+                Color = BikeColor,
+                Scale = 2f,
+                UpdateDelay = new TimeSpan(0, 0, 0, 0, 30)
+            });
+        }
 
         private Vector2 DirectionToVelocity(Direction direction)
         {
@@ -585,13 +648,10 @@ namespace Cyclotron2D.Core
 
                 Direction = m_scheduledDirection;
 
-            //    if (elapsedDistance > 0)
-            //    {
-                    m_vertices.Add(NextTurnIntersection.Value);
-              //  }
+
+                m_vertices.Add(NextTurnIntersection.Value);
 
                 Position = NextTurnIntersection.Value.AddOffset(m_scheduledDirection, elapsedDistance);
-              //  m_vertices.Add(Position);
 
                 
             }
@@ -690,56 +750,7 @@ namespace Cyclotron2D.Core
         }
 
         #endregion
-    }
 
-    public enum CollisionType
-    {
-        Wall,
-        Self,
-        Player,
-        Suicide
-    }
-
-    public class CycleCollisionEventArgs : EventArgs
-    {
-        public CollisionType Type { get; private set; }
-
-        public Player Killer { get; private set; }
-
-        public Player Victim { get; private set; }
-
-        public bool AmbiguousCollision { get; private set; }
-
-        public CycleCollisionEventArgs(CollisionType type, Player killer, bool ambiguous, Player victim)
-        {
-            Type = type;
-            Killer = killer;
-            Victim = victim;
-            AmbiguousCollision = ambiguous;
-        }
-    }
-
-
-    public static class PointOffset
-    {
-
-
-        public static Point AddOffset(this Point p, Direction dir, int dist)
-        {
-            switch (dir)
-            {
-                case Direction.Up:
-                    return new Point(p.X, p.Y - dist);
-                case Direction.Down:
-                    return new Point(p.X, p.Y + dist);
-                case Direction.Left:
-                    return new Point(p.X - dist, p.Y);
-                case Direction.Right:
-                    return new Point(p.X + dist, p.Y);
-                default:
-                    throw new Exception("Is there a 5th direction?");
-            }
-        }
     }
 
 }

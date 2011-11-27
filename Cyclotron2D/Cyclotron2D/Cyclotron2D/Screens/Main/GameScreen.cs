@@ -43,6 +43,8 @@ namespace Cyclotron2D.Screens.Main
 
         private bool m_gameStarted;
 
+        private DateTime m_startTimeUtc;
+
         public GameScreen(Game game)
             : base(game, GameState.PlayingAsClient | GameState.PlayingSolo | GameState.PlayingAsHost)
         {
@@ -54,12 +56,17 @@ namespace Cyclotron2D.Screens.Main
             isGameSetup = false;
         }
 
+        public Player GetPlayer(int id)
+        {
+            return m_engine.GetPlayer(id);
+        }
+
 
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            if (isGameSetup && ActivePlayers.Aggregate(true, (ready, player) => ready && player.Ready))
+            if (isGameSetup && ActivePlayers.Aggregate(true, (ready, player) => ready && player.Ready) && DateTime.UtcNow > m_startTimeUtc)
             {
                 StartGame();
             }
@@ -101,7 +108,8 @@ namespace Cyclotron2D.Screens.Main
                             //if all players are ready
                             if (ActivePlayers.Aggregate(true, (ready, p) => ready && p.Ready))
                             {
-                                Game.Communicator.MessageAll(new NetworkMessage(MessageType.AllReady, ""));
+                                string content = (DateTime.UtcNow + Game.Communicator.AverageRtt + new TimeSpan(0, 0, 0, 0, 500)).ToFileTimeUtc().ToString();
+                                Game.Communicator.MessageAll(new NetworkMessage(MessageType.AllReady, content));
                             }
 
                         }
@@ -117,6 +125,7 @@ namespace Cyclotron2D.Screens.Main
                             {
                                 activePlayer.Ready = true;
                             }
+                            m_startTimeUtc = DateTime.FromFileTimeUtc(long.Parse(e.Message.Content));
                         }
                     }
                     break;
@@ -202,6 +211,14 @@ namespace Cyclotron2D.Screens.Main
                         Debug.Assert(SetupMessage != null, "there should be a setup message ready for client play.");
 
                         UseUdp = SetupMessage.Type == MessageType.SetupGameUdp;
+                        if(UseUdp)
+                        {
+                            DebugMessages.AddLogOnly("Joining Udp Game");
+                        }
+                        else
+                        {
+                            DebugMessages.AddLogOnly("Joining Tcp Game");
+                        }
 
                         var lines = SetupMessage.ContentLines;
                         var localEp = Game.Communicator.Connections[Game.Communicator.Host].LocalEP;

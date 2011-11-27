@@ -1,7 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Cyclotron2D.Components;
+using Cyclotron2D.Helpers;
+using Cyclotron2D.Network;
 using Cyclotron2D.Screens.Base;
 using Cyclotron2D.Screens.Main;
+using Cyclotron2D.State;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Core.Players
@@ -18,8 +23,8 @@ namespace Cyclotron2D.Core.Players
         protected Player(Game game, Screen screen) : base(game, screen)
         {
             Ready = false;
+            SubscribeConnection();
         }
-
 
         protected GameScreen GameScreen { get { return Screen as GameScreen; } }
 
@@ -65,6 +70,7 @@ namespace Cyclotron2D.Core.Players
             Cycle = cycle;
 
             SubscribeCycle();
+
         }
 
         public override void Update(GameTime gameTime)
@@ -73,13 +79,66 @@ namespace Cyclotron2D.Core.Players
             if(Cycle != null && Cycle.Enabled && gameTime.TotalGameTime > Cycle.GameStart)
             {
                 SurvivalTime = gameTime.TotalGameTime - Cycle.GameStart;
+
+                if (Game.IsState(GameState.PlayingAsClient | GameState.PlayingAsHost))
+                {
+                    if (!Cycle.Enabled && !Cycle.Dead)
+                    {
+                        if (gameTime.TotalGameTime > Cycle.FeigningDeathStart + new TimeSpan(CollisionNotifier.MaxAckDelay.Ticks * 2))
+                        {
+                            Cycle.Revive();
+                        }
+
+                    }
+
+                }
+
             }
 
+
+          
         }
 
         protected virtual void OnCycleEnabledChanged(object sender, EventArgs e)
         {
         }
+
+        private void SubscribeConnection()
+        {
+            Game.Communicator.MessageReceived += OnMessageReceived;
+        }
+
+        protected virtual void OnMessageReceived(object sender, MessageEventArgs e)
+        {
+            if(e.Message.Type == MessageType.RealDeath)
+            {
+                int id = int.Parse(e.Message.ContentLines[0]);
+                if (PlayerID == id)
+                {
+                    var authority = GameScreen.GetPlayer(e.Message.Source) as RemotePlayer;
+                    if(authority != null)
+                    {
+                        Game.Communicator.MessagePlayer(authority, new NetworkMessage(MessageType.AckDeath, id.ToString()));
+                    }
+
+                    if(!Cycle.Dead)
+                    {
+                        var lines = e.Message.ContentLines;
+                        lines.RemoveAt(0);
+
+                        List<Point> vertices = lines.Select(PointExtention.FromString).ToList();
+
+                        Cycle.Kill(vertices);
+                    }
+                }
+            }
+        }
+
+        private void UnsubscribeConnection()
+        {
+            Game.Communicator.MessageReceived -= OnMessageReceived;
+        }
+
 
         protected void SubscribeCycle()
         {
@@ -102,6 +161,7 @@ namespace Cyclotron2D.Core.Players
             if (disposing && Cycle != null)
             {
                 UnsubscribeCycle();
+                UnsubscribeConnection();
             }
             base.Dispose(disposing);
         }

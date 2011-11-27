@@ -223,7 +223,7 @@ namespace Cyclotron2D.Core.Players
                         {
                             //we killed ourselves some way or another. we are the authoritative source for these cases
                             GameScreen.CollisionNotifier.NotifyRealDeath(this);
-                            Cycle.Enabled = false;
+                            Cycle.Kill();
                         }
                         break;
                     case CollisionType.Player:
@@ -232,7 +232,7 @@ namespace Cyclotron2D.Core.Players
                             {
                                 //we collided into a confirmed portion of the other players tail
                                 GameScreen.CollisionNotifier.NotifyRealDeath(this);
-                                Cycle.Enabled = false;
+                                Cycle.Kill();
 
                             }
                         }
@@ -246,10 +246,7 @@ namespace Cyclotron2D.Core.Players
 
         protected override void OnCycleEnabledChanged(object sender, EventArgs e)
         {
-            if (!Cycle.Enabled)
-            {
-                Enabled = false;
-            }
+            Enabled = Cycle.Enabled;
         }
     }
 }

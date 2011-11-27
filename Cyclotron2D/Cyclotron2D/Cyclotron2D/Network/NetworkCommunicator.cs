@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Threading;
 using Cyclotron2D.Components;
 using Cyclotron2D.Core.Players;
+using Cyclotron2D.State;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Network
@@ -35,6 +36,8 @@ namespace Cyclotron2D.Network
 
         public RemotePlayer Host { get; private set; }
 
+        public TimeSpan AverageRtt { get; private set; }
+
         /// <summary>
         /// Id for the local player set here so that it can be added to all outgoing messages automatically
         /// </summary>
@@ -52,7 +55,7 @@ namespace Cyclotron2D.Network
             Mode = NetworkMode.Tcp;
         }
 
-        #endregion  
+        #endregion
 
         #region Public Methods
 
@@ -142,26 +145,7 @@ namespace Cyclotron2D.Network
             if (Connections.ContainsKey(player))
             {
                 message.Source = source;
-
-                switch (Mode)
-                {
-                    case NetworkMode.Udp:
-                    case NetworkMode.Tcp:
-                        Connections[player].Send(message);
-                        break;
-//                    case NetworkMode.Udp:
-//                        {
-//                            new Thread(() =>
-//                            {
-//                                lock(UdpSendSocket)
-//                                {
-//                                    UdpSendSocket.SendTo(message.Data, Connections[player].RemoteEP);
-//                                } 
-//
-//                            }).Start();
-//                        }
-//                        break;
-                }
+                Connections[player].Send(message);
             }
         }
 
@@ -172,8 +156,6 @@ namespace Cyclotron2D.Network
 
         public void MessageOtherPlayers(RemotePlayer player, NetworkMessage message, byte source)
         {
-            //Debug.Assert(Mode == NetworkMode.Tcp, "This method is not supported in Udp Mode");
-
             message.Source = source;
             foreach (RemotePlayer remotePlayer in Connections.Keys.Where(key => key != player))
             {
@@ -193,28 +175,6 @@ namespace Cyclotron2D.Network
             {
                 Connections[remotePlayer].Send(message);
             }
-
-//            switch (Mode)
-//            {
-//                case NetworkMode.Tcp:
-//                    {
-//                       
-//                    }
-//                    break;
-//                case NetworkMode.Udp:
-//                    {
-//                        new Thread(() =>
-//                        {
-//                            lock (UdpSendSocket)
-//                            {
-//                                UdpSendSocket.Send(message.Data, message.Data.Length, SocketFlags.Broadcast);
-//                            }
-//                        }).Start();
-//                    }
-//                    break;
-//            }
-
-           
         }
 
         public RemotePlayer GetPlayer(Socket socket)
@@ -246,44 +206,33 @@ namespace Cyclotron2D.Network
             {
                 Remove(key);
             }
+            if (UdpSocket != null)
+            {
+                UdpSocket.Close();
+                UdpSocket = null;
+            }
+
         }
 
         public void SwitchToUdp()
         {
 
-//            EndPoint localEp = null;
-//            RemotePlayer first = null;
-//
-//
-//            if(Connections.Count > 0)
-//            {
-//                first = Connections.Keys.ToList()[0];
-//            }
-//            
-//
-//            foreach (var kvp in Connections)
-//            {
-//                kvp.Value.SwitchToUdp(kvp.Key == first);
-                //localEp = networkConnection.LocalEP;
-//            }
-//
-//            if(localEp != null)
-//            {
-//                UdpSendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-//                UdpSendSocket.Bind(localEp);
-//                UdpSendSocket.EnableBroadcast = true;
-//            }
-
             SetupUdpSocket();
+            TimeSpan totalRTT = new TimeSpan(0);
             foreach (NetworkConnection networkConnection in Connections.Values)
             {
                 networkConnection.SwitchToUdp(UdpSocket);
+                totalRTT += networkConnection.RoundTripTime;
             }
+
+            AverageRtt = Game.IsState(GameState.PlayingAsHost) ? new TimeSpan(totalRTT.Ticks / Connections.Count) : Connections[Host].RoundTripTime;
 
 
             Mode = NetworkMode.Udp;
 
         }
+
+
 
         #endregion
 
@@ -305,9 +254,9 @@ namespace Cyclotron2D.Network
 
             UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
-            if(Connections.Count > 0)
+            if (Connections.Count > 0)
             {
-                
+
                 var first = Connections.Values.ToArray()[0];
 
                 UdpSocket.Bind(first.LocalEP);
@@ -315,7 +264,7 @@ namespace Cyclotron2D.Network
                 StartReceivingUdp();
             }
 
-           
+
         }
 
         private void ReceiveCallbackUdp(IAsyncResult ar)
@@ -346,16 +295,22 @@ namespace Cyclotron2D.Network
                 //disconnected, stop receive loop
                 return;
             }
-           catch(SocketException e)
-           {
-               DebugMessages.Add("Udp Socket Exception: " + e.Message);
-           }
+            catch (NullReferenceException)
+            {
+                //disconnected, stop receive loop
+                return;
+            }
+            catch (SocketException e)
+            {
+                DebugMessages.Add("Udp Socket Exception: " + e.Message);
+                return;
+            }
 
 
 
             StartReceivingUdp();
 
-            
+
             OnMessageReceived(GetConnection(msg.Source), new MessageEventArgs(msg));
 
         }
@@ -367,7 +322,7 @@ namespace Cyclotron2D.Network
             UdpSocket.BeginReceiveFrom(buffer, 0, NetworkConnection.MAX_BUFFER_SIZE, SocketFlags.None, ref endpoint, ReceiveCallbackUdp, buffer);
         }
 
-        
+
         #endregion
 
         #region Events

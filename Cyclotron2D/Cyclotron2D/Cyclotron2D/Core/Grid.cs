@@ -8,7 +8,6 @@ using Cyclotron2D.Screens.Base;
 using Cyclotron2D.Screens.Main;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Cyclotron2D.Core.Players;
 
 namespace Cyclotron2D.Core
 {
@@ -106,14 +105,20 @@ namespace Cyclotron2D.Core
             if((Screen as GameScreen).GameSettings.PlasmaGrid.Value)
                 UpdateColor(gameTime);
 
-			UpdateCycleData(gameTime);
+			if(Cycles != null)
+			{
+			    UpdateCycleData(gameTime);
+               // UpdateEffectData();
+			}
+
+
         }
 
 		public override void Draw(GameTime gameTime)
 		{
 			base.Draw(gameTime);
 
-			// Firstly, we draw the grid to it's own render target.
+			//we draw the grid to it's own render target.
 			Game.GraphicsDevice.SetRenderTarget(m_renderTarget);
 			Game.GraphicsDevice.Clear(Color.Black);
 
@@ -129,28 +134,9 @@ namespace Cyclotron2D.Core
 			// (Put the render target back to the back buffer.)
 			Game.GraphicsDevice.SetRenderTarget(null);
 
-			// Secondly, set up the data needed for the warpy effect
-			var positions = new Vector2[Cycles.Count];
-			var velocities = new Vector2[Cycles.Count];
-			for (int i = 0; i < Cycles.Count && i < 6; i++)
-			{
-				var cycle = Cycles[i];
+		    UpdateEffectData();
 
-				// Get average velocity
-				velocities[i] = cycleVelocities[cycle].Aggregate(Vector2.Zero, (x, y) => x + y, x => x / (cycleVelocities[cycle].Count * m_renderTarget.Bounds.Size()));
-				positions[i] = cycle.Position.ToVector() / m_renderTarget.Bounds.Size();
-			}
-
-			GraphicsDevice.SetVertexBuffer(m_vertexBuffer);
-			GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
-
-			// Thirdly, we pass the data to the warpy effect.
-			m_effect.Parameters["inputTex"].SetValue(m_renderTarget);
-			m_effect.Parameters["numPlayers"].SetValue(Cycles.Count);
-			m_effect.Parameters["cyclePos"].SetValue(positions);
-			m_effect.Parameters["cycleVel"].SetValue(velocities);
-
-			// Fourthly, we apply the warpy effect.
+			// apply the warpy effect.
 			foreach (EffectPass pass in m_effect.CurrentTechnique.Passes)
 			{
 				pass.Apply();
@@ -189,6 +175,30 @@ namespace Cyclotron2D.Core
 			}
 			m_hue %= 6;
 			GridColor = new Vector3(m_hue, 1f, 0.5f).HSVToColor();
+        }
+
+        private void UpdateEffectData()
+        {
+            // first, set up the data needed for the warpy effect
+            var positions = new Vector2[Cycles.Count];
+            var velocities = new Vector2[Cycles.Count];
+            for (int i = 0; i < Cycles.Count && i < 6; i++)
+            {
+                var cycle = Cycles[i];
+
+                // Get average velocity
+                velocities[i] = cycleVelocities[cycle].Aggregate(Vector2.Zero, (x, y) => x + y, x => (x / (cycleVelocities[cycle].Count * m_renderTarget.Bounds.Size())) / 1.5f);
+                positions[i] = cycle.Position.ToVector() / m_renderTarget.Bounds.Size();
+            }
+
+            GraphicsDevice.SetVertexBuffer(m_vertexBuffer);
+            GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
+
+            // second, we pass the data to the warpy effect.
+            m_effect.Parameters["inputTex"].SetValue(m_renderTarget);
+            m_effect.Parameters["numPlayers"].SetValue(Cycles.Count);
+            m_effect.Parameters["cyclePos"].SetValue(positions);
+            m_effect.Parameters["cycleVel"].SetValue(velocities);
         }
 
 		private void UpdateCycleData(GameTime gameTime)

@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 
 namespace Cyclotron2D
@@ -17,11 +18,22 @@ namespace Cyclotron2D
                 listener.AssertUiEnabled = true;
             }
 
-
-            using (Cyclotron game = new Cyclotron())
+            try
             {
-               game.Run();
+                    using (Cyclotron game = new Cyclotron())
+                    {
+                       game.Run();
+                    }
             }
+            catch (Exception e)
+            {
+                DebugMessages.AddLogOnly("Game Crashed: " + e.Message);
+                DebugMessages.FlushLog();
+                throw;
+            }
+
+
+            DebugMessages.FlushLog();
         }
     }
 #endif

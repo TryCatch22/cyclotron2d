@@ -11,6 +11,8 @@ namespace Cyclotron2D.Network
     {
         Debug,
 
+        Ping,
+
         Hello,
 
         Welcome,
@@ -50,7 +52,7 @@ namespace Cyclotron2D.Network
 
         public static string EndOfHeader = "\n\n";
 
-        public MessageType Type { get; private set; }
+        public MessageType Type { get; set; }
 
         public byte Source { get; set; }
 
@@ -58,7 +60,7 @@ namespace Cyclotron2D.Network
 
         public int Length { get { return length == 0 ? encoding.GetByteCount(Content) : length; } set { length = value; } }
 
-        public string Content { get; private set; }
+        public string Content { get; set; }
 
         public List<string> ContentLines { get { return Content.Split(new [] {'\n'}).Where(line => !string.IsNullOrEmpty(line)).ToList(); } }
 

@@ -46,7 +46,7 @@ namespace Cyclotron2D
 
         public Cyclotron()
         {
-			DebugMessages.LogMessages = false;
+			DebugMessages.LogMessages = true;
             IsFixedTimeStep = true;
             Content.RootDirectory = "Content";
 
@@ -92,7 +92,19 @@ namespace Cyclotron2D
             {
                 var args = new StateChangedEventArgs(State, state);
                 State = state;
+
+                DebugMessages.AddLogOnly("Changing State: " + state);
+                
                 InvokeStateChanged(args);
+
+
+
+                if(State == GameState.MainMenu)
+                {
+                    DebugMessages.FlushLog();
+                    Communicator.ClearAll();
+                }
+
             }
         }
 
@@ -195,7 +207,7 @@ namespace Cyclotron2D
                 ScreenManager = null;
                 InputState.Dispose();
                 InputState = null;
-				DebugMessages.FinishWriteLog();
+				DebugMessages.FlushLog();
             }
             base.Dispose(disposing);
         }
