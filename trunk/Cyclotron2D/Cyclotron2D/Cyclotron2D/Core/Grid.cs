@@ -108,7 +108,6 @@ namespace Cyclotron2D.Core
 			if(Cycles != null)
 			{
 			    UpdateCycleData(gameTime);
-               // UpdateEffectData();
 			}
 
 
@@ -186,8 +185,10 @@ namespace Cyclotron2D.Core
             {
                 var cycle = Cycles[i];
 
+                var square = new Vector2(m_renderTarget.Bounds.Size().Y);
+
                 // Get average velocity
-                velocities[i] = cycleVelocities[cycle].Aggregate(Vector2.Zero, (x, y) => x + y, x => (x / (cycleVelocities[cycle].Count * m_renderTarget.Bounds.Size())) / 1.5f);
+                velocities[i] = cycleVelocities[cycle].Aggregate(Vector2.Zero, (x, y) => x + y, x => x / (cycleVelocities[cycle].Count * square));
                 positions[i] = cycle.Position.ToVector() / m_renderTarget.Bounds.Size();
             }
 
