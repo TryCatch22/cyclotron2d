@@ -114,7 +114,7 @@ namespace Cyclotron2D.Core
             foreach (var player in m_playerCycleMap.Keys)
             {
                 var cycle = m_playerCycleMap[player];
-                if (cycle.Enabled)
+                if (!cycle.Dead)
                 {
                     i++;
                     winner = player;
