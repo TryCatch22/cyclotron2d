@@ -66,12 +66,20 @@ namespace Cyclotron2D.Screens.Main
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            if (isGameSetup && ActivePlayers.Aggregate(true, (ready, player) => ready && player.Ready) && DateTime.UtcNow > m_startTimeUtc)
+            if (isGameSetup && ActivePlayers.Aggregate(true, (ready, player) => ready && player.Ready))
             {
-                StartGame();
+                if(DateTime.UtcNow > m_startTimeUtc)
+                {
+                    StartGame();
+                }else if (DateTime.UtcNow + gameTime.ElapsedGameTime > m_startTimeUtc)
+                {
+                    Thread.Sleep(DateTime.UtcNow + gameTime.ElapsedGameTime - m_startTimeUtc);
+                    StartGame();
+                }
+                
             }
         }
-
+        
 
 
         #region Subscription
