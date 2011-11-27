@@ -35,7 +35,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-	const float intensity = 6;
+	const float intensity = 10;
 	const float inverseScale = 12;
 
 	float2 coord = input.TexCoord;

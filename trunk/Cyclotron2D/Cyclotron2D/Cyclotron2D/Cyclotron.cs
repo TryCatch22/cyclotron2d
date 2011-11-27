@@ -46,7 +46,7 @@ namespace Cyclotron2D
 
         public Cyclotron()
         {
-			DebugMessages.LogMessages = true;
+			DebugMessages.LogMessages = false;
             IsFixedTimeStep = true;
             Content.RootDirectory = "Content";
 

@@ -22,7 +22,7 @@ namespace Cyclotron2D.Graphics
 
         public Texture2D SpriteSheet { get; private set; }
 
-        public Rectangle Rect { get; set; }
+        public Vector2 Position { get; set; }
 
         public TimeSpan UpdateDelay { get; set; }
 
@@ -33,6 +33,10 @@ namespace Cyclotron2D.Graphics
         private int FrameCount { get { return FrameLayout.X*FrameLayout.Y; } }
 
         public Point FrameLayout { get; private set; }
+
+		public float Scale { get; set; }
+
+		public Color Color { get; set; }
 
         /// <summary>
         /// size of a single rectangle in the spriteSheet
@@ -47,6 +51,8 @@ namespace Cyclotron2D.Graphics
 	    {
 	        SpriteSheet = spriteSheet;
             Size = new Point(spriteSheet.Width / frameLayout.X, spriteSheet.Height / frameLayout.Y);
+			Scale = 3f;
+			Color = Color.White;
 	        IsLooping = false;
             UpdateDelay = new TimeSpan(0, 0, 0, 0, 20);
 	        FrameLayout = frameLayout;
@@ -55,14 +61,6 @@ namespace Cyclotron2D.Graphics
 	    }
 
         #endregion
-
-        public Rectangle GetSourceRect(int frame)
-		{
-		    int x = frame%FrameLayout.X;
-            int y = (int)Math.Floor((float)frame / FrameLayout.X);
-
-			return new Rectangle(x, y, Size.X, Size.Y);
-		}
 
         public override void Update(GameTime gameTime)
         {
@@ -79,7 +77,7 @@ namespace Cyclotron2D.Graphics
                     }
                     else
                     {
-                        Enabled = Visible = false;
+						Enabled = Visible = false;
                         return;
                     }
                 }
@@ -91,7 +89,16 @@ namespace Cyclotron2D.Graphics
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
-            Game.SpriteBatch.Draw(SpriteSheet, Rect, GetSourceRect(Frame), Color.White);
+			var sourceRect = GetSourceRect(Frame);
+            Game.SpriteBatch.Draw(SpriteSheet, Position, sourceRect, Color, 0, new Vector2(sourceRect.Width, sourceRect.Height) / 2, Scale, SpriteEffects.None, 0);
         }
+
+		private Rectangle GetSourceRect(int frame)
+		{
+			int x = frame % FrameLayout.X;
+			int y = (int)Math.Floor((float)frame / FrameLayout.X);
+
+			return new Rectangle(x, y, Size.X, Size.Y);
+		}
 	}
 }
