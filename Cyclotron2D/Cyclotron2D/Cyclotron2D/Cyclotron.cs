@@ -94,8 +94,18 @@ namespace Cyclotron2D
                 State = state;
 
                 DebugMessages.AddLogOnly("Changing State: " + state);
-                
-                InvokeStateChanged(args);
+
+                try
+                {
+                    InvokeStateChanged(args);
+                }
+                catch (Exception e)
+                {
+                    DebugMessages.AddLogOnly("Game Crashed On State Change: " + e.Message);
+                    DebugMessages.FlushLog();
+                    throw;
+                }
+
 
 
 

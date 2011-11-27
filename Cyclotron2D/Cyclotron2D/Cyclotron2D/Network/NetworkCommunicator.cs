@@ -240,8 +240,18 @@ namespace Cyclotron2D.Network
 
         private void OnMessageReceived(object sender, MessageEventArgs e)
         {
-            EventHandler<MessageEventArgs> handler = MessageReceived;
-            if (handler != null) handler(sender, e);
+            try
+            {
+                EventHandler<MessageEventArgs> handler = MessageReceived;
+                if (handler != null) handler(sender, e);
+            }
+            catch (Exception ex)
+            {
+                DebugMessages.AddLogOnly("Game Crashed On Message Handle: " + ex.Message);
+                DebugMessages.FlushLog();
+                throw;
+            }
+            
         }
 
         #endregion
