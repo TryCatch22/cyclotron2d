@@ -38,7 +38,12 @@ namespace Cyclotron2D.Core
         /// </summary>
         private List<Point> m_vertices;
 		
-		#endregion
+        /// <summary>
+        /// for udp connections, the average distance from our simulated position to the message position.
+        /// </summary>
+        private int m_averageLag;
+
+        #endregion
 
         #region Properties
 
@@ -120,12 +125,12 @@ namespace Cyclotron2D.Core
 
         #region Events
 
-        public event EventHandler Collided;
+        public event EventHandler<CycleCollisionEventArgs> Collided;
 
-        public void InvokeCollided()
+        public void InvokeCollided(CycleCollisionEventArgs e)
         {
-            EventHandler handler = Collided;
-            if (handler != null) handler(this, new EventArgs());
+            EventHandler<CycleCollisionEventArgs> handler = Collided;
+            if (handler != null) handler(this, e);
         }
 
         #endregion
@@ -159,6 +164,9 @@ namespace Cyclotron2D.Core
                         Debug.Assert(
                             ((Direction == Direction.Down || Direction == Direction.Up) && Position.X == vertices[0].X && Position.X == vertices[1].X) ||
                             ((Direction == Direction.Left || Direction == Direction.Right) && Position.Y == vertices[0].Y && Position.Y == vertices[1].Y), "Something is wrong noob.");
+
+                        //this should be the most common case (all is well), update the average lag here 
+                        m_averageLag = (int) ((m_averageLag + Position.Distance(vertices[0]))/2);
                     }
                     break;
                 case 2:
@@ -172,7 +180,7 @@ namespace Cyclotron2D.Core
                     break;
                 case 3:
                     {
-                        DebugMessages.Add("Missed a turn, trying to catching up ...");
+                        DebugMessages.Add(" Missed a turn from player "+m_player.PlayerID+" trying to catch up ...");
                         int length =(int)Position.Distance(vertices[3]);
 
                         var line = new Line(vertices[1], vertices[0]);
@@ -181,7 +189,10 @@ namespace Cyclotron2D.Core
 
                         m_vertices.Add(vertices[2]);
                         m_vertices.Add(vertices[1]);
-                        Position = vertices[1].AddOffset(line.Direction, offset);
+
+                        Position = offset > 0 ? vertices[1].AddOffset(line.Direction, offset) : vertices[0].AddOffset(line.Direction, m_averageLag);
+
+
                         Direction = line.Direction;
 
 
@@ -189,7 +200,7 @@ namespace Cyclotron2D.Core
                     break;
                 case 4:
                     {
-                        DebugMessages.Add("Missed two turns!! pls lag less");
+                        DebugMessages.Add("Missed two turns from player " + m_player.PlayerID + " pls lag less");
                         int length = (int)Position.Distance(vertices[4]);
 
                         var line = new Line(vertices[1], vertices[0]);
@@ -200,12 +211,14 @@ namespace Cyclotron2D.Core
                         m_vertices.Add(vertices[2]);
                         m_vertices.Add(vertices[1]);
 
-                        Position = vertices[1].AddOffset(line.Direction, offset);
+                        Position = offset > 0 ? vertices[1].AddOffset(line.Direction, offset) : vertices[0].AddOffset(line.Direction, m_averageLag);
+
+                        
                         Direction = line.Direction;
                     }
                     break;
                 default:
-                    DebugMessages.Add("we are in SERIOUS trouble here");
+                    DebugMessages.Add("player " + m_player.PlayerID +" in SERIOUS trouble here");
                     break;
 
             }
@@ -229,11 +242,12 @@ namespace Cyclotron2D.Core
             return new NetworkMessage(MessageType.PlayerInfoUpdate, content);
         }
 
-        public bool CheckHeadLine(Line myline, out Player killer)
+        public bool CheckHeadLine(Line myline, out Player killer, out bool headlineCollision)
         {
             //hiding the class scope position Vector here caus this method can be used to check for future colisions.
             var Position = myline.End;
             bool hasCollision = false;
+            headlineCollision = false;
 
             killer = null;
 
@@ -260,6 +274,7 @@ namespace Cyclotron2D.Core
                         if (mydist <= hisdist)
                         {
                             hasCollision = true;
+                            headlineCollision = true;
                             killer = cycle.m_player;
                             break;
                         }
@@ -273,6 +288,7 @@ namespace Cyclotron2D.Core
                         if ((distheads <= distMe && distheads <= distHim) || distMe <= distHim)
                         {
                             hasCollision = true;
+                            headlineCollision = true;
                             killer = cycle.m_player;
                             break;
                         }
@@ -287,11 +303,12 @@ namespace Cyclotron2D.Core
                     /*it could be that this is the AI checking a future line, if that is the case it could be an extension
                      or a line at an angle if it is at an angle it is not in lines so it does not need to be removed*/
                     if (lines[lines.Count - 1].Orientation == myline.Orientation) lines.RemoveAt(lines.Count-1);
-                    // 
 
                      if(lines.Count > 0)lines.RemoveAt(lines.Count - 1);
                      if (lines.Count > 0) lines.RemoveAt(lines.Count - 1);
                 }
+
+              //  headlineCollision = hasCollision;
 
 
                 if (lines.Aggregate(false, (current, line) => current || Line.FindIntersection(line, myline) != IntersectionType.None))
@@ -374,7 +391,7 @@ namespace Cyclotron2D.Core
                     {
                         if(gridCrossing.Y != headLine.End.Y)
                         {
-                            DebugMessages.Add("Missed turn message detected");
+                            DebugMessages.Add("Tcp Lag, or UDp wtf???");
                         }
 
                     }
@@ -383,7 +400,7 @@ namespace Cyclotron2D.Core
                     {
                         if (gridCrossing.X != headLine.End.X)
                         {
-                            DebugMessages.Add("Missed turn message detected");
+                            DebugMessages.Add("Tcp Lag or Udp wtf??");
                         }
 
                     }
@@ -538,7 +555,7 @@ namespace Cyclotron2D.Core
 					if (AllowSuicide)
 					{
 						DebugMessages.Add(m_player + "committed suicide");
-						InvokeCollided();
+						InvokeCollided(new CycleCollisionEventArgs(CollisionType.Suicide, m_player, false, m_player));
 					}
 					else
 					{
@@ -582,16 +599,21 @@ namespace Cyclotron2D.Core
             Player killer = null;
 
             bool hasCollision = IsOutsideGrid(Position);
-            
+
+            bool headCollision = false;
+
             if(!hasCollision)
-                hasCollision = CheckHeadLine(myline, out killer);
+                hasCollision = CheckHeadLine(myline, out killer, out headCollision);
 
             if (hasCollision)
             {
                 string killerString = killer!=null?killer.ToString():"the wall";
 
+                CollisionType type = killer == null ? CollisionType.Wall : killer == m_player ? CollisionType.Self : CollisionType.Player;
+
                 DebugMessages.Add(m_player + " Crashed into " + killerString);
-                InvokeCollided();
+
+                InvokeCollided(new CycleCollisionEventArgs(type, killer, headCollision, m_player));
             }
         }
 
@@ -660,6 +682,33 @@ namespace Cyclotron2D.Core
         }
 
         #endregion
+    }
+
+    public enum CollisionType
+    {
+        Wall,
+        Self,
+        Player,
+        Suicide
+    }
+
+    public class CycleCollisionEventArgs : EventArgs
+    {
+        public CollisionType Type { get; private set; }
+
+        public Player Killer { get; private set; }
+
+        public Player Victim { get; private set; }
+
+        public bool AmbiguousCollision { get; private set; }
+
+        public CycleCollisionEventArgs(CollisionType type, Player killer, bool ambiguous, Player victim)
+        {
+            Type = type;
+            Killer = killer;
+            Victim = victim;
+            AmbiguousCollision = ambiguous;
+        }
     }
 
 

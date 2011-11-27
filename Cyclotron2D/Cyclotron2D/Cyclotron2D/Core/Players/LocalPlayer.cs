@@ -22,17 +22,14 @@ namespace Cyclotron2D.Core.Players
         public LocalPlayer(Game game, Screen screen) : base(game, screen)
         {
             Name = Settings.SinglePlayer.PlayerName.Value;
-
         }
 
-        private GameScreen GameScreen { get { return Screen as GameScreen; } }
 
         public override string Name { get; set; }
 
         public override void Initialize(Cycle cycle)
         {
             base.Initialize(cycle);
-            SubscribeCycleCollision();
             Ready = true;
         }
 
@@ -41,8 +38,6 @@ namespace Cyclotron2D.Core.Players
             base.HandleInput(gameTime);
 
             if (Cycle == null || gameTime.TotalGameTime < Cycle.GameStart) return;
-
-           // Debug.Assert(Cycle != null, "Player has not been initialized.");
 
             InputState input = Game.InputState;
 
@@ -97,22 +92,48 @@ namespace Cyclotron2D.Core.Players
 
         #region Subscription
 
-        private void SubscribeCycleCollision()
-        {
-            Cycle.Collided += OnCollision;
-        }
-
-        private void UnsubscribeCycleCollision()
-        {
-            Cycle.Collided -= OnCollision;
-        }
 
         #endregion
 
         #region Event Handlers
 
-        private void OnCollision(object sender, EventArgs e)
+        protected override void OnCycleCollided(object sender, CycleCollisionEventArgs e)
         {
+            base.OnCycleCollided(sender, e);
+            if (Game.IsState(GameState.PlayingAsClient | GameState.PlayingAsHost))
+            {
+                switch (e.Type)
+                {
+                    case CollisionType.Self:
+                    case CollisionType.Suicide:
+                    case CollisionType.Wall:
+                        {
+                            //we killed ourselves some way or another. we are the authoritative source for these cases
+                            GameScreen.CollisionNotifier.NotifyRealDeath(this);
+                            Cycle.Enabled = false;
+                        }
+                        break;
+                    case CollisionType.Player:
+                        {
+                            if (!e.AmbiguousCollision)
+                            {
+                                //we collided into a confirmed portion of the other players tail
+                                GameScreen.CollisionNotifier.NotifyRealDeath(this);
+                                Cycle.Enabled = false;
+                                
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+
+
+
+
+
             if (!m_gameEnded)
             {
                 Game.ScreenManager.AddScreen(new EndGamePopup(Game, Screen as MainScreen, "Game Over"));
@@ -121,19 +142,7 @@ namespace Cyclotron2D.Core.Players
             
         }
 
-        #endregion
-
-        #region IDisposable
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && Cycle != null)
-            {
-                UnsubscribeCycleCollision();
-            }
-            base.Dispose(disposing);
-        }
-
+       
         #endregion
     }
 }

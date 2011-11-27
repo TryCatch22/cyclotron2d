@@ -34,6 +34,9 @@ namespace Cyclotron2D.Screens.Main
 
         public Settings GameSettings { get; set; }
 
+
+        public CollisionNotifier CollisionNotifier { get; private set; }
+
         public TimeSpan GameStartTime { get { return m_engine.GameStartTime; } }
 
         public NetworkMessage SetupMessage { get; set; }
@@ -46,6 +49,7 @@ namespace Cyclotron2D.Screens.Main
             GameSettings = Settings.SinglePlayer;
             m_lobbyPlayers = new List<Player>();
             m_engine = new Engine(game, this);
+            CollisionNotifier = new CollisionNotifier(game, this, m_engine);
             m_startRandomizer = new StartRandomizer(game);
             isGameSetup = false;
         }
@@ -61,10 +65,7 @@ namespace Cyclotron2D.Screens.Main
             }
         }
 
-        public Player GetPlayer(int id)
-        {
-            return (from player in ActivePlayers where player.PlayerID == id select player).FirstOrDefault();
-        }
+
 
         #region Subscription
 
@@ -91,7 +92,7 @@ namespace Cyclotron2D.Screens.Main
                     {
                         if (e.Message.Type == MessageType.Ready)
                         {
-                            Player player = GetPlayer(e.Message.Source);
+                            Player player = m_engine.GetPlayer(e.Message.Source);
                             if (player != null)
                             {
                                 player.Ready = true;
@@ -146,10 +147,11 @@ namespace Cyclotron2D.Screens.Main
             if (m_engine != null)
             {
                 m_engine.Dispose();
+                CollisionNotifier.Dispose();
             }
 
             m_engine = new Engine(Game, this);
-
+            CollisionNotifier = new CollisionNotifier(Game, this, m_engine);
 
             switch (Game.State)
             {
@@ -234,7 +236,7 @@ namespace Cyclotron2D.Screens.Main
                                 var ip = IPAddress.Parse(ipString);
                                 int port = int.Parse(portString);
 
-                                var player = GetPlayer(playerId);
+                                var player = m_engine.GetPlayer(playerId);
 
                                 if(player is RemotePlayer)
                                 {
@@ -296,6 +298,7 @@ namespace Cyclotron2D.Screens.Main
             {
                 m_engine.Dispose();
                 m_engine = null;
+                CollisionNotifier.Dispose();
                 UnsubscribeCommunicator();
             }
             base.Dispose(disposing);
