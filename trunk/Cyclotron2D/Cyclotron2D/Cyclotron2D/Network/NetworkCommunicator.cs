@@ -227,6 +227,11 @@ namespace Cyclotron2D.Network
             return (from kvp in Connections where kvp.Key.PlayerID == playerId select kvp.Value).FirstOrDefault();
         }
 
+        public RemotePlayer GetPlayer(int playerId)
+        {
+            return (from kvp in Connections where kvp.Key.PlayerID == playerId select kvp.Key).FirstOrDefault();
+        }
+
 
         public RemotePlayer GetPlayer(NetworkConnection connection)
         {

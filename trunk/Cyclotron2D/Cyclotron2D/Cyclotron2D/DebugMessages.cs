@@ -42,8 +42,6 @@ namespace Cyclotron2D {
 			s_messages = new List<Message>();
 			s_logFile = ("log-"+@DateTime.Now.ToString("s")+".txt").Replace(':', '.');
 
-
-
 		    if (File.Exists(s_logFile))
 		    {
 		        File.Delete(s_logFile);
@@ -80,7 +78,7 @@ namespace Cyclotron2D {
         {
             List<Message> logs = s_messages.Where(msg => msg.TimeLeft <= 0).ToList();
             s_messages.RemoveAll(msg => msg.TimeLeft <= 0);
-            WriteLog(logs);
+            if(LogMessages)WriteLog(logs);
 
         }
 
@@ -103,7 +101,7 @@ namespace Cyclotron2D {
 
         public static void FinishWriteLog()
         {
-        	  WriteLog(s_messages);
+        	  if(LogMessages)WriteLog(s_messages);
         }
 
 		private static void WriteLog(List<Message> logs)

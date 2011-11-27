@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Screens.Base;
+using Cyclotron2D.Screens.Main;
+using Cyclotron2D.State;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Core.Players
@@ -181,8 +183,8 @@ namespace Cyclotron2D.Core.Players
                 }
             }
             Player killer;
-
-            return !(Cycle.IsOutsideGrid(headLine.End) || Cycle.CheckHeadLine(headLine, out killer));
+            bool hh;
+            return !(Cycle.IsOutsideGrid(headLine.End) || Cycle.CheckHeadLine(headLine, out killer, out hh));
         }
 
 
@@ -206,6 +208,41 @@ namespace Cyclotron2D.Core.Players
         }
 
         #endregion
+
+
+        protected override void OnCycleCollided(object sender, CycleCollisionEventArgs e)
+        {
+            base.OnCycleCollided(sender, e);
+            if (Game.IsState(GameState.PlayingAsClient | GameState.PlayingAsHost))
+            {
+                switch (e.Type)
+                {
+                    case CollisionType.Self:
+                    case CollisionType.Suicide:
+                    case CollisionType.Wall:
+                        {
+                            //we killed ourselves some way or another. we are the authoritative source for these cases
+                            GameScreen.CollisionNotifier.NotifyRealDeath(this);
+                            Cycle.Enabled = false;
+                        }
+                        break;
+                    case CollisionType.Player:
+                        {
+                            if (!e.AmbiguousCollision)
+                            {
+                                //we collided into a confirmed portion of the other players tail
+                                GameScreen.CollisionNotifier.NotifyRealDeath(this);
+                                Cycle.Enabled = false;
+
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+        }
 
         protected override void OnCycleEnabledChanged(object sender, EventArgs e)
         {

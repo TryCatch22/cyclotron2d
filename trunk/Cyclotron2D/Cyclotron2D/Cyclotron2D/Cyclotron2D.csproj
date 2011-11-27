@@ -107,6 +107,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\CollisionNotifier.cs" />
     <Compile Include="Graphics\Art.cs" />
     <Compile Include="Core\Players\AIPlayer.cs" />
     <Compile Include="Core\Players\LocalPlayer.cs" />

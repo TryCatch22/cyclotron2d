@@ -46,7 +46,7 @@ namespace Cyclotron2D.Core
     /// The Game Engine handles events from Player objects in order to simulate the game. It has no concept of the difference
     /// between a local and remote player.
     /// </summary>
-    internal class Engine : DrawableScreenComponent
+    public class Engine : DrawableScreenComponent
     {
         #region Fields
 
@@ -55,6 +55,7 @@ namespace Cyclotron2D.Core
         private Dictionary<Player, Cycle> m_playerCycleMap;
 
         private Countdown m_countdown;
+
 
 		private List<Animation> m_explosionAnimations;
 
@@ -94,6 +95,11 @@ namespace Cyclotron2D.Core
         #endregion
 
         #region Public Methods
+
+        public Player GetPlayer(int id)
+        {
+            return (from player in Players where player.PlayerID == id select player).FirstOrDefault();
+        }
 
         public override void Update(GameTime gameTime)
         {
@@ -231,20 +237,25 @@ namespace Cyclotron2D.Core
             }
         }
 
-        private void OnCycleCollided(object sender, EventArgs e)
+        private void OnCycleCollided(object sender, CycleCollisionEventArgs e)
         {
             var cycle = sender as Cycle;
-            if (cycle != null)
+            if (cycle == null) return;
+
+            if (Game.State == GameState.PlayingSolo)
             {
                 cycle.Enabled = false;
-				m_explosionAnimations.Add(cycle.CreateExplosion());
-
-                if (GameScreen.UseUdp && Game.IsState(GameState.PlayingAsHost))
-                {
-                    //todo tell people about the colision
-                }
-
+                m_explosionAnimations.Add(cycle.CreateExplosion());
             }
+
+
+            if (e.Type == CollisionType.Player && e.AmbiguousCollision && Game.State == GameState.PlayingAsHost)
+            {
+                //currently the host will decide on ambiguous collisions.
+                GameScreen.CollisionNotifier.NotifyRealDeath(e.Victim);
+                m_explosionAnimations.Add(cycle.CreateExplosion());
+            }
+          
         }
 
         #endregion

@@ -98,7 +98,7 @@ namespace Cyclotron2D.Graphics
 			int x = frame % FrameLayout.X;
 			int y = (int)Math.Floor((float)frame / FrameLayout.X);
 
-			return new Rectangle(x, y, Size.X, Size.Y);
+            return new Rectangle(x * Size.X, y * Size.Y, Size.X, Size.Y);
 		}
 	}
 }

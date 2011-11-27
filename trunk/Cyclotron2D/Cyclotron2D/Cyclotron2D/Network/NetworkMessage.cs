@@ -29,7 +29,11 @@ namespace Cyclotron2D.Network
 
         SignalTurn,
 
-        PlayerInfoUpdate    
+        PlayerInfoUpdate,
+    
+        RealDeath,
+
+        AckDeath,
     }
 
 

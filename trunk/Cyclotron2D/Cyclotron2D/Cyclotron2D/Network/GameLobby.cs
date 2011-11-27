@@ -100,11 +100,6 @@ namespace Cyclotron2D.Network {
                 {
                     SpawnThread();
                 }
-                //Poll all connected clients to see if someone disconnected
-//                if (Clients.Count > 0)
-//                {
-//                    Socket.Select(null, Clients, null, 1000);
-//                }
 
                 m_acceptThreads.RemoveAll(t => !t.IsAlive);
 

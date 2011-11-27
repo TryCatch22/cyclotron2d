@@ -20,6 +20,9 @@ namespace Cyclotron2D.Core.Players
             Ready = false;
         }
 
+
+        protected GameScreen GameScreen { get { return Screen as GameScreen; } }
+
         public abstract string Name { get; set; }
 
         public Cycle Cycle { get; protected set; }
@@ -81,11 +84,17 @@ namespace Cyclotron2D.Core.Players
         protected void SubscribeCycle()
         {
             Cycle.EnabledChanged += OnCycleEnabledChanged;
+            Cycle.Collided += OnCycleCollided;
+        }
+
+        protected virtual void OnCycleCollided(object sender, CycleCollisionEventArgs e)
+        {
         }
 
         private void UnsubscribeCycle()
         {
-            Cycle.EnabledChanged += OnCycleEnabledChanged;
+            Cycle.EnabledChanged -= OnCycleEnabledChanged;
+            Cycle.Collided -= OnCycleCollided;
         }
 
         protected override void Dispose(bool disposing)
