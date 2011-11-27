@@ -159,6 +159,7 @@ namespace Cyclotron2D.Network
         /// <param name="message"></param>
         public void Send(NetworkMessage message)
         {
+            DebugMessages.AddLogOnly("Sending Message: " + message.Type + "\n" + message.Content + "\n");
             switch (Mode)
             {
                 case NetworkMode.Tcp:

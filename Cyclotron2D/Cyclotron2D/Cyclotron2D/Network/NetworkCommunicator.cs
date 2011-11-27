@@ -242,6 +242,7 @@ namespace Cyclotron2D.Network
         {
             try
             {
+                DebugMessages.AddLogOnly("Received Message: " + e.Message.Type + "\n" + e.Message.Content + "\n");
                 EventHandler<MessageEventArgs> handler = MessageReceived;
                 if (handler != null) handler(sender, e);
             }
