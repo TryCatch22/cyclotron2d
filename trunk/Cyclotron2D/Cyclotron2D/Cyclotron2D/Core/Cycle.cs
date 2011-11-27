@@ -32,6 +32,8 @@ namespace Cyclotron2D.Core
         private Player m_player;
         private Direction m_scheduledDirection;
 
+
+
         /// <summary>
         /// The list of positions on the map at which we've made turns.
         /// This is used to draw our trail.
@@ -412,6 +414,10 @@ namespace Cyclotron2D.Core
             m_scheduledDirection = direction;
         }
 
+        public void FakeDeath()
+        {
+            
+        }
 
 		public override void Draw(GameTime gameTime)
 		{
@@ -484,7 +490,9 @@ namespace Cyclotron2D.Core
 			return new Animation(Game, Screen, Art.ExplosionSheet, new Point(3, 4))
 			{
 				Position = Position.ToVector(),
-				Color = BikeColor
+				Color = BikeColor,
+		        Scale = 2f,
+                UpdateDelay = new TimeSpan(0, 0, 0, 0, 30)
 			};
 		}
 
