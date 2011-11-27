@@ -13,6 +13,10 @@ namespace Cyclotron2D.UI.UIElements
         /// </summary>
         public int Value { get; set; }
 
+        public bool ScaleText { get; set; }
+
+        public float MaxScaleFactor { get; set; }
+
         private int m_startValue;
 
         private TimeSpan m_startTime;
@@ -20,6 +24,8 @@ namespace Cyclotron2D.UI.UIElements
         public Countdown(Game game, Screen screen) : base(game, screen)
         {
             m_startTime = TimeSpan.MaxValue;
+            ScaleText = false;
+            MaxScaleFactor = 2;
         }
 
         public void Start()
@@ -40,7 +46,11 @@ namespace Cyclotron2D.UI.UIElements
             }
 
             // decrement count every second
-            if (gameTime.TotalGameTime - m_startTime >= new TimeSpan((m_startValue - Value + 1) * OneSecond.Ticks))
+
+            var elapsedTime = gameTime.TotalGameTime - m_startTime;
+            var nextTick = new TimeSpan((m_startValue - Value + 1)*OneSecond.Ticks);
+
+            if (elapsedTime >= nextTick)
             {
                 Value--;
                 Text = Value.ToString();
@@ -49,7 +59,7 @@ namespace Cyclotron2D.UI.UIElements
             // increment size of number
             else
             {
-                TextScale *= 1.05f;
+                TextScale = MaxScaleFactor - (MaxScaleFactor - 1)*((nextTick - elapsedTime).Ticks/(float)OneSecond.Ticks);
             }
         }
 
