@@ -128,11 +128,11 @@ namespace Cyclotron2D.Core
             }
 
 			m_explosionAnimations.RemoveAll(x => !x.Enabled);
-			foreach (var explosion in m_explosionAnimations)
-			{
-				explosion.Scale += 0.1f;
-				explosion.Color *= 0.99f;
-			}
+//			foreach (var explosion in m_explosionAnimations)
+//			{
+//				explosion.Scale += 0.1f;
+//				explosion.Color *= 0.99f;
+//			}
         }
 
         public void StartGame()
@@ -185,10 +185,9 @@ namespace Cyclotron2D.Core
                     m_countdown.Draw(gameTime);
                 }
 
-				foreach (var explosion in m_explosionAnimations)
+				foreach (var explosion in m_explosionAnimations.Where(ex => ex.Visible))
 				{
-					if (explosion.Enabled)
-						explosion.Draw(gameTime);
+			        explosion.Draw(gameTime);
 				}
             }
             catch (NullReferenceException)
@@ -247,13 +246,15 @@ namespace Cyclotron2D.Core
                 cycle.Enabled = false;
                 m_explosionAnimations.Add(cycle.CreateExplosion());
             }
-
-
-            if (e.Type == CollisionType.Player && e.AmbiguousCollision && Game.State == GameState.PlayingAsHost)
+            else if (e.Type == CollisionType.Player && e.AmbiguousCollision && Game.State == GameState.PlayingAsHost)
             {
                 //currently the host will decide on ambiguous collisions.
                 GameScreen.CollisionNotifier.NotifyRealDeath(e.Victim);
                 m_explosionAnimations.Add(cycle.CreateExplosion());
+            }
+            else if(e.Victim is RemotePlayer || e.AmbiguousCollision)
+            {
+                
             }
           
         }

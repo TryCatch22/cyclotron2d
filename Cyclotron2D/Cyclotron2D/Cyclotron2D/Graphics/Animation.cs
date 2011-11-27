@@ -51,7 +51,7 @@ namespace Cyclotron2D.Graphics
 	    {
 	        SpriteSheet = spriteSheet;
             Size = new Point(spriteSheet.Width / frameLayout.X, spriteSheet.Height / frameLayout.Y);
-			Scale = 3f;
+            Scale = 1f;
 			Color = Color.White;
 	        IsLooping = false;
             UpdateDelay = new TimeSpan(0, 0, 0, 0, 20);
