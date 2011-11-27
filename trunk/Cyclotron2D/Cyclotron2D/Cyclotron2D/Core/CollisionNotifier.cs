@@ -24,7 +24,7 @@ namespace Cyclotron2D.Core
 
         private Engine Engine { get; set; }
 
-        public readonly TimeSpan MaxAckDelay =  new TimeSpan(0, 0, 0, 0, 200);
+        public static readonly TimeSpan MaxAckDelay =  new TimeSpan(0, 0, 0, 0, 200);
 
         private Dictionary<Player, Dictionary<RemotePlayer, Confirmation>> m_confirmations;
 
@@ -74,8 +74,13 @@ namespace Cyclotron2D.Core
         }
 
         public void NotifyRealDeath(Player p)
-        {           
-            Game.Communicator.MessageAll(new NetworkMessage(MessageType.RealDeath, p.PlayerID.ToString()));
+        {
+
+            var msg = p.Cycle.GetInfoMessage();
+            msg.Type = MessageType.RealDeath;
+            msg.Content = p.PlayerID + "\n" + msg.Content;
+
+            Game.Communicator.MessageAll(msg);
 
             Dictionary<RemotePlayer, Confirmation> confirmations = new Dictionary<RemotePlayer, Confirmation>();
 

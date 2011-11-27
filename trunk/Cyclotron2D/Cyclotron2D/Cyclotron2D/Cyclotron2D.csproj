@@ -108,11 +108,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\CollisionNotifier.cs" />
+    <Compile Include="Core\CycleCollisionEventArgs.cs" />
     <Compile Include="Graphics\Art.cs" />
     <Compile Include="Core\Players\AIPlayer.cs" />
     <Compile Include="Core\Players\LocalPlayer.cs" />
     <Compile Include="Core\Players\RemotePlayer.cs" />
     <Compile Include="Core\StartRandomizer.cs" />
+    <Compile Include="Helpers\PointOffset.cs" />
     <Compile Include="Helpers\RectangleBuilder.cs" />
     <Compile Include="Helpers\Sorter.cs" />
     <Compile Include="Helpers\Vector2Extention.cs" />

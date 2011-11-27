@@ -78,16 +78,6 @@ namespace Cyclotron2D.Network {
         #region Private Methods
 
         /// <summary>
-        /// Temporary Debug Print Method
-        /// </summary>
-        /// <param name="msg"></param>
-        private void print(String msg)
-        {
-            Console.WriteLine(msg);
-            DebugMessages.Add(msg);
-        }
-
-        /// <summary>
         /// Creates multiple conncetion threads to wait for incoming clients and verifies if clients have disconnected.
         /// Maintains this number of listening threads until the lobby is closed.
         /// </summary>
@@ -117,7 +107,7 @@ namespace Cyclotron2D.Network {
 
             var thread = new Thread(WaitForClient) {IsBackground = true, Name = "Connection Listener"}; 
             thread.Start();
-            print("Listening Thread Started");
+            DebugMessages.AddLogOnly("Listening Thread Started");
             m_acceptThreads.Add(thread);
 
         }
@@ -161,11 +151,11 @@ namespace Cyclotron2D.Network {
                 GameLobbySocket.Bind(localServer);
                 GameLobbySocket.Blocking = true;
                 GameLobbySocket.Listen(CONNECTION_BACKLOG);
-                print("Game Lobby Server started on port " + GAME_PORT);
+                DebugMessages.Add("Game Lobby Server started on port " + GAME_PORT);
             }
             catch (ArgumentOutOfRangeException ex)
             {
-                print("Invalid Port Number " + GAME_PORT);
+                DebugMessages.Add("Invalid Port Number " + GAME_PORT);
                 Console.WriteLine(ex.StackTrace);
             }
 
@@ -191,7 +181,7 @@ namespace Cyclotron2D.Network {
 				t.Abort();
 			}
 		    m_acceptThreads.Clear();
-			print("Closed Lobby");
+			DebugMessages.Add("Closed Lobby");
 		}
 
 		/// <summary>
@@ -215,7 +205,7 @@ namespace Cyclotron2D.Network {
 			}
             m_acceptThreads.Clear();
 			GameLobbySocket.Close();
-            print("Lobby killed");
+            DebugMessages.Add("Lobby killed");
         }
 
         #endregion
@@ -229,10 +219,9 @@ namespace Cyclotron2D.Network {
 		private void WaitForClient() {
 			try {
 				Socket client = GameLobbySocket.Accept();
-				print("Accepting Connection ...");
                 lock (Clients) { Clients.Add(client); }
                 InvokeNewConnection(new SocketEventArgs(client));
-			    print("Accepted Client #" + Clients.Count);
+			    DebugMessages.Add("Accepted Client #" + Clients.Count);
 			} catch (SocketException ex) {
 				Console.WriteLine(ex);
 			} catch (ThreadAbortException) {

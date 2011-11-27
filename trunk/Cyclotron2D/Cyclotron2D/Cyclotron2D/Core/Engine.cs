@@ -56,8 +56,7 @@ namespace Cyclotron2D.Core
 
         private Countdown m_countdown;
 
-
-		private List<Animation> m_explosionAnimations;
+        public List<Animation> ExplosionAnimations { get; private set; }
 
         #endregion
 
@@ -89,7 +88,7 @@ namespace Cyclotron2D.Core
             m_countdown = new Countdown(Game, Screen) { Value = Countdown, TextColor = Color.Red};
             m_countdown.Rect = RectangleBuilder.Centered(vp, new Vector2(0.2f, 0.2f));
 
-			m_explosionAnimations = new List<Animation>();
+			ExplosionAnimations = new List<Animation>();
         }
 
         #endregion
@@ -127,12 +126,7 @@ namespace Cyclotron2D.Core
                 m_playerCycleMap[winner].Enabled = false;
             }
 
-			m_explosionAnimations.RemoveAll(x => !x.Enabled);
-//			foreach (var explosion in m_explosionAnimations)
-//			{
-//				explosion.Scale += 0.1f;
-//				explosion.Color *= 0.99f;
-//			}
+			ExplosionAnimations.RemoveAll(x => !x.Enabled);
         }
 
         public void StartGame()
@@ -153,7 +147,7 @@ namespace Cyclotron2D.Core
             int i = 0;
             foreach (var player in players)
             {
-                Cycle c = new Cycle(Game, Screen, Grid, startConditions[i++], player);
+                Cycle c = new Cycle(Game, Screen, Grid, startConditions[i++], player, ExplosionAnimations);
                 m_playerCycleMap.Add(player, c);
                 player.Initialize(c);
             }
@@ -185,7 +179,7 @@ namespace Cyclotron2D.Core
                     m_countdown.Draw(gameTime);
                 }
 
-				foreach (var explosion in m_explosionAnimations.Where(ex => ex.Visible))
+				foreach (var explosion in ExplosionAnimations.Where(ex => ex.Visible))
 				{
 			        explosion.Draw(gameTime);
 				}
@@ -243,18 +237,17 @@ namespace Cyclotron2D.Core
 
             if (Game.State == GameState.PlayingSolo)
             {
-                cycle.Enabled = false;
-                m_explosionAnimations.Add(cycle.CreateExplosion());
+                cycle.Kill();
             }
             else if (e.Type == CollisionType.Player && e.AmbiguousCollision && Game.State == GameState.PlayingAsHost)
             {
                 //currently the host will decide on ambiguous collisions.
                 GameScreen.CollisionNotifier.NotifyRealDeath(e.Victim);
-                m_explosionAnimations.Add(cycle.CreateExplosion());
+                cycle.Kill();
             }
             else if(e.Victim is RemotePlayer || e.AmbiguousCollision)
             {
-                
+                cycle.FeignDeath();
             }
           
         }

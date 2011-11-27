@@ -90,7 +90,18 @@ namespace Cyclotron2D.Screens.Main {
 		    }
 		}
 
-//
+
+        protected override void OnStateChanged(object sender, StateChangedEventArgs e)
+        {
+            base.OnStateChanged(sender, e);
+            if(IsValidState && Host != null)
+            {
+                Host.Disconnect();
+                Host = null;
+                Host = new NetworkConnection();
+            }
+        }
+
         private void CreateHost()
         {
             var lobbyScreen = Game.ScreenManager.GetMainScreen<GameLobbyScreen>() as GameLobbyScreen;
@@ -101,7 +112,7 @@ namespace Cyclotron2D.Screens.Main {
                 //we are connecting to host. Host always has player id = 1
                 RemotePlayer hostPlayer = new RemotePlayer(Game, gameScreen) { PlayerID = 1 };
                 lobbyScreen.AddHost(hostPlayer, Host);
-                hostPlayer.SubscribeConnection();
+                //hostPlayer.SubscribeConnection();
             }
         }
 //

@@ -59,13 +59,18 @@ namespace Cyclotron2D.Network
 
 //        public static Socket UdpListenSocket { get; private set; }
 
-        public bool IsConnected { get { return SocketProbe.IsConnectedTcp(Socket); } }
+        public bool IsConnected { get { return Mode == NetworkMode.Tcp ? SocketProbe.IsConnectedTcp(Socket):true; } }
 
         public EndPoint LocalEP { get; private set; }
 
         public EndPoint RemoteEP { get; private set; }
 
         public NetworkMode Mode { get; private set; }
+
+        /// <summary>
+        /// currently only the server has this information for everyone. clients only have it for the server
+        /// </summary>
+        public TimeSpan RoundTripTime { get; set; }
 
         #endregion
 
@@ -77,6 +82,7 @@ namespace Cyclotron2D.Network
         /// <param name="socket">an already connected socket</param>
         public NetworkConnection(Socket socket)
         {
+            Mode = NetworkMode.Tcp;
             Socket = socket;
             if (SocketProbe.IsConnectedTcp(socket))
             {
@@ -86,7 +92,7 @@ namespace Cyclotron2D.Network
                // ClearReceiveBuffer();
                 StartReceiving();
             }
-            Mode = NetworkMode.Tcp;
+
         }
 
         public NetworkConnection()
@@ -97,9 +103,10 @@ namespace Cyclotron2D.Network
 
         public NetworkConnection(EndPoint localEp, IPAddress ip, int port)
         {
+            Mode = NetworkMode.Tcp;
             LocalEP = localEp;
             RemoteEP = new IPEndPoint(ip, port);
-            Mode = NetworkMode.Tcp;
+
         }
 
         #endregion
@@ -194,7 +201,6 @@ namespace Cyclotron2D.Network
                 LocalEP = Socket.LocalEndPoint;
                 RemoteEP = Socket.RemoteEndPoint;
 
-               // ClearReceiveBuffer();
                 StartReceiving();
 
             }
@@ -212,6 +218,7 @@ namespace Cyclotron2D.Network
             if (Socket != null)
             {
                 Socket.Close();
+                Socket = null;
             }
             
         }
@@ -228,24 +235,22 @@ namespace Cyclotron2D.Network
 
             try
             {
-//                switch (Mode)
-//                {
-//                    case NetworkMode.Tcp:
-//                        {
-                            Socket.BeginReceive(buffer, 0, MAX_BUFFER_SIZE, SocketFlags.None, ReceiveCallback, buffer);
-//                        }
-//                        break;
-//                    case NetworkMode.Udp:
-//                        {
-//                           /* var endpoint = RemoteEP;
-//                            Socket.BeginReceiveFrom(buffer, 0, MAX_BUFFER_SIZE, SocketFlags.None, ref endpoint, ReceiveCallback, buffer);*/
-//                        }
-//                        break;
-//                }
+                Socket.BeginReceive(buffer, 0, MAX_BUFFER_SIZE, SocketFlags.None, ReceiveCallback, buffer);
             }
             catch (ObjectDisposedException)
             {
                 //disconnected, stop receive loop
+                return;
+            }
+            catch (NullReferenceException)
+            {
+                //disconnected, stop receive loop
+                return;
+            }
+            catch (SocketException ex)
+            {
+                //forcibly disconnected from remote host?
+                DebugMessages.Add(ex.Message);
                 return;
             }
         }
@@ -276,6 +281,11 @@ namespace Cyclotron2D.Network
 
             }
             catch (ObjectDisposedException)
+            {
+                //disconnected, stop receive loop
+                return;
+            }
+            catch(NullReferenceException)
             {
                 //disconnected, stop receive loop
                 return;

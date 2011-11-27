@@ -15,32 +15,16 @@ namespace Cyclotron2D.Core.Players
     {
         public RemotePlayer(Game game, Screen screen) : base(game, screen)
         {
-            //SubscribeConnection();
         }
 
         public override string Name { get; set; } 
 
 
-
-        #region Subscription
-
-        public void SubscribeConnection()
-        {
-            Game.Communicator.MessageReceived += OnMessageReceived;
-        }
-
-        private void UnsubscribeConnection()
-        {
-            Game.Communicator.MessageReceived -= OnMessageReceived;
-        }
-
-
-        #endregion
-
         #region Event Handlers
 
-        private void OnMessageReceived(object sender, MessageEventArgs e)
+        protected override void OnMessageReceived(object sender, MessageEventArgs e)
         {
+            base.OnMessageReceived(sender, e);
             //handle only messages from the player this instance represents
             if (e.Message.Source != PlayerID) return;
 
@@ -58,7 +42,7 @@ namespace Cyclotron2D.Core.Players
                     break;
                 case MessageType.PlayerInfoUpdate:
                     {
-                        List<Point> vertices = e.Message.ContentLines.Select(line => PointExtention.FromString(line)).ToList();
+                        List<Point> vertices = e.Message.ContentLines.Select(PointExtention.FromString).ToList();
                         Cycle.HandleUpdateInfo(vertices);
                     }
                     break;
@@ -70,18 +54,5 @@ namespace Cyclotron2D.Core.Players
 
         #endregion
 
-
-        #region IDisposable
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                UnsubscribeConnection();
-            }
-            base.Dispose(disposing);
-        }
-
-        #endregion
     }
 }

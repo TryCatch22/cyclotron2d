@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
+using System.Threading;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Mod;
@@ -233,6 +234,14 @@ namespace Cyclotron2D.Screens.Main
         private void OnStartGameClicked(object sender, EventArgs eventArgs)
         {
             GameScreen.UseUdp = m_useUdpBox.IsChecked;
+            if (GameScreen.UseUdp)
+            {
+                DebugMessages.AddLogOnly("Hosting Udp Game");
+            }
+            else
+            {
+                DebugMessages.AddLogOnly("Hosting Tcp Game");
+            }
             Game.ChangeState(GameState.PlayingAsHost);
         }
 
@@ -240,7 +249,7 @@ namespace Cyclotron2D.Screens.Main
         {
             var rem = new RemotePlayer(Game, GameScreen) {PlayerID = Players.Count + 1};
             AddPlayer(rem, e.Socket);
-            rem.SubscribeConnection();
+           // rem.SubscribeConnection();
             string content = rem.PlayerID + "\n" + Settings.SinglePlayer.PlayerName.Value;
             Game.Communicator.MessagePlayer(rem, new NetworkMessage(MessageType.Welcome, content));
             
@@ -318,92 +327,119 @@ namespace Cyclotron2D.Screens.Main
             }
         }
 
+        private DateTime m_pingOut;
+
         private void OnMessageReceived(object sender, MessageEventArgs e)
         {
             //only handle messages if we are in one of our states
             if (!IsValidState) return;
 
+            RemotePlayer source = Game.Communicator.GetPlayer(e.Message.Source);
 
-            var connection = sender as NetworkConnection;
-            if (connection != null)
+            switch (e.Message.Type)
             {
-                switch (e.Message.Type)
-                {
-                    //for server side getting the name of the newly connected player
-                    //once it has this it can announce the new player to the other players.
-                    case MessageType.Hello:
-                        {
-                            RemotePlayer player = Game.Communicator.GetPlayer(connection);
-                            player.Name = e.Message.Content;
-                            string content = player.PlayerID + "\n" + player.Name;
-                            Game.Communicator.MessageOtherPlayers(player,
-                                new NetworkMessage(MessageType.PlayerJoined, content));
+                //for server side getting the name of the newly connected player
+                //once it has this it can announce the new player to the other players.
+                case MessageType.Hello:
+                    {
 
-                            foreach (Player otherPlayer in Players)
+                        source.Name = e.Message.Content;
+                        string content = source.PlayerID + "\n" + source.Name;
+                        Game.Communicator.MessageOtherPlayers(source,
+                            new NetworkMessage(MessageType.PlayerJoined, content));
+
+                        foreach (Player otherPlayer in Players)
+                        {
+                            if (otherPlayer != source && otherPlayer.PlayerID != Game.Communicator.LocalId)
                             {
-                                if (otherPlayer != player && otherPlayer.PlayerID != Game.Communicator.LocalId)
-                                {
-                                    content = otherPlayer.PlayerID + "\n" + otherPlayer.Name;
-                                    Game.Communicator.MessagePlayer(player,
-                                        new NetworkMessage(MessageType.PlayerJoined, content));
-                                }
+                                content = otherPlayer.PlayerID + "\n" + otherPlayer.Name;
+                                Game.Communicator.MessagePlayer(source,
+                                    new NetworkMessage(MessageType.PlayerJoined, content));
                             }
                         }
-                        break;
-                    //now on client side we can add the new player
-                    case MessageType.PlayerJoined:
-                        {
-                            var lines = e.Message.Content.Split(new[] { '\n' });
 
-                            int id;
-                            if (int.TryParse(lines[0], out id))
+                        Thread.Sleep(400);
+
+                        m_pingOut = DateTime.Now;
+                        Game.Communicator.MessagePlayer(source, new NetworkMessage(MessageType.Ping, "a"));
+
+                    }
+                    break;
+                case MessageType.Ping:
+                    {
+                        switch (e.Message.Content[0])
+                        {
+                            case 'a':
+                                //client receives initial ping
+                                m_pingOut = DateTime.Now;
+                                Game.Communicator.MessagePlayer(source, new NetworkMessage(MessageType.Ping, "b"));
+                                break;
+                            case 'b':
+                                //server getting pingback
+                                Game.Communicator.Connections[source].RoundTripTime = DateTime.Now - m_pingOut;
+                                Game.Communicator.MessagePlayer(source, new NetworkMessage(MessageType.Ping, "c"));
+                                break;
+                            case 'c':
+                                //client getting pingback
+                                Game.Communicator.Connections[source].RoundTripTime = DateTime.Now - m_pingOut;
+                                break;
+                        }
+                    }
+                    break;
+                //now on client side we can add the new player
+                case MessageType.PlayerJoined:
+                    {
+                        var lines = e.Message.Content.Split(new[] { '\n' });
+
+                        int id;
+                        if (int.TryParse(lines[0], out id))
+                        {
+                            var player = new RemotePlayer(Game, GameScreen) { PlayerID = id, Name = lines[1] };
+                            AddPlayer(player);
+                            //  player.SubscribeConnection();
+                            DebugMessages.Add("Player " + player.PlayerID + " Joined");
+                        }
+
+                    }
+                    break;
+                case MessageType.PlayerLeft:
+                    {
+                        //client got player left notice, now remap player id and remove useless player
+                        var lines = e.Message.Content.Split(new[] { '\n' }).Where(line => !string.IsNullOrEmpty(line));
+                        foreach (var line in lines)
+                        {
+                            var idstrings = line.Split(new[] { ' ' });
+                            int oId, nId;
+
+                            int.TryParse(idstrings[0], out oId);
+                            int.TryParse(idstrings[1], out nId);
+                            Player player = GetPlayer(oId);
+
+                            if (nId == -1)
                             {
-                                var player = new RemotePlayer(Game, GameScreen) { PlayerID = id, Name = lines[1] };
-                                AddPlayer(player);
-                                player.SubscribeConnection();
-                                DebugMessages.Add("Player " + player.PlayerID + " Joined");
+                                DebugMessages.Add("Player " + oId + " Left");
+                                RemovePlayer(player);
+                                player.Dispose();
+                            }
+                            else
+                            {
+                                player.PlayerID = nId;
                             }
 
                         }
-                        break;
-                    case MessageType.PlayerLeft:
-                        {
-                            //client got player left notice, now remap player id and remove useless player
-                            var lines = e.Message.Content.Split(new[] { '\n' }).Where(line => !string.IsNullOrEmpty(line));
-                            foreach (var line in lines)
-                            {
-                                var idstrings = line.Split(new[] { ' ' });
-                                int oId, nId;
-
-                                int.TryParse(idstrings[0], out oId);
-                                int.TryParse(idstrings[1], out nId);
-                                Player player = GetPlayer(oId);
-
-                                if (nId == -1)
-                                {
-                                    DebugMessages.Add("Player " + oId + " Left");
-                                    RemovePlayer(player);
-                                    player.Dispose();
-                                }
-                                else
-                                {
-                                    player.PlayerID = nId;
-                                }
-
-                            }
-                        }
-                        break;
-                    case MessageType.SetupGameUdp:
-                    case MessageType.SetupGame:
-                        {
-                            GameScreen.SetupMessage = e.Message;
-                            Game.ChangeState(GameState.PlayingAsClient);
-                        }
-                        break;
-                    default:
-                        return;
-                }
+                    }
+                    break;
+                case MessageType.SetupGameUdp:
+                case MessageType.SetupGame:
+                    {
+                        GameScreen.SetupMessage = e.Message;
+                        Game.ChangeState(GameState.PlayingAsClient);
+                    }
+                    break;
+                default:
+                    return;
             }
+            
 
         }
 
