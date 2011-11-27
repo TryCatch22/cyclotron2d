@@ -40,12 +40,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	float2 coord = input.TexCoord;
 	for (int i = 0; i < numPlayers; i++) {
-		coord -= cyclePos[i];
-	
-		float dist = length(coord);
-		coord -= intensity * cycleVel[i] * smoothstep(0, 1, max(0, 1 - inverseScale * dist));
-
-		coord += cyclePos[i];
+		float dist = length(coord - cyclePos[i]);
+		coord -= intensity * cycleVel[i] * lerp(0, 1, max(0, 1 - inverseScale * dist));
 	}
 
 	float4 color = tex2D(inputSampler, coord);
@@ -59,7 +55,7 @@ technique Technique1
     {
         // TODO: set renderstates here.
 
-        VertexShader = compile vs_3_0 VertexShaderFunction();
-        PixelShader = compile ps_3_0 PixelShaderFunction();
+        VertexShader = compile vs_2_0 VertexShaderFunction();
+        PixelShader = compile ps_2_0 PixelShaderFunction();
     }
 }
