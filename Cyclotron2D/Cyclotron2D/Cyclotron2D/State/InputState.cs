@@ -65,7 +65,7 @@ namespace Cyclotron2D.State
         public bool IsNewCharPress(out char? c)
         {
             c = null;
-            List<Keys> keys = CurrentKeyState.GetPressedKeys().ToList();
+            List<Keys> keys = CurrentKeyState.GetPressedKeys().Where(x => x != Keys.None).ToList();
             List<Keys> modKeys = new List<Keys>();
             foreach (var modKey in ModifierKeys)
             {
