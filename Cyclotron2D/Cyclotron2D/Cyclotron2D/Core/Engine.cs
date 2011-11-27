@@ -10,6 +10,8 @@ using Cyclotron2D.Screens.Main;
 using Cyclotron2D.State;
 using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
+using Cyclotron2D.Graphics;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Cyclotron2D.Core
 {
@@ -54,6 +56,8 @@ namespace Cyclotron2D.Core
 
         private Countdown m_countdown;
 
+		private List<Animation> m_explosionAnimations;
+
         #endregion
 
         #region Properties
@@ -84,17 +88,15 @@ namespace Cyclotron2D.Core
             m_countdown = new Countdown(Game, Screen) { Value = Countdown, TextColor = Color.Red};
             m_countdown.Rect = RectangleBuilder.Centered(vp, new Vector2(0.2f, 0.2f));
 
-
+			m_explosionAnimations = new List<Animation>();
         }
 
         #endregion
 
         #region Public Methods
 
-
         public override void Update(GameTime gameTime)
         {
-
             base.Update(gameTime);
 
             if (m_playerCycleMap == null)
@@ -118,6 +120,13 @@ namespace Cyclotron2D.Core
                 winner.Winner = true;
                 m_playerCycleMap[winner].Enabled = false;
             }
+
+			m_explosionAnimations.RemoveAll(x => !x.Enabled);
+			foreach (var explosion in m_explosionAnimations)
+			{
+				explosion.Scale += 0.1f;
+				explosion.Color *= 0.99f;
+			}
         }
 
         public void StartGame()
@@ -145,8 +154,6 @@ namespace Cyclotron2D.Core
 
             Grid.Initialize(m_playerCycleMap.Values);
 
-
-
             SubscribePlayers();
             SubscribeCycles();
         }
@@ -154,7 +161,6 @@ namespace Cyclotron2D.Core
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
-
 
             try
             {
@@ -172,14 +178,18 @@ namespace Cyclotron2D.Core
                 {
                     m_countdown.Draw(gameTime);
                 }
+
+				foreach (var explosion in m_explosionAnimations)
+				{
+					if (explosion.Enabled)
+						explosion.Draw(gameTime);
+				}
             }
             catch (NullReferenceException)
             {
                 //engine was disposed on seperate thread in the middle of draw call. 
                 //dont need to do anything, this object is about to no longer exist
             }
-
-
         }
 
         #endregion
@@ -227,6 +237,7 @@ namespace Cyclotron2D.Core
             if (cycle != null)
             {
                 cycle.Enabled = false;
+				m_explosionAnimations.Add(cycle.CreateExplosion());
 
                 if (GameScreen.UseUdp && Game.IsState(GameState.PlayingAsHost))
                 {

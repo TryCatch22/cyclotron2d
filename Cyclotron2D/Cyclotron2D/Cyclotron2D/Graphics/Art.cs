@@ -30,7 +30,7 @@ namespace Cyclotron2D.Graphics
             Circle = content.Load<Texture2D>("Circle");
 			Bike = content.Load<Texture2D>("Bike");
 
-            ExplosionSheet = content.Load<Texture2D>("BlueExplosion");
+			ExplosionSheet = content.Load<Texture2D>("GrayExplosion");
 
 			Font = content.Load<SpriteFont>("Font");
         }

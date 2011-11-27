@@ -37,8 +37,8 @@ namespace Cyclotron2D.Core
         /// This is used to draw our trail.
         /// </summary>
         private List<Point> m_vertices;
-
-        #endregion
+		
+		#endregion
 
         #region Properties
 
@@ -114,7 +114,6 @@ namespace Cyclotron2D.Core
             m_player = player;
             //add start position
             m_vertices.Add(Position);
-
         }
 
         #endregion
@@ -397,22 +396,23 @@ namespace Cyclotron2D.Core
         }
 
 
-        public override void Draw(GameTime gameTime)
-        {
-            base.Draw(gameTime);
-            Point? lastVertex = null;
+		public override void Draw(GameTime gameTime)
+		{
+			base.Draw(gameTime);
+			Point? lastVertex = null;
 
-            foreach (var vertex in m_vertices)
-            {
-                if (lastVertex != null)
-                    DrawLine(lastVertex.Value, vertex);
-                lastVertex = vertex;
-            }
+			foreach (var vertex in m_vertices)
+			{
+				if (lastVertex != null)
+					DrawLine(lastVertex.Value, vertex);
+				lastVertex = vertex;
+			}
 
-            DrawLine(m_vertices.Last(), Position);
+			DrawLine(m_vertices.Last(), Position);
 
-			Game.SpriteBatch.Draw(Art.Bike, Position.ToVector(), null, BikeColor, (float)Math.PI + Velocity.Orientation(), new Vector2(Art.Bike.Width / 2, Art.Bike.Height / 2), 1f, SpriteEffects.None, 0);
-        }
+			if (Enabled)
+				Game.SpriteBatch.Draw(Art.Bike, Position.ToVector(), null, BikeColor, (float)Math.PI + Velocity.Orientation(), new Vector2(Art.Bike.Width / 2, Art.Bike.Height / 2), 1f, SpriteEffects.None, 0);
+		}
 
         public override void Update(GameTime gameTime)
         {
@@ -435,8 +435,6 @@ namespace Cyclotron2D.Core
             {//could have been disabled during collision check
                 CheckScheduledTurn();
             }
-            
-           
         }
 
         public bool CycleJustTurned()
@@ -463,6 +461,15 @@ namespace Cyclotron2D.Core
             }
             return false;
         }
+
+		public Animation CreateExplosion()
+		{
+			return new Animation(Game, Screen, Art.ExplosionSheet, new Point(3, 4))
+			{
+				Position = Position.ToVector(),
+				Color = BikeColor
+			};
+		}
 
         #endregion
 
@@ -653,8 +660,6 @@ namespace Cyclotron2D.Core
         }
 
         #endregion
-
-
     }
 
 

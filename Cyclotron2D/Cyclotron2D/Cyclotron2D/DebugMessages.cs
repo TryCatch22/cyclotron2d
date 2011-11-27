@@ -109,6 +109,9 @@ namespace Cyclotron2D {
 		private static void WriteLog(List<Message> logs)
 		{
 #if DEBUG
+			if (!LogMessages)
+				return;
+
 		    (new Thread(() =>
 		                    {
                                 lock (s_fileLock)

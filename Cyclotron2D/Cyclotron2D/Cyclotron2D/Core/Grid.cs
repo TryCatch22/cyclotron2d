@@ -113,6 +113,7 @@ namespace Cyclotron2D.Core
 		{
 			base.Draw(gameTime);
 
+			// Firstly, we draw the grid to it's own render target.
 			Game.GraphicsDevice.SetRenderTarget(m_renderTarget);
 			Game.GraphicsDevice.Clear(Color.Black);
 
@@ -125,8 +126,10 @@ namespace Cyclotron2D.Core
 
 			m_spriteBatch.End();
 
+			// (Put the render target back to the back buffer.)
 			Game.GraphicsDevice.SetRenderTarget(null);
 
+			// Secondly, set up the data needed for the warpy effect
 			var positions = new Vector2[Cycles.Count];
 			var velocities = new Vector2[Cycles.Count];
 			for (int i = 0; i < Cycles.Count && i < 6; i++)
@@ -141,11 +144,13 @@ namespace Cyclotron2D.Core
 			GraphicsDevice.SetVertexBuffer(m_vertexBuffer);
 			GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
 
+			// Thirdly, we pass the data to the warpy effect.
 			m_effect.Parameters["inputTex"].SetValue(m_renderTarget);
 			m_effect.Parameters["numPlayers"].SetValue(Cycles.Count);
 			m_effect.Parameters["cyclePos"].SetValue(positions);
 			m_effect.Parameters["cycleVel"].SetValue(velocities);
 
+			// Fourthly, we apply the warpy effect.
 			foreach (EffectPass pass in m_effect.CurrentTechnique.Passes)
 			{
 				pass.Apply();
