@@ -108,7 +108,7 @@ namespace Cyclotron2D.Screens.Main
                             //if all players are ready
                             if (ActivePlayers.Aggregate(true, (ready, p) => ready && p.Ready))
                             {
-                                string content = (DateTime.UtcNow + Game.Communicator.AverageRtt + new TimeSpan(0, 0, 0, 0, 500)).ToFileTimeUtc().ToString();
+                                string content = (DateTime.UtcNow + new TimeSpan(0, 0, 0, 2)).ToString("r");
                                 Game.Communicator.MessageAll(new NetworkMessage(MessageType.AllReady, content));
                             }
 
@@ -125,7 +125,7 @@ namespace Cyclotron2D.Screens.Main
                             {
                                 activePlayer.Ready = true;
                             }
-                            m_startTimeUtc = DateTime.FromFileTimeUtc(long.Parse(e.Message.Content));
+                            m_startTimeUtc = DateTime.Parse(e.Message.Content);
                         }
                     }
                     break;
