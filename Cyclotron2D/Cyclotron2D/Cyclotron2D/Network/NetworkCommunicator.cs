@@ -120,20 +120,34 @@ namespace Cyclotron2D.Network
             }
         }
 
-        public void Remove(RemotePlayer player)
+        private void RemoveAllDisconnected()
         {
             lock (Connections)
             {
-                if (Connections.ContainsKey(player))
+                foreach (RemotePlayer player in m_disconnected)
                 {
-                    var connection = Connections[player];
-                    connection.MessageReceived -= OnMessageReceived;
-                    connection.Disconnected -= OnConnectionDisconnected;
-                    connection.Disconnect();
-                    Connections.Remove(player);
 
-                    DebugMessages.Add("Removing " + player + " from Communicator.");
+                    if (Connections.ContainsKey(player))
+                    {
+                        var connection = Connections[player];
+                        connection.MessageReceived -= OnMessageReceived;
+                        connection.Disconnected -= OnConnectionDisconnected;
+                        connection.Disconnect();
+                        Connections.Remove(player);
+
+                        DebugMessages.Add("Removing " + player + " from Communicator.");
+                    }
                 }
+            }
+
+        }
+
+        public void Remove(RemotePlayer player)
+        {
+
+            m_disconnected.Add(player);
+            lock (Connections)
+            {
             }
 
         }
@@ -149,10 +163,7 @@ namespace Cyclotron2D.Network
                 connections = Connections.Values.ToList();
             }
 
-            foreach (RemotePlayer remotePlayer in m_disconnected)
-            {
-                Remove(remotePlayer);
-            }
+            RemoveAllDisconnected();
 
             m_disconnected.Clear();
 
@@ -164,18 +175,18 @@ namespace Cyclotron2D.Network
                     if (!connection.IsConnected)
                     {
                         var player = GetPlayer(connection);
-                        if(player != null && !m_doingUdpSwitch)
+                        if (player != null && !m_doingUdpSwitch)
                         {
-                              
-                              InvokeConnectionLost(new ConnectionEventArgs(connection));
-                              Remove(player);
+
+                            InvokeConnectionLost(new ConnectionEventArgs(connection));
+                            Remove(player);
                         }
-                      
+
                     }
 
                 }
 
-               
+
                 lastConnectionCheck = gameTime.TotalGameTime;
             }
 
@@ -349,7 +360,7 @@ namespace Cyclotron2D.Network
             m_doingUdpSwitch = true;
             DebugMessages.AddLogOnly("udp Switch start");
 
-            if(Game.IsState(GameState.PlayingAsHost))
+            if (Game.IsState(GameState.PlayingAsHost))
             {
                 //wait until all clients have received the setup message before stopping tcp
                 Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 200)));
@@ -360,20 +371,20 @@ namespace Cyclotron2D.Network
                 Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 400)));
             }
 
-             StopTcp();
+            StopTcp();
 
-             if (Game.IsState(GameState.PlayingAsHost))
-             {
-                 //wait until all clients have stopped Tcp to start udp
-                 Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 200)));
-             }
-             else if (Game.IsState(GameState.PlayingAsClient))
-             {
-                 //wait until host has started udp then start after
-                 Thread.Sleep(100);
-             }
+            if (Game.IsState(GameState.PlayingAsHost))
+            {
+                //wait until all clients have stopped Tcp to start udp
+                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 200)));
+            }
+            else if (Game.IsState(GameState.PlayingAsClient))
+            {
+                //wait until host has started udp then start after
+                Thread.Sleep(100);
+            }
 
-           
+
             StartUdp();
 
             DebugMessages.AddLogOnly("udp Switch end");
@@ -390,7 +401,7 @@ namespace Cyclotron2D.Network
 
         private void OnConnectionDisconnected(object sender, ConnectionEventArgs e)
         {
-            if(!m_doingUdpSwitch)
+            if (!m_doingUdpSwitch)
             {
                 InvokeConnectionLost(e);
                 m_disconnected.Add(GetPlayer(e.Connection));
@@ -486,7 +497,7 @@ namespace Cyclotron2D.Network
             StartReceivingUdp();
 
 
-            if(msg != null)
+            if (msg != null)
             {
                 OnMessageReceived(GetConnection(msg.Source), new MessageEventArgs(msg));
             }
