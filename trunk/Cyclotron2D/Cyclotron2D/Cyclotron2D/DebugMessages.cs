@@ -97,7 +97,7 @@ namespace Cyclotron2D {
 
             if (LogMessages)
             {
-                s_logMessages.Enqueue(message);
+                s_logMessages.Enqueue("["+DateTime.Now.ToString("T")+"] "+ message);
             }
 #endif
         }
@@ -161,6 +161,7 @@ namespace Cyclotron2D {
 		public Message(string text, float timeLeft) {
 			Text = text;
 			TimeLeft = timeLeft;
+
 		}
 
 		public string Text { get; set; }

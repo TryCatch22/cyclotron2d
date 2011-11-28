@@ -25,6 +25,8 @@ namespace Cyclotron2D.Network
 
         private TimeSpan lastConnectionCheck;
 
+        private bool m_doingUdpSwitch;
+
         #endregion
 
         private List<RemotePlayer> m_disconnected;
@@ -39,6 +41,8 @@ namespace Cyclotron2D.Network
         public NetworkMode Mode { get; private set; }
 
         public RemotePlayer Host { get; private set; }
+
+
 
         public TimeSpan AverageRtt
         {
@@ -178,6 +182,8 @@ namespace Cyclotron2D.Network
 
         public void SendDebugMessage(string message)
         {
+            while (m_doingUdpSwitch) Thread.Yield();
+
             foreach (var networkConnection in Connections.Values)
             {
                 networkConnection.Send(new NetworkMessage(MessageType.Debug, message) { Source = (byte)LocalId });
@@ -197,6 +203,8 @@ namespace Cyclotron2D.Network
         /// <param name="source">overrides default local source to pretend to be another player</param>
         public void MessagePlayer(RemotePlayer player, NetworkMessage message, byte source)
         {
+            while (m_doingUdpSwitch) Thread.Yield();
+
             if (Connections.ContainsKey(player))
             {
                 message.Source = source;
@@ -212,6 +220,9 @@ namespace Cyclotron2D.Network
         public void MessageOtherPlayers(RemotePlayer player, NetworkMessage message, byte source)
         {
             message.Source = source;
+
+            while (m_doingUdpSwitch) Thread.Yield();
+
             foreach (RemotePlayer remotePlayer in Connections.Keys.Where(key => key != player))
             {
                 Connections[remotePlayer].Send(message);
@@ -226,6 +237,9 @@ namespace Cyclotron2D.Network
         public void MessageAll(NetworkMessage message, byte source)
         {
             message.Source = source;
+
+            while (m_doingUdpSwitch) Thread.Yield();
+
             lock (Connections)
             {
                 foreach (RemotePlayer remotePlayer in Connections.Keys)
