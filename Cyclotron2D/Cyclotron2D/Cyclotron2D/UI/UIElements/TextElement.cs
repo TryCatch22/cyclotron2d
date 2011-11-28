@@ -26,7 +26,7 @@ namespace Cyclotron2D.UI.UIElements
 		{
 			//default value
 			TextColor = Color.Black;
-			TextScale = 1f;
+			TextScale = 0.4f;
 			Text = "";
 			TextAlign = TextAlign.Center;
 		}
