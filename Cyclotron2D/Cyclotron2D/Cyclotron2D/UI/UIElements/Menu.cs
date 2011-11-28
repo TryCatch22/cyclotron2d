@@ -160,15 +160,6 @@ namespace Cyclotron2D.UI.UIElements
             }
         }
 
-
-        public override void Draw(GameTime gameTime)
-        {
-            base.Draw(gameTime);
-
-            //draw diff color for Preview item
-            Game.SpriteBatch.Draw(Art.Pixel, PreviewItem.Rect, PreviewTint);
-        }
-
         #endregion
 
        
