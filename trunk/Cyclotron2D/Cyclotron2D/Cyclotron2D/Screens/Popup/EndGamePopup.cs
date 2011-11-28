@@ -46,11 +46,11 @@ namespace Cyclotron2D.Screens.Popup
             //temporarily for debugging
 
 
-//            base.Draw(gameTime);
-//            if (m_table.Visible)
-//            {
-//                m_table.Draw(gameTime);
-//            }
+            base.Draw(gameTime);
+            if (m_table.Visible)
+            {
+                m_table.Draw(gameTime);
+            }
         }
     }
 }
