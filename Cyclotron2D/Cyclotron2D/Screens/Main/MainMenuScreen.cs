@@ -4,6 +4,8 @@ using Cyclotron2D.State;
 using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
 using Cyclotron2D.Graphics;
+using Cyclotron2D.Sounds;
+using Microsoft.Xna.Framework.Media;
 
 namespace Cyclotron2D.Screens.Main
 {
@@ -97,6 +99,17 @@ namespace Cyclotron2D.Screens.Main
             m_mainMenu.Rect = new Rectangle(rect.Width/4, rect.Height/6 + 100, rect.Width/2, 2*rect.Height/3); // Hacked height by 100px to fit title art...
             m_mainMenu.Reset();
         }
+
+		public override void Update(GameTime gameTime)
+		{
+			base.Update(gameTime);
+
+			if (!Sound.menuMusicPlaying)
+			{
+				MediaPlayer.Play(Sound.MenuMusic);
+				Sound.menuMusicPlaying = true;
+			}
+		}
 
         public override void Draw(GameTime gameTime)
         {

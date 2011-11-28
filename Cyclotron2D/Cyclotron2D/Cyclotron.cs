@@ -6,6 +6,7 @@ using Cyclotron2D.Screens.Main;
 using Cyclotron2D.State;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Cyclotron2D.Sounds;
 
 namespace Cyclotron2D
 {
@@ -110,6 +111,7 @@ namespace Cyclotron2D
         {
             IsMouseVisible = true;
             Art.Initalize(this);
+			Sound.Initialize();
             LoadScreens();
             Settings.SinglePlayer.LoadFromFile();
 
@@ -127,6 +129,7 @@ namespace Cyclotron2D
             SpriteBatch = new SpriteBatch(GraphicsDevice);
 
             Art.LoadContent(Content);
+			Sound.LoadContent(Content);
         }
 
         /// <summary>
