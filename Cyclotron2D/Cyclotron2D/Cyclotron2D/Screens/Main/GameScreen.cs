@@ -77,12 +77,12 @@ namespace Cyclotron2D.Screens.Main
                     StartGame();
                 }
                 
-            }else if (isGameSetup && !m_gameStarted && Game.IsState(GameState.PlayingAsClient) && gameTime.TotalGameTime > m_lastReady + new TimeSpan(0, 0, 0, 0, 800))
+            }/*else if (isGameSetup && !m_gameStarted && Game.IsState(GameState.PlayingAsClient) && gameTime.TotalGameTime > m_lastReady + new TimeSpan(0, 0, 0, 0, 800))
             {
                 //in case ready packet got dropped
                 Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
                 m_lastReady = gameTime.TotalGameTime;
-            }
+            }*/
         }
         
 
