@@ -144,7 +144,7 @@ namespace Cyclotron2D.Mod
                         PlasmaGrid.TrySetValue(b);
                     }
                 }
-                catch (Exception)
+                catch (Exception r)
                 {
                     DebugMessages.Add("Failed to load Settings from file");
                 }
