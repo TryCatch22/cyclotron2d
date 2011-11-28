@@ -26,6 +26,8 @@ namespace Cyclotron2D.Core.Players
             SubscribeConnection();
         }
 
+
+
         protected GameScreen GameScreen { get { return Screen as GameScreen; } }
 
         public abstract string Name { get; set; }
@@ -88,7 +90,8 @@ namespace Cyclotron2D.Core.Players
             {
                 if (!Cycle.Enabled && !Cycle.Dead)
                 {
-                    if (gameTime.TotalGameTime > Cycle.FeigningDeathStart + new TimeSpan(GameScreen.CollisionNotifier.MaxAckDelay.Ticks * 2))
+                    TimeSpan delay = TimeSpanExtention.Max(GameScreen.CollisionNotifier.MaxAckDelay.Mult(2), new TimeSpan(0, 0, 0, 0, 100));
+                    if (gameTime.TotalGameTime > Cycle.FeigningDeathStart + delay)
                     {
                         Cycle.Revive();
                     }

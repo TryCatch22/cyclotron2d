@@ -120,7 +120,32 @@ namespace Cyclotron2D.Helpers
 			else if (hsv.X < 5) return new Color(x + m, m, c + m);
 			else return new Color(c + m, m, x + m);
 		}
-	}
+	
+    
+    
+    
+    
+    }
+
+
+    public static class TimeSpanExtention
+    {
+        public static TimeSpan Mult(this TimeSpan ts, int i)
+        {
+            return new TimeSpan(ts.Ticks * i);
+        }
+
+        public static TimeSpan Div(this TimeSpan ts, int i)
+        {
+            return new TimeSpan(ts.Ticks / i);
+        }
+
+        public static TimeSpan Max(TimeSpan a, TimeSpan b)
+        {
+            return a >= b ? a : b;
+        }
+
+    }
 
 
 }

@@ -153,14 +153,31 @@ namespace Cyclotron2D.Core
         }
 
 
-        public void HandleUpdateInfo(List<Point> vertices)
-        {
+        private List<Point> m_lastUpdateInfo;
 
-            if(!Enabled)
+        public void HandleUpdateInfo(List<Point> vertices, bool revive = false)
+        {
+            m_lastUpdateInfo = vertices;
+            if(!Enabled || vertices == null)
             {
                 //we are currently feigning death, and not updating the cycle for the moment
                 return;
             }
+
+
+            Point Position;
+
+            if(revive)
+            {
+                //if reviving, pretend the position is the one from the last update + average lag
+                var line = new Line(vertices[1], vertices[0]);
+                Position = vertices[0].AddOffset(line.Direction, m_averageLag);
+            }
+            else
+            {
+                Position = this.Position;
+            }
+            
 
             Point last = m_vertices[m_vertices.Count - 1];
             int i = 0;
@@ -183,7 +200,31 @@ namespace Cyclotron2D.Core
                             ((Direction == Direction.Left || Direction == Direction.Right) && Position.Y == vertices[0].Y && Position.Y == vertices[1].Y), "Something is wrong noob.");
 
                         //this should be the most common case (all is well), update the average lag here 
-                        m_averageLag = (int) ((m_averageLag + Position.Distance(vertices[0]))/2);
+
+                        int lag = (int) Position.Distance(vertices[0]);
+                        
+                        switch (Direction)
+                        {
+                            case Direction.Up:
+                                if (Position.Y > vertices[0].Y) lag = -lag;
+                                break;
+                            case Direction.Down:
+                                if (Position.Y < vertices[0].Y) lag = -lag;
+                                break;
+                            case Direction.Right:
+                                if (Position.X < vertices[0].X) lag = -lag;
+                                break;
+                            case Direction.Left:
+                                if (Position.X > vertices[0].X) lag = -lag;
+                                break;
+
+                        }
+
+
+                        m_averageLag = (m_averageLag + lag)/2;
+
+                        DebugMessages.AddLogOnly(m_player + " handling update info, all normal, avg delay: " + m_averageLag + " pixels");
+
                     }
                     break;
                 case 2:
@@ -193,6 +234,9 @@ namespace Cyclotron2D.Core
                         Line l = new Line(vertices[1], vertices[0]);
 
                         TurnAt(l.Direction, l.Start);
+
+                        DebugMessages.AddLogOnly(m_player + "Detected turn, handling ...");
+
                     }
                     break;
                 case 3:
@@ -202,22 +246,33 @@ namespace Cyclotron2D.Core
                                             : "Missed two turns from " + m_player + " pls lag less";
 
                         DebugMessages.Add(msg);
+
+
+
                         int length =(int)Position.Distance(vertices[i]);
 
-                        var line = new Line(vertices[1], vertices[0]);
+                  
 
                         int offset = length;
 
-                        for (int j = 0; j < i; j++)
+                        int addedPoints = 0;
+
+                        for (int j = i; j > 0; j--)
                         {
-                            offset -= (int)vertices[j].Distance(vertices[j + 1]);
-                            if(i-j-1 > 0)m_vertices.Add(vertices[i-j-1]);
+                            offset -= (int)vertices[j - 1].Distance(vertices[j]);
+                            if(j-1 > 0 && offset > 0)
+                            {
+                                m_vertices.Add(vertices[j-1]);
+                                addedPoints++;
+                            }
                         }
 
-                        Position = offset > 0 ? vertices[1].AddOffset(line.Direction, offset) : vertices[0].AddOffset(line.Direction, m_averageLag);
 
-
+                        var line = new Line(vertices[i - addedPoints], vertices[i -addedPoints - 1]);
+                        Position = vertices[i - addedPoints].AddOffset(line.Direction, offset);
                         Direction = line.Direction;
+
+
 
 
                     }
@@ -227,9 +282,6 @@ namespace Cyclotron2D.Core
                     break;
 
             }
-
-
-
             
         }
 
@@ -537,10 +589,11 @@ namespace Cyclotron2D.Core
 
         public void Revive()
         {
-            if (!Dead && !Enabled)
+            if (!Dead && !Enabled && !m_player.Winner)
             {
                 Enabled = true;
                 DebugMessages.Add(m_player + " Reviving");
+                HandleUpdateInfo(m_lastUpdateInfo);
             }
 
         }

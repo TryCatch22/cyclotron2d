@@ -18,19 +18,19 @@ namespace Cyclotron2D
                 listener.AssertUiEnabled = true;
             }
 
-            try
-            {
+          //  try
+            //{
                     using (Cyclotron game = new Cyclotron())
                     {
                        game.Run();
                     }
-            }
-            catch (Exception e)
-            {
-                DebugMessages.AddLogOnly("Game Crashed: " + e.Message);
-                DebugMessages.FlushLog();
-                throw;
-            }
+//            }
+//            catch (Exception e)
+//            {
+//                DebugMessages.AddLogOnly("Game Crashed: " + e.Message + "\n" + e.StackTrace);
+//                DebugMessages.FlushLog();
+//                throw;
+//            }
 
 
             DebugMessages.FlushLog();

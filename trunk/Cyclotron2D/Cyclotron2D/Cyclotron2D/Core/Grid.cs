@@ -211,10 +211,22 @@ namespace Cyclotron2D.Core
 				// if the cycle is moving.
 				var cycleVelocity = (gameTime.TotalGameTime < cycle.GameStart || !cycle.Enabled) ? Vector2.Zero : cycle.Velocity;
 
-				var velocities = cycleVelocities[cycle];
-				velocities.Enqueue(cycleVelocity);
-				if (velocities.Count > 15)
-					velocities.Dequeue();
+                try
+                {
+                    var velocities = cycleVelocities[cycle];
+
+
+                    velocities.Enqueue(cycleVelocity);
+                    if (velocities.Count > 15)
+                        velocities.Dequeue();
+                }
+                catch (KeyNotFoundException)
+                {
+                    //normally this could never happen here. In fact the only time i saw it happen, the key was actually in the dict... and pressing F5 had it run fine 
+                    //but somehow it did happen so im catching it ... and doing nothing
+                }
+
+
 			}
 		}
 

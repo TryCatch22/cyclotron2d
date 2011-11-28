@@ -19,6 +19,14 @@ namespace Cyclotron2D.Core.Players
 
         private bool m_gameEnded;
 
+
+        /// <summary>
+        /// sends notifications about bike state every NotifyPeriod gameloops for Udp
+        /// </summary>
+        public const int NotifyPeriod = 4;
+
+        private int m_currentPeriod = 0;
+
         public LocalPlayer(Game game, Screen screen) : base(game, screen)
         {
             Name = Settings.SinglePlayer.PlayerName.Value;
@@ -61,16 +69,17 @@ namespace Cyclotron2D.Core.Players
         }
 
 
-
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+            m_currentPeriod = (m_currentPeriod + 1)%(NotifyPeriod);
             if (Winner && !m_gameEnded && gameTime.TotalGameTime > Cycle.GameStart)
             {
                 Game.ScreenManager.AddScreen(new EndGamePopup(Game, Screen as MainScreen, "Victory"));
                 m_gameEnded = true;
             }
-            else if (Cycle != null && !m_gameEnded && gameTime.TotalGameTime > Cycle.GameStart)
+            
+            if (Cycle != null && !m_gameEnded && gameTime.TotalGameTime > Cycle.GameStart && m_currentPeriod == 0 && Game.IsState(GameState.PlayingAsClient | GameState.PlayingAsHost))
             {
                 NotifyPeers();
             }

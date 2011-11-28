@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Cyclotron2D.Components;
 using Cyclotron2D.Core.Players;
+using Cyclotron2D.Helpers;
 using Cyclotron2D.Network;
 using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
@@ -24,7 +25,7 @@ namespace Cyclotron2D.Core
 
         private Engine Engine { get; set; }
 
-        public TimeSpan MaxAckDelay { get { return new TimeSpan(Game.Communicator.AverageRtt.Ticks*2); } }
+        public TimeSpan MaxAckDelay { get { return Game.Communicator.AverageRtt.Mult(2); } }
 
         private Dictionary<Player, Dictionary<RemotePlayer, Confirmation>> m_confirmations;
 
@@ -111,8 +112,16 @@ namespace Cyclotron2D.Core
                 int id = int.Parse(e.Message.Content);
 
                 var deadplayer = Engine.GetPlayer(id);
+                try
+                {
+                    m_confirmations[deadplayer][ackplayer].Confirmed = true;
+                }
+                catch (KeyNotFoundException)
+                {
+                    //normally this could never happen here. In fact the only time i saw it happen, the key was actually in the dict... and pressing F5 had it run fine 
+                    //but somehow it did happen so im catching it ...
+                }
 
-                m_confirmations[deadplayer][ackplayer].Confirmed = true;
             }
         }
 

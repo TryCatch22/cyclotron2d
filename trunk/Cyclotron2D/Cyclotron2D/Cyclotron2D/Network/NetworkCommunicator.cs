@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Threading;
 using Cyclotron2D.Components;
 using Cyclotron2D.Core.Players;
+using Cyclotron2D.Helpers;
 using Cyclotron2D.State;
 using Microsoft.Xna.Framework;
 
@@ -26,6 +27,9 @@ namespace Cyclotron2D.Network
 
         #endregion
 
+        private List<RemotePlayer> m_disconnected;
+
+
         #region Properties
 
         public Dictionary<RemotePlayer, NetworkConnection> Connections { get; private set; }
@@ -36,7 +40,35 @@ namespace Cyclotron2D.Network
 
         public RemotePlayer Host { get; private set; }
 
-        public TimeSpan AverageRtt { get; private set; }
+        public TimeSpan AverageRtt
+        {
+            get
+            {
+                TimeSpan sum = new TimeSpan(0);
+                int nonZero = 0;
+                foreach (NetworkConnection networkConnection in Connections.Values.Where(c => c.RoundTripTime != new TimeSpan(0)))
+                {
+                    sum += networkConnection.RoundTripTime;
+                    nonZero++;
+                }
+
+                return nonZero == 0 ? new TimeSpan(0) : sum.Div(nonZero);
+            }
+        }
+
+        public TimeSpan MaximumRtt
+        {
+            get
+            {
+                TimeSpan max = new TimeSpan(0);
+                foreach (NetworkConnection networkConnection in Connections.Values.Where(c => c.RoundTripTime != new TimeSpan(0)))
+                {
+                    max = networkConnection.RoundTripTime > max ? networkConnection.RoundTripTime : max;
+                }
+
+                return max;
+            }
+        }
 
         /// <summary>
         /// Id for the local player set here so that it can be added to all outgoing messages automatically
@@ -52,6 +84,7 @@ namespace Cyclotron2D.Network
         {
             Connections = new Dictionary<RemotePlayer, NetworkConnection>();
             LocalId = 0;
+            m_disconnected = new List<RemotePlayer>();
             Mode = NetworkMode.Tcp;
         }
 
@@ -78,6 +111,7 @@ namespace Cyclotron2D.Network
                 {
                     Connections.Add(player, connection);
                     connection.MessageReceived += OnMessageReceived;
+                    connection.Disconnected += OnConnectionDisconnected;
                 }
             }
         }
@@ -90,6 +124,7 @@ namespace Cyclotron2D.Network
                 {
                     var connection = Connections[player];
                     connection.MessageReceived -= OnMessageReceived;
+                    connection.Disconnected -= OnConnectionDisconnected;
                     connection.Disconnect();
                     Connections.Remove(player);
                 }
@@ -108,13 +143,25 @@ namespace Cyclotron2D.Network
                 connections = Connections.Values.ToList();
             }
 
+            foreach (RemotePlayer remotePlayer in m_disconnected)
+            {
+                Remove(remotePlayer);
+            }
+
+
             if (gameTime.TotalGameTime - lastConnectionCheck > new TimeSpan(0, 0, 0, 0, 500))
             {
                 foreach (var connection in connections)
                 {
                     if (!connection.IsConnected)
+                    {
+                        Remove(GetPlayer(connection));
                         InvokeConnectionLost(new ConnectionEventArgs(connection));
+                    }
+
                 }
+
+               
                 lastConnectionCheck = gameTime.TotalGameTime;
             }
 
@@ -171,36 +218,71 @@ namespace Cyclotron2D.Network
         public void MessageAll(NetworkMessage message, byte source)
         {
             message.Source = source;
-            foreach (RemotePlayer remotePlayer in Connections.Keys)
+            lock (Connections)
             {
-                Connections[remotePlayer].Send(message);
+                foreach (RemotePlayer remotePlayer in Connections.Keys)
+                {
+                    Connections[remotePlayer].Send(message);
+                }
             }
+
         }
 
         public RemotePlayer GetPlayer(Socket socket)
         {
-            return (from kvp in Connections where kvp.Value.Socket == socket select kvp.Key).FirstOrDefault();
+            RemotePlayer player;
+
+            lock (Connections)
+            {
+                player = (from kvp in Connections where kvp.Value.Socket == socket select kvp.Key).FirstOrDefault();
+            }
+
+            return player;
         }
 
         public NetworkConnection GetConnection(int playerId)
         {
-            return (from kvp in Connections where kvp.Key.PlayerID == playerId select kvp.Value).FirstOrDefault();
+            NetworkConnection connection;
+
+            lock (Connections)
+            {
+                connection = (from kvp in Connections where kvp.Key.PlayerID == playerId select kvp.Value).FirstOrDefault();
+            }
+
+            return connection;
         }
 
         public RemotePlayer GetPlayer(int playerId)
         {
-            return (from kvp in Connections where kvp.Key.PlayerID == playerId select kvp.Key).FirstOrDefault();
+
+            RemotePlayer player;
+
+            lock (Connections)
+            {
+                player = (from kvp in Connections where kvp.Key.PlayerID == playerId select kvp.Key).FirstOrDefault();
+            }
+
+            return player;
         }
 
 
         public RemotePlayer GetPlayer(NetworkConnection connection)
         {
-            return (from kvp in Connections where kvp.Value == connection select kvp.Key).FirstOrDefault();
+            RemotePlayer player;
+
+            lock (Connections)
+            {
+                player = (from kvp in Connections where kvp.Value == connection select kvp.Key).FirstOrDefault();
+            }
+
+            return player;
         }
 
         public void ClearAll()
         {
             List<RemotePlayer> players = Connections.Keys.ToList();
+
+            Game.RttService.Reset();
 
             foreach (var key in players)
             {
@@ -218,14 +300,6 @@ namespace Cyclotron2D.Network
         {
 
             SetupUdpSocket();
-            TimeSpan totalRTT = new TimeSpan(0);
-            foreach (NetworkConnection networkConnection in Connections.Values)
-            {
-                networkConnection.SwitchToUdp(UdpSocket);
-                totalRTT += networkConnection.RoundTripTime;
-            }
-
-            AverageRtt = Game.IsState(GameState.PlayingAsHost) ? new TimeSpan(totalRTT.Ticks / Connections.Count) : Connections[Host].RoundTripTime;
 
 
             Mode = NetworkMode.Udp;
@@ -238,21 +312,30 @@ namespace Cyclotron2D.Network
 
         #region Event Handlers
 
+
+
+        private void OnConnectionDisconnected(object sender, ConnectionEventArgs e)
+        {
+            m_disconnected.Add(GetPlayer(e.Connection));
+            InvokeConnectionLost(e);
+        }
+
+
         private void OnMessageReceived(object sender, MessageEventArgs e)
         {
-            try
-            {
-                DebugMessages.AddLogOnly("Received Message: " + e.Message.Type + "\n" + e.Message.Content + "\n");
-                EventHandler<MessageEventArgs> handler = MessageReceived;
-                if (handler != null) handler(sender, e);
-            }
-            catch (Exception ex)
-            {
-                DebugMessages.AddLogOnly("Game Crashed On Message Handle: " + ex.Message);
-                DebugMessages.FlushLog();
-                throw;
-            }
-            
+            //            try
+            //            {
+            DebugMessages.AddLogOnly("Received Message: " + e.Message.Type + "\n" + e.Message.Content + "\n");
+            EventHandler<MessageEventArgs> handler = MessageReceived;
+            if (handler != null) handler(sender, e);
+            //            }
+            //            catch (Exception ex)
+            //            {
+            //                DebugMessages.AddLogOnly("Game Crashed On Message Handle: " + ex.Message + "\n" + ex.StackTrace);
+            //                DebugMessages.FlushLog();
+            //                throw;
+            //            }
+
         }
 
         #endregion

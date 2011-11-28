@@ -39,6 +39,24 @@ namespace Cyclotron2D.Network
             }
             return false;
         }
+
+
+        public static bool IsConnectedUdp(Socket socket)
+        {
+            if (socket != null && socket.Connected)
+            {
+                bool read = socket.Poll(1000, SelectMode.SelectRead);
+
+                if (read && socket.Available == 0)
+                {
+                    return false;
+                }
+
+                return true;
+
+            }
+            return false;
+        }
     }
 
     /// <summary>
@@ -57,9 +75,7 @@ namespace Cyclotron2D.Network
 
         public Socket Socket { get; private set; }
 
-//        public static Socket UdpListenSocket { get; private set; }
-
-        public bool IsConnected { get { return Mode == NetworkMode.Tcp ? SocketProbe.IsConnectedTcp(Socket):true; } }
+        public bool IsConnected { get { return Mode == NetworkMode.Tcp ? SocketProbe.IsConnectedTcp(Socket) : SocketProbe.IsConnectedUdp(Socket); } }
 
         public EndPoint LocalEP { get; private set; }
 
@@ -84,6 +100,7 @@ namespace Cyclotron2D.Network
         {
             Mode = NetworkMode.Tcp;
             Socket = socket;
+            RoundTripTime = new TimeSpan(0);
             if (SocketProbe.IsConnectedTcp(socket))
             {
 
@@ -160,22 +177,37 @@ namespace Cyclotron2D.Network
         public void Send(NetworkMessage message)
         {
             DebugMessages.AddLogOnly("Sending Message: " + message.Type + "\n" + message.Content + "\n");
-            switch (Mode)
+            try
             {
-                case NetworkMode.Tcp:
-                    {
-                        Socket.BeginSend(message.Data, 0, message.Data.Length, SocketFlags.None, (ar => Socket.EndSend(ar)), null);
-                    }
-                    break;
-                case NetworkMode.Udp:
-                    {
-                        Socket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, (ar => Socket.EndSend(ar)), null);
-                    }
-                    break;
+                switch (Mode)
+                {
+                    case NetworkMode.Tcp:
+                        {
+                            Socket.BeginSend(message.Data, 0, message.Data.Length, SocketFlags.None, (ar => Socket.EndSend(ar)), null);
+                        }
+                        break;
+                    case NetworkMode.Udp:
+                        {
+                            Socket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, (ar => Socket.EndSend(ar)), null);
+                        }
+                        break;
+                }
             }
+            catch (SocketException ex)
+            {
+                DebugMessages.Add("Socket exception on send: " + ex.Message);
+                InvokeDisconnected(new ConnectionEventArgs(this));
+            }
+           
         }
 
+        public event EventHandler<ConnectionEventArgs> Disconnected;
 
+        private void InvokeDisconnected(ConnectionEventArgs e)
+        {
+            EventHandler<ConnectionEventArgs> handler = Disconnected;
+            if (handler != null) handler(this, e);
+        }
 
         /// <summary>
         /// Attempts to connect to the specified address. Creates a new Socket in the process
