@@ -60,6 +60,7 @@ namespace Cyclotron2D.UI.UIElements
 
                 Value--;
 
+				// play countdown sound
 				if (Value > 0)
 				{
 					Sound.BlipLow.Play();
