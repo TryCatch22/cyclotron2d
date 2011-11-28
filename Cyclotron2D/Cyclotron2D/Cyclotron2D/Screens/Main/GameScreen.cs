@@ -123,6 +123,12 @@ namespace Cyclotron2D.Screens.Main
                             {
                                 //string content = (DateTime.UtcNow + new TimeSpan(0, 0, 0, 2)).ToString("r");
 
+
+                                //if we are still in intensive rtt update mode then wait until we aer done before calculating and sending all ready.
+                                while (Game.RttService.UpdatePeriod != RttUpdateService.DefaultUpdatePeriod) Thread.Yield();
+
+
+
                                 TimeSpan baseDelay = new TimeSpan(0, 0, 0, 1);
                                 TimeSpan maxRtt = Game.Communicator.MaximumRtt;
 
@@ -132,7 +138,6 @@ namespace Cyclotron2D.Screens.Main
                                     Game.Communicator.MessagePlayer(kvp.Key, new NetworkMessage(MessageType.AllReady, content));
                                 }
 
-                             //   Game.Communicator.MessageAll(new NetworkMessage(MessageType.AllReady, content));
                                 m_startTimeUtc = DateTime.UtcNow + maxRtt.Div(2) + baseDelay;
 
                             }
@@ -224,11 +229,21 @@ namespace Cyclotron2D.Screens.Main
 
                         Game.Communicator.MessageAll(new NetworkMessage(type, content));
 
-                        Thread.Sleep(500);
+                        Thread.Sleep(50);
 
                         if(UseUdp)Game.Communicator.SwitchToUdp();
 
+
+
                         Game.RttService.Reset();
+
+                        //accelerate rtt updates to get better estimate before sending all ready
+                        Game.RttService.UpdatePeriod = Game.Communicator.AverageRtt.Div(2);
+
+                        Thread.Sleep(Game.Communicator.AverageRtt.Mult(3));
+
+                        Game.RttService.UpdatePeriod = RttUpdateService.DefaultUpdatePeriod;
+
 
                     }
                     break;
