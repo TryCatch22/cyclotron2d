@@ -124,6 +124,7 @@
     <Compile Include="Screens\Base\MainScreen.cs" />
     <Compile Include="Screens\Base\PopupScreen.cs" />
     <Compile Include="Screens\Base\Screen.cs" />
+    <Compile Include="Sounds\Sound.cs" />
     <Compile Include="State\ScreenManager.cs" />
     <Compile Include="Screens\Main\GameLobbyScreen.cs" />
     <Compile Include="Screens\Main\GameScreen.cs" />
