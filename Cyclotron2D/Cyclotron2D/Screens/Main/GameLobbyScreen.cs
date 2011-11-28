@@ -195,18 +195,6 @@ namespace Cyclotron2D.Screens.Main
             
         }
 
-		public void AddPlayerUdp(Player player, Socket socket = null)
-		{
-			if (player is RemotePlayer && socket != null)
-			{
-				new UdpNetworkConnection().
-			}
-			GameScreen.AddPlayer(player);
-			m_playersPanel.AddPlayer(player);
-			Players.Add(player);
-		}
-
-
         /// <summary>
         /// add client player
         /// </summary>

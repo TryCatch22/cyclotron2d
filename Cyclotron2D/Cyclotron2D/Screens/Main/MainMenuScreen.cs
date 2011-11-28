@@ -3,6 +3,7 @@ using Cyclotron2D.Screens.Base;
 using Cyclotron2D.State;
 using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
+using Cyclotron2D.Graphics;
 
 namespace Cyclotron2D.Screens.Main
 {
@@ -93,7 +94,7 @@ namespace Cyclotron2D.Screens.Main
         {
             base.Initialize();
             var rect = Game.GraphicsDevice.Viewport.Bounds;
-            m_mainMenu.Rect = new Rectangle(rect.Width/4, rect.Height/6, rect.Width/2, 2*rect.Height/3);
+            m_mainMenu.Rect = new Rectangle(rect.Width/4, rect.Height/6 + 100, rect.Width/2, 2*rect.Height/3); // Hacked height by 100px to fit title art...
             m_mainMenu.Reset();
         }
 
@@ -104,6 +105,10 @@ namespace Cyclotron2D.Screens.Main
             {
                 m_mainMenu.Draw(gameTime);
             }
+
+			// Draw the title graphic
+			var rect = Game.GraphicsDevice.Viewport.Bounds;
+			Game.SpriteBatch.Draw(Art.Title, new Vector2(rect.Width / 2, 0), null, Color.White, 0.0f, new Vector2(Art.Title.Width / 2, 0), 0.4f, Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
         }
 
         #endregion

@@ -5,6 +5,7 @@ using Cyclotron2D.State;
 using Cyclotron2D.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Cyclotron2D.Graphics;
 
 namespace Cyclotron2D.Screens.Main
 {
@@ -55,6 +56,9 @@ namespace Cyclotron2D.Screens.Main
             {
                 m_settingsView.Draw(gameTime);
             }
+
+			// Draw settings title art
+			Game.SpriteBatch.Draw(Art.Settings, new Vector2(GraphicsDevice.Viewport.Bounds.Width/2, -25), null, Color.White, 0.0f, new Vector2(Art.Settings.Width/2, 0), 1.0f, Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
         }
 
         #endregion
