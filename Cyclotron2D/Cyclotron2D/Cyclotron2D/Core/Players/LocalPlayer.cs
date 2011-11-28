@@ -23,7 +23,7 @@ namespace Cyclotron2D.Core.Players
         /// <summary>
         /// sends notifications about bike state every NotifyPeriod gameloops for Udp
         /// </summary>
-        public const int NotifyPeriod = 4;
+        public const int NotifyPeriod = 2;
 
         private int m_currentPeriod = 0;
 

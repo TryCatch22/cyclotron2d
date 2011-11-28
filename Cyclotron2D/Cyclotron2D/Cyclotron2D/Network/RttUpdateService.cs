@@ -25,7 +25,7 @@ namespace Cyclotron2D.Network
 
         #region Properties
 
-        public static readonly TimeSpan UpdatePeriod = new TimeSpan(0, 0, 0, 1, 500);
+        public static readonly TimeSpan UpdatePeriod = new TimeSpan(0, 0, 0, 1);
 
         #endregion
 
