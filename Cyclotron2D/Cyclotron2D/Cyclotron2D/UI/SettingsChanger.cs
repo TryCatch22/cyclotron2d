@@ -30,7 +30,7 @@ namespace Cyclotron2D.UI
 
         public SettingsChanger(Game game, Screen screen) : base(game, screen)
         {
-			int labelWidth = 300;
+			int labelWidth = 400;
 			TextAlign align = TextAlign.Left;
 			m_drawGrid = new LabelCheckBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
             m_plasmaGrid = new LabelCheckBox(game, screen) { LabelWidth = labelWidth, LabelAlign = align };
