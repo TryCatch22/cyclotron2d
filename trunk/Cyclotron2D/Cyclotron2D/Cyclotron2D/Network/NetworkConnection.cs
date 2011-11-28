@@ -65,7 +65,7 @@ namespace Cyclotron2D.Network
 
         #region Constants
 
-        public const int MAX_BUFFER_SIZE = 100;
+        public const int MAX_BUFFER_SIZE = 512;
 
         #endregion
 
