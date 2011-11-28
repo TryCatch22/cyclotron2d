@@ -9,7 +9,7 @@ namespace Cyclotron2D.UI.UIElements
         public Button(Game game, Screen screen) : base(game, screen)
         {
             Click += OnClick;
-            Background = Color.GreenYellow;
+            Background = new Color(0, 148, 255, 255);
         }
 
         protected virtual void OnClick(object sender, EventArgs e)
