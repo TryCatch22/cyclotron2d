@@ -123,6 +123,7 @@
     <Compile Include="Network\PlayerMonitor.cs" />
     <Compile Include="Network\GameLobby.cs" />
     <Compile Include="Network\NetworkConnection.cs" />
+    <Compile Include="Network\RttUpdateService.cs" />
     <Compile Include="Screens\Base\MainScreen.cs" />
     <Compile Include="Screens\Base\PopupScreen.cs" />
     <Compile Include="Screens\Base\Screen.cs" />

@@ -56,6 +56,8 @@ namespace Cyclotron2D.Core
 
         private Countdown m_countdown;
 
+        private bool m_started;
+
         public List<Animation> ExplosionAnimations { get; private set; }
 
         #endregion
@@ -109,6 +111,17 @@ namespace Cyclotron2D.Core
                 return;
             }
 
+            if(gameTime.TotalGameTime > GameStartTime && !m_started)
+            {
+                m_started = true;
+                DebugMessages.AddLogOnly("Game Starting");
+            }
+            else if(!m_started)
+            {
+                //game has not started yet no need to check the rest of the stuff
+                return;
+            }
+
             int i = 0;
             Player winner = null;
             foreach (var player in m_playerCycleMap.Keys)
@@ -137,7 +150,7 @@ namespace Cyclotron2D.Core
             {
                 cycle.GameStart = GameStartTime;
             }
-
+            DebugMessages.AddLogOnly("Countdown Starting");
             m_countdown.Start();
         }
 

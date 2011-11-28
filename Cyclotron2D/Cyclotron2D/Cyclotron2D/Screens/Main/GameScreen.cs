@@ -61,7 +61,7 @@ namespace Cyclotron2D.Screens.Main
             return m_engine.GetPlayer(id);
         }
 
-
+        private TimeSpan m_lastReady;
 
         public override void Update(GameTime gameTime)
         {
@@ -77,6 +77,11 @@ namespace Cyclotron2D.Screens.Main
                     StartGame();
                 }
                 
+            }else if (isGameSetup && !m_gameStarted && Game.IsState(GameState.PlayingAsClient) && gameTime.TotalGameTime > m_lastReady + new TimeSpan(0, 0, 0, 0, 800))
+            {
+                //in case ready packet got dropped
+                Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
+                m_lastReady = gameTime.TotalGameTime;
             }
         }
         
@@ -116,9 +121,19 @@ namespace Cyclotron2D.Screens.Main
                             //if all players are ready
                             if (ActivePlayers.Aggregate(true, (ready, p) => ready && p.Ready))
                             {
-                                string content = (DateTime.UtcNow + new TimeSpan(0, 0, 0, 2)).ToString("r");
-                                Game.Communicator.MessageAll(new NetworkMessage(MessageType.AllReady, content));
-                                m_startTimeUtc = DateTime.Parse(content);
+                                //string content = (DateTime.UtcNow + new TimeSpan(0, 0, 0, 2)).ToString("r");
+
+                                TimeSpan baseDelay = new TimeSpan(0, 0, 0, 1);
+                                TimeSpan maxRtt = Game.Communicator.MaximumRtt;
+
+                                foreach (var kvp in Game.Communicator.Connections)
+                                {
+                                    string content = ((maxRtt - kvp.Value.RoundTripTime).Div(2) + baseDelay).ToString();
+                                    Game.Communicator.MessagePlayer(kvp.Key, new NetworkMessage(MessageType.AllReady, content));
+                                }
+
+                             //   Game.Communicator.MessageAll(new NetworkMessage(MessageType.AllReady, content));
+                                m_startTimeUtc = DateTime.UtcNow + maxRtt.Div(2) + baseDelay;
 
                             }
 
@@ -135,7 +150,7 @@ namespace Cyclotron2D.Screens.Main
                             {
                                 activePlayer.Ready = true;
                             }
-                            m_startTimeUtc = DateTime.Parse(e.Message.Content);
+                            m_startTimeUtc = DateTime.UtcNow + TimeSpan.Parse(e.Message.Content);
                         }
                     }
                     break;
@@ -213,6 +228,7 @@ namespace Cyclotron2D.Screens.Main
 
                         if(UseUdp)Game.Communicator.SwitchToUdp();
 
+                        Game.RttService.Reset();
 
                     }
                     break;
@@ -281,8 +297,11 @@ namespace Cyclotron2D.Screens.Main
                            Game.Communicator.SwitchToUdp();
                        }
 
+                        Game.RttService.Reset();
+
                         Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
-                        
+                        m_lastReady = Game.GameTime.TotalGameTime;
+
                     }
                     break;
                     

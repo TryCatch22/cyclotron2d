@@ -13,6 +13,11 @@ namespace Cyclotron2D.Screens.Popup
 
         public EndGamePopup(Game game, MainScreen parent, string text) : base(game, parent)
         {
+
+
+
+
+
             m_table = new EndGameTable(game, this);
 
             Rectangle vp = Game.GraphicsDevice.Viewport.Bounds;
@@ -38,11 +43,14 @@ namespace Cyclotron2D.Screens.Popup
 
         public override void Draw(GameTime gameTime)
         {
-            base.Draw(gameTime);
-            if (m_table.Visible)
-            {
-                m_table.Draw(gameTime);
-            }
+            //temporarily for debugging
+
+
+//            base.Draw(gameTime);
+//            if (m_table.Visible)
+//            {
+//                m_table.Draw(gameTime);
+//            }
         }
     }
 }

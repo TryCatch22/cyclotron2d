@@ -25,9 +25,13 @@ namespace Cyclotron2D
 
         private GraphicsDeviceManager m_graphics;
 
+
+
         #endregion
 
         #region Properties
+
+        public RttUpdateService RttService { get; private set; }
 
         public GameTime GameTime { get; private set; }
 
@@ -52,6 +56,7 @@ namespace Cyclotron2D
             Content.RootDirectory = "Content";
 
             m_graphics = new GraphicsDeviceManager(this);
+            RttService = new RttUpdateService(this);
             ScreenManager = new ScreenManager(this);
             InputState = new InputState(this);
             Communicator = new NetworkCommunicator(this);
@@ -96,16 +101,16 @@ namespace Cyclotron2D
 
                 DebugMessages.AddLogOnly("Changing State: " + state);
 
-                try
-                {
+//                try
+//                {
                     InvokeStateChanged(args);
-                }
-                catch (Exception e)
-                {
-                    DebugMessages.AddLogOnly("Game Crashed On State Change: " + e.Message);
-                    DebugMessages.FlushLog();
-                    throw;
-                }
+//                }
+//                catch (Exception e)
+//                {
+//                    DebugMessages.AddLogOnly("Game Crashed On State Change: " + e.Message + "\n" + e.StackTrace);
+//                    DebugMessages.FlushLog();
+//                    throw;
+//                }
 
 
 

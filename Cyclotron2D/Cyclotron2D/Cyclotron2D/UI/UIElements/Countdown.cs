@@ -1,4 +1,5 @@
 ﻿using System;
+using Cyclotron2D.Helpers;
 using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
 
@@ -48,7 +49,7 @@ namespace Cyclotron2D.UI.UIElements
             // decrement count every second
 
             var elapsedTime = gameTime.TotalGameTime - m_startTime;
-            var nextTick = new TimeSpan((m_startValue - Value + 1)*OneSecond.Ticks);
+            var nextTick = OneSecond.Mult(m_startValue - Value + 1);
 
             if (elapsedTime >= nextTick)
             {
