@@ -8,7 +8,7 @@ namespace Cyclotron2D.Graphics
     {
 		private static ContentManager content;
 
-        public static Texture2D Pixel, Circle, Bike;
+        public static Texture2D Pixel, Circle, Bike, Title, Settings;
 		public static Texture2D ExplosionSheet;
         public static SpriteFont Font;
 
@@ -29,6 +29,8 @@ namespace Cyclotron2D.Graphics
 
             Circle = content.Load<Texture2D>("Circle");
 			Bike = content.Load<Texture2D>("Bike");
+			Title = content.Load<Texture2D>("title");
+			Settings = content.Load<Texture2D>("settings");
 
             ExplosionSheet = content.Load<Texture2D>("BlueExplosion");
 
