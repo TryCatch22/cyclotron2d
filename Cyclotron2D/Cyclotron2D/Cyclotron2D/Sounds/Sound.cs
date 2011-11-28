@@ -18,6 +18,14 @@ namespace Cyclotron2D.Sounds
 			MediaPlayer.IsRepeating = true;
 		}
 
+		public static void PlaySound(SoundEffect sound)
+		{
+			if (!MediaPlayer.IsMuted)
+			{
+				sound.Play();
+			}
+		}
+
 		public static void LoadContent(ContentManager content)
 		{
 			Boom = content.Load<SoundEffect>(@"Boom");
