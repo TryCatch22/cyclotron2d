@@ -94,24 +94,36 @@ namespace Cyclotron2D.Network
                 throw new Exception("Data is too long");
             }
 
+            try
+            {
+                string s = encoding.GetString(data).TrimEnd(new[] { '\0' });
 
-            string s = encoding.GetString(data).TrimEnd(new[] { '\0' });
+                string header = s.Substring(0, s.IndexOf(EndOfHeader));
+                string content = s.Substring(header.Length + EndOfHeader.Length);
 
-            string header = s.Substring(0, s.IndexOf(EndOfHeader));
-            string content = s.Substring(header.Length + EndOfHeader.Length);
+                MessageType type = (MessageType)byte.Parse(header.Substring(0, header.IndexOf(' ')));
+                header = header.Substring(header.IndexOf(' ') + 1);
 
-            MessageType type = (MessageType)byte.Parse(header.Substring(0, header.IndexOf(' ')));
-            header = header.Substring(header.IndexOf(' ') + 1);
+                byte source = byte.Parse(header.Substring(0, header.IndexOf(' ')));
+                header = header.Substring(header.IndexOf(' ') + 1);
 
-            byte source = byte.Parse(header.Substring(0, header.IndexOf(' ')));
-            header = header.Substring(header.IndexOf(' ') + 1);
+                int size = int.Parse(header);
 
-            int size = int.Parse(header);
+                return new NetworkMessage(type, content) { Source = source, Length = size };
 
+            }
+            catch (Exception e )
+            {
+                DebugMessages.AddLogOnly("Crash on Message Build: " + e.Message + e.StackTrace);
+                DebugMessages.FlushLog();
+                throw;
+            }
+
+           
 
         
 
-            return new NetworkMessage(type,content){Source = source, Length = size};
+          
         }
 
 
