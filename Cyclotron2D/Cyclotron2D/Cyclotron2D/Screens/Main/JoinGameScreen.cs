@@ -8,6 +8,7 @@ using Cyclotron2D.UI;
 using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
 using Cyclotron2D.Network;
+using System.IO;
 
 
 namespace Cyclotron2D.Screens.Main {
@@ -59,8 +60,22 @@ namespace Cyclotron2D.Screens.Main {
 
 			m_hostIp.Label.TextColor = Color.White;
 			m_hostIp.LabelText = "Host Ip Adress:";
-		    m_hostIp.BoxText = "127.0.0.1";
 
+
+			//Set last IP address used
+			try
+			{
+				StreamReader logReader = new StreamReader(File.Open("lastServer", FileMode.Open));
+				IPAddress serverIp = IPAddress.Parse(logReader.ReadLine());
+				m_hostIp.BoxText = serverIp.ToString();
+			} catch (FileNotFoundException)
+			{
+				m_hostIp.BoxText = "127.0.0.1";
+			} catch (FormatException)
+			{
+				m_hostIp.BoxText = "127.0.0.1";
+			}
+		    
 			m_ok.OkText = "Connect";
 			m_ok.Rect = new Rectangle((int)(vp.Width * 3.2 / 5), vp.Height * 5 / 6, (int)(vp.Width / 3.7), vp.Height / 7);
 			m_ok.OnCancel = CancelConnection;
@@ -76,7 +91,10 @@ namespace Cyclotron2D.Screens.Main {
 			    if(Host.ConnectTo(ip))
 			    {
 			        CreateHost();
-
+					//Log the last server used
+					using (StreamWriter ipLogger = new StreamWriter("lastServer", false)){
+						ipLogger.Write(ip);
+					}
 
 			    }
 			}
