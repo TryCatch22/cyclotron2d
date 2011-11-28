@@ -508,7 +508,7 @@ namespace Cyclotron2D.Core
             Dead = true;
             Enabled = false;
             CreateExplosion();
-			Sound.Boom.Play();
+			Sound.PlaySound(Sound.Boom);
 
             DebugMessages.Add(m_player + " confirmed dead.");
         }
