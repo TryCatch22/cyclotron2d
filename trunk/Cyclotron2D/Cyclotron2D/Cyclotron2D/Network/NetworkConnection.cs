@@ -264,11 +264,11 @@ namespace Cyclotron2D.Network
         private void StartReceiving()
         {
             Debug.Assert(Mode == NetworkMode.Tcp, "wtf wrong mode on connection");
-            byte[] buffer = new byte[MAX_BUFFER_SIZE];
+            byte[] buffer = new byte[10];
 
             try
             {
-                Socket.BeginReceive(buffer, 0, MAX_BUFFER_SIZE, SocketFlags.None, ReceiveCallback, buffer);
+                Socket.BeginReceive(buffer, 0, 10, SocketFlags.None, ReceiveCallback, buffer);
             }
             catch (ObjectDisposedException)
             {
@@ -305,11 +305,11 @@ namespace Cyclotron2D.Network
 
                 msg = NetworkMessage.Build(buffer);
 
-                Debug.Assert(msg.Length < 200, "there should not be a message with more than 200 bytes of content");
+                Debug.Assert(msg.Length < 100, "there should not be a message with more than 200 bytes of content");
 
                 while (msg.Length > msg.Content.Length)
                 {
-                    Array.Clear(buffer, 0, MAX_BUFFER_SIZE);
+                    buffer = new byte[msg.Length - msg.Content.Length];
                     Socket.Receive(buffer);
                     msg.AddContent(buffer);
                 }
