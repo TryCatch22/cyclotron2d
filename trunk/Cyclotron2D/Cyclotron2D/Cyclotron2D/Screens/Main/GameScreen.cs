@@ -238,9 +238,9 @@ namespace Cyclotron2D.Screens.Main
                         Game.RttService.Reset();
 
                         //accelerate rtt updates to get better estimate before sending all ready
-                        Game.RttService.UpdatePeriod = Game.Communicator.AverageRtt.Div(2);
+                        Game.RttService.UpdatePeriod = RttUpdateService.DefaultUpdatePeriod.Div(5);
 
-                        Thread.Sleep(Game.Communicator.AverageRtt.Mult(3));
+                        Thread.Sleep(RttUpdateService.DefaultUpdatePeriod.Mult(2));
 
                         Game.RttService.UpdatePeriod = RttUpdateService.DefaultUpdatePeriod;
 
