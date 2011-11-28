@@ -60,12 +60,22 @@ namespace Cyclotron2D.Helpers
 
         public static Point FromString(string s)
         {
-            int xs = s.IndexOf("X:") + 2, xe = s.IndexOf(' ');
-            int ys = s.IndexOf("Y:") + 2, ye = s.IndexOf('}');
-            string x = s.Substring(xs, xe - xs);
-            string y = s.Substring(ys, ye - ys);
+            try
+            {
+                int xs = s.IndexOf("X:") + 2, xe = s.IndexOf(' ');
+                int ys = s.IndexOf("Y:") + 2, ye = s.IndexOf('}');
+                string x = s.Substring(xs, xe - xs);
+                string y = s.Substring(ys, ye - ys);
 
-            return new Point(int.Parse(x), int.Parse(y));
+                return new Point(int.Parse(x), int.Parse(y));
+            }
+            catch (Exception e)
+            {
+                DebugMessages.AddLogOnly("Crash on Point Parse: " + e.Message + e.StackTrace);
+                DebugMessages.FlushLog();
+                throw;
+            }
+          
         }
     }
 
