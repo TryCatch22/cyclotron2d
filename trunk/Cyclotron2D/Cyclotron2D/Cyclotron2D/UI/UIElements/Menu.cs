@@ -32,7 +32,7 @@ namespace Cyclotron2D.UI.UIElements
         public Menu(Game game, Screen screen) : base(game, screen)
         {
             ItemSpacing = 2;
-            PreviewTint = new Color(0, 148, 255, 100);
+			PreviewTint = Art.NeonBlue;
             Reset();
         }
 

@@ -8,6 +8,8 @@ namespace Cyclotron2D.Graphics
     {
 		private static ContentManager content;
 
+		public static Color NeonBlue = new Color(0, 148, 255, 100);
+
         public static Texture2D Pixel, Circle, Bike, Title, Settings;
 		public static Texture2D ExplosionSheet;
         public static SpriteFont Font;
