@@ -109,14 +109,11 @@ namespace Cyclotron2D.Network {
             thread.Start();
             DebugMessages.AddLogOnly("Listening Thread Started");
             m_acceptThreads.Add(thread);
-
         }
 
         #endregion
 
         #region Public Methods
-
-
 
         public override void Update(GameTime gameTime)
         {
@@ -158,8 +155,6 @@ namespace Cyclotron2D.Network {
                 DebugMessages.Add("Invalid Port Number " + GAME_PORT);
                 Console.WriteLine(ex.StackTrace);
             }
-
-
 
 			Thread listenerSpawner = new Thread(SpawnConnectionThreads) {Name = "ListenerSpawningThread"};
 		    listenerSpawner.Start();

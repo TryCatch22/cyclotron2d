@@ -96,8 +96,10 @@ namespace Cyclotron2D.Network
                     {
                         foreach (var key in m_pingOutTimes.Keys.ToList())
                         {
-                            m_pingOutTimes[key] = gameTime.TotalGameTime;
-                        }
+							if (key != null) {
+								m_pingOutTimes[key] = gameTime.TotalGameTime;
+							}
+						}
                     }
                     try
                     {
