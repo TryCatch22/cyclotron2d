@@ -12,6 +12,8 @@ namespace Cyclotron2D.Sounds
 	{
 		public static Song MenuMusic;
 
+		public static SoundEffect Boom;
+
 		public static bool menuMusicPlaying = false;
 
 		public static void Initialize()
@@ -21,6 +23,8 @@ namespace Cyclotron2D.Sounds
 
 		public static void LoadContent(ContentManager content)
 		{
+			Boom = content.Load<SoundEffect>(@"Boom");
+
 			MenuMusic = content.Load<Song>(@"MenuMusic");
 		}
 
