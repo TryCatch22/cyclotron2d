@@ -67,6 +67,11 @@ namespace Cyclotron2D.Network
             }
         }
 
+        public void TriggerPing()
+        {
+            m_lastPingRound = new TimeSpan(0);
+        }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
