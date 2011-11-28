@@ -10,6 +10,7 @@ namespace Cyclotron2D.UI.UIElements
 {
     public class LabeledElement : UIElement
     {
+		private const float textSize = 0.4f;
 
         public String LabelText { get { return Label.Text; } set { Label.Text = value; } }
 
@@ -32,7 +33,7 @@ namespace Cyclotron2D.UI.UIElements
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            Vector2 lblsize = Art.Font.MeasureString(LabelText) + new Vector2(2, 2);
+            Vector2 lblsize = Art.Font.MeasureString(LabelText)*textSize + new Vector2(2, 2);
 			if (LabelWidth.HasValue)
 			{
 				lblsize.X = (float)LabelWidth;

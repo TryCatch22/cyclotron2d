@@ -45,7 +45,7 @@ namespace Cyclotron2D.Screens.Main
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            m_settingsView.Rect = RectangleBuilder.Centered(GraphicsDevice.Viewport.Bounds, new Vector2(0.7f, 0.6f));
+            m_settingsView.Rect = RectangleBuilder.Centered(GraphicsDevice.Viewport.Bounds, new Vector2(0.6f, 0.6f));
         }
 
 

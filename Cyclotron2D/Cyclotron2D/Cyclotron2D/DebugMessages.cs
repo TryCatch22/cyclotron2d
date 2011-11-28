@@ -12,7 +12,8 @@ namespace Cyclotron2D {
 
 		#region Constants
 
-		private const float DisplayTime = 7f;
+		private const float DisplayTime = 5f;
+		private const float textScale = 0.3f;
 
 		#endregion
 
@@ -119,11 +120,11 @@ namespace Cyclotron2D {
 			lock (s_msgLock) {
 				foreach (var message in s_messages) {
 					var alpha = message.TimeLeft < 1f ? message.TimeLeft : 1f;
-					var pos = new Vector2(5, message.Size.Y * i + 5);
-					var rect = new Rectangle((int)pos.X, (int)pos.Y, (int)message.Size.X, (int)message.Size.Y);
+					var pos = new Vector2(5, message.Size.Y*textScale * i + 5);
+					var rect = new Rectangle((int)pos.X, (int)pos.Y, (int)(message.Size.X*textScale), (int)(message.Size.Y*textScale));
 
 					spriteBatch.Draw(Art.Pixel, rect, Color.White * 0.5f * alpha);
-					spriteBatch.DrawString(Art.Font, s_messages[i++].Text, pos, Color.Purple * alpha, 0.0f, Vector2.Zero, 0.3f, SpriteEffects.None, 0.0f);
+					spriteBatch.DrawString(Art.Font, s_messages[i++].Text, pos, Color.Purple * alpha, 0.0f, Vector2.Zero, textScale, SpriteEffects.None, 0.0f);
 				}
 			}
 #endif
