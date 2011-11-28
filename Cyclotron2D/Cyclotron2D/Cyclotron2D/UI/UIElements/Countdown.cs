@@ -2,6 +2,7 @@
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
+using Cyclotron2D.Sounds;
 
 namespace Cyclotron2D.UI.UIElements
 {
@@ -36,6 +37,7 @@ namespace Cyclotron2D.UI.UIElements
             m_startTime = Game.GameTime.TotalGameTime;
             m_startValue = Value;
             Text = Value.ToString();
+			Sound.BlipLow.Play();
         }
 
 
@@ -55,7 +57,18 @@ namespace Cyclotron2D.UI.UIElements
 
             if (elapsedTime >= nextTick)
             {
+
                 Value--;
+
+				if (Value > 0)
+				{
+					Sound.BlipLow.Play();
+				}
+				else if (Value == 0)
+				{
+					Sound.BlipHigh.Play();
+				}
+
                 Text = Value.ToString();
                 TextScale = StartTextScale;  // resets number size after incrementing
             }

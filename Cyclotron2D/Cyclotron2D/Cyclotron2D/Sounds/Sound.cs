@@ -12,7 +12,7 @@ namespace Cyclotron2D.Sounds
 	{
 		public static Song MenuMusic;
 
-		public static SoundEffect Boom;
+		public static SoundEffect Boom, BlipLow, BlipHigh;
 
 		public static bool menuMusicPlaying = false;
 
@@ -24,6 +24,8 @@ namespace Cyclotron2D.Sounds
 		public static void LoadContent(ContentManager content)
 		{
 			Boom = content.Load<SoundEffect>(@"Boom");
+			BlipLow = content.Load<SoundEffect>(@"BlipLow");
+			BlipHigh = content.Load<SoundEffect>(@"BlipHigh");
 
 			MenuMusic = content.Load<Song>(@"MenuMusic");
 		}
