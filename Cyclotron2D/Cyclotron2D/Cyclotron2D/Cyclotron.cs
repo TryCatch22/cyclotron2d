@@ -7,6 +7,7 @@ using Cyclotron2D.State;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Cyclotron2D.Sounds;
+using Microsoft.Xna.Framework.Media;
 
 namespace Cyclotron2D
 {
@@ -174,6 +175,15 @@ namespace Cyclotron2D
             GameTime = gameTime;
             //updates the rest of the game
             base.Update(gameTime);
+
+			if (Settings.SinglePlayer.Mute.Value == true)
+			{
+				MediaPlayer.IsMuted = true;
+			}
+			else
+			{
+				MediaPlayer.IsMuted = false;
+			}
 
             DebugMessages.Update(gameTime);
         }
