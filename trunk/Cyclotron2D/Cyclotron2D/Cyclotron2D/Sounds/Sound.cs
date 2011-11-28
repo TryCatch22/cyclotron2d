@@ -11,8 +11,6 @@ namespace Cyclotron2D.Sounds
 
 		public static SoundEffect Boom, BlipLow, BlipHigh;
 
-		public bool Mute { get { return Settings.SinglePlayer.Mute.Value; } }
-
 		public static bool menuMusicPlaying = false;
 
 		public static void Initialize()
