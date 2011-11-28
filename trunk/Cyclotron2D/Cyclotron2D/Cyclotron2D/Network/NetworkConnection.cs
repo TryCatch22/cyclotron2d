@@ -309,7 +309,7 @@ namespace Cyclotron2D.Network
 
                 while (msg.Length > msg.Content.Length)
                 {
-                    buffer = new byte[msg.Length - msg.Content.Length];
+                    buffer = new byte[msg.Length - msg.Content.Length + 1];
                     Socket.Receive(buffer);
                     msg.AddContent(buffer);
                 }
