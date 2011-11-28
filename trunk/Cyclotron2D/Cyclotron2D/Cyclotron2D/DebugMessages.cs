@@ -73,7 +73,7 @@ namespace Cyclotron2D {
             }
 
 
-		    s_logFile += "log_" + DateTime.Now.ToString(@"hh.mm.ss") + ".txt";
+		    s_logFile += "log_" + DateTime.Now.ToString(@"HH.mm.ss") + ".txt";
         }
 
 		#endregion
@@ -97,7 +97,7 @@ namespace Cyclotron2D {
 
             if (LogMessages)
             {
-                s_logMessages.Enqueue("[" + DateTime.Now.ToString(@"hh:mm:ss.ff") + "] " + message);
+                s_logMessages.Enqueue("[" + DateTime.Now.ToString(@"HH:mm:ss.ff") + "] " + message);
             }
 #endif
         }
