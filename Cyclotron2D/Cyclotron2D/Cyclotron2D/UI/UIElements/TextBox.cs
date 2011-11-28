@@ -3,6 +3,7 @@ using Cyclotron2D.Graphics;
 using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Cyclotron2D.Sounds;
 
 namespace Cyclotron2D.UI.UIElements
 {
@@ -64,6 +65,7 @@ namespace Cyclotron2D.UI.UIElements
             if (input.IsNewLeftClick)
             {
                 m_readingText = IsMouseOver;
+				Sound.PlaySound(Sound.Clink, 0.5f);
             }
 
 
