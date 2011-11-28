@@ -148,13 +148,18 @@ namespace Cyclotron2D.Network
 
         public void SwitchToUdp(Socket UdpSocket)
         {
-            Disconnect();
+            if(IsConnected)
+            {
+                Disconnect();
 
-            Thread.Sleep(20);
+                Thread.Sleep(20);
+            }
 
-            Mode = NetworkMode.Udp;
+
 
             Socket = UdpSocket;
+            Mode = NetworkMode.Udp;
+
 
         }
 
