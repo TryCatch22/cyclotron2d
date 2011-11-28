@@ -148,6 +148,8 @@ namespace Cyclotron2D.Network
                 Remove(remotePlayer);
             }
 
+            m_disconnected.Clear();
+
 
             if (gameTime.TotalGameTime - lastConnectionCheck > new TimeSpan(0, 0, 0, 0, 500))
             {
