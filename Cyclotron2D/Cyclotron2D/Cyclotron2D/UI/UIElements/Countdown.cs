@@ -37,7 +37,7 @@ namespace Cyclotron2D.UI.UIElements
             m_startTime = Game.GameTime.TotalGameTime;
             m_startValue = Value;
             Text = Value.ToString();
-			Sound.PlaySound(Sound.BlipLow);
+			Sound.PlaySound(Sound.BlipLow, 1.0f);
         }
 
 
@@ -63,11 +63,11 @@ namespace Cyclotron2D.UI.UIElements
 				// play countdown sound
 				if (Value > 0)
 				{
-					Sound.PlaySound(Sound.BlipLow);
+					Sound.PlaySound(Sound.BlipLow, 1.0f);
 				}
 				else if (Value == 0)
 				{
-					Sound.PlaySound(Sound.BlipHigh);
+					Sound.PlaySound(Sound.BlipHigh, 1.0f);
 				}
 
                 Text = Value.ToString();

@@ -18,11 +18,11 @@ namespace Cyclotron2D.Sounds
 			MediaPlayer.IsRepeating = true;
 		}
 
-		public static void PlaySound(SoundEffect sound)
+		public static void PlaySound(SoundEffect sound, float volume)
 		{
 			if (!MediaPlayer.IsMuted)
 			{
-				sound.Play();
+				sound.Play(volume, 0.0f, 0.0f);
 			}
 		}
 
