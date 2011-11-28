@@ -18,6 +18,8 @@ namespace Cyclotron2D.UI.UIElements
 
         public float MaxScaleFactor { get; set; }
 
+        public float StartTextScale { get; set; }
+
         private int m_startValue;
 
         private TimeSpan m_startTime;
@@ -55,7 +57,7 @@ namespace Cyclotron2D.UI.UIElements
             {
                 Value--;
                 Text = Value.ToString();
-                TextScale = 3f;  // resets number size after incrementing
+                TextScale = StartTextScale;  // resets number size after incrementing
             }
             // increment size of number
             else
