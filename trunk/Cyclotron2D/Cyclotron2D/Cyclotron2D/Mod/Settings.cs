@@ -99,7 +99,6 @@ namespace Cyclotron2D.Mod
                 File.Delete(fileName);
             }
             
-
             using (var fileStream = File.OpenWrite(fileName))
             {
                 foreach (var line in lines)
