@@ -65,7 +65,7 @@ namespace Cyclotron2D.Network
 
         #region Constants
 
-        public const int MAX_BUFFER_SIZE = 1024;
+        public const int MAX_BUFFER_SIZE = 100;
 
         #endregion
 
@@ -305,11 +305,11 @@ namespace Cyclotron2D.Network
 
                 msg = NetworkMessage.Build(buffer);
 
-                Debug.Assert(msg.Length < 100, "there should not be a message with more than 200 bytes of content");
+                Debug.Assert(msg.Length < MAX_BUFFER_SIZE, "there should not be a message with more than " + MAX_BUFFER_SIZE + " bytes of content");
 
                 while (msg.Length > msg.Content.Length)
                 {
-                    buffer = new byte[msg.Length - msg.Content.Length + 1];
+                    buffer = new byte[msg.Length - msg.Content.Length];
                     Socket.Receive(buffer);
                     msg.AddContent(buffer);
                 }
