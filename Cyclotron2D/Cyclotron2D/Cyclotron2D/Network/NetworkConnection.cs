@@ -43,19 +43,17 @@ namespace Cyclotron2D.Network
 
         public static bool IsConnectedUdp(Socket socket)
         {
-            if (socket != null && socket.Connected)
-            {
-                bool read = socket.Poll(1000, SelectMode.SelectRead);
-
-                if (read && socket.Available == 0)
-                {
-                    return false;
-                }
-
-                return true;
-
-            }
-            return false;
+//            if (socket != null)
+//            {
+//                bool read = socket.Poll(-1, SelectMode.SelectRead);
+//                bool write = socket.Poll(-1, SelectMode.SelectWrite);
+//                bool error = socket.Poll(-1, SelectMode.SelectWrite);
+//
+//                return ((read && socket.Available > 0) || write) && !error;
+//
+//            }
+//            return false;
+            return true;
         }
     }
 
