@@ -165,7 +165,7 @@ namespace Cyclotron2D.Core
                 return;
             }
 
-
+            //hide class property for revive calls
             Point Position;
 
             if(revive)
@@ -595,7 +595,7 @@ namespace Cyclotron2D.Core
             {
                 Enabled = true;
                 DebugMessages.Add(m_player + " Reviving");
-                HandleUpdateInfo(m_lastUpdateInfo);
+                HandleUpdateInfo(m_lastUpdateInfo, true);
             }
 
         }
