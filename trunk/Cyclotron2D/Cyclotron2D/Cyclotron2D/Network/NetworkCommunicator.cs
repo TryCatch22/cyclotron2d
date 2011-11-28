@@ -384,9 +384,11 @@ namespace Cyclotron2D.Network
 
                 msg = NetworkMessage.Build(buffer);
 
+                Debug.Assert(msg.Length < 100, "there should not be a message longer than 100 bytes");
+
                 while (msg.Length > msg.Content.Length)
                 {
-                    Array.Clear(buffer, 0, NetworkConnection.MAX_BUFFER_SIZE);
+                    buffer = new byte[msg.Length - msg.Content.Length];
                     UdpSocket.ReceiveFrom(buffer, ref remote);
                     msg.AddContent(buffer);
                 }
@@ -418,9 +420,9 @@ namespace Cyclotron2D.Network
 
         private void StartReceivingUdp()
         {
-            byte[] buffer = new byte[NetworkConnection.MAX_BUFFER_SIZE];
+            byte[] buffer = new byte[15];
             EndPoint endpoint = new IPEndPoint(IPAddress.Any, 0);
-            UdpSocket.BeginReceiveFrom(buffer, 0, NetworkConnection.MAX_BUFFER_SIZE, SocketFlags.None, ref endpoint, ReceiveCallbackUdp, buffer);
+            UdpSocket.BeginReceiveFrom(buffer, 0, 15, SocketFlags.None, ref endpoint, ReceiveCallbackUdp, buffer);
         }
 
 

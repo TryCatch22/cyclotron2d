@@ -96,6 +96,7 @@ namespace Cyclotron2D.Network
         /// creates a new connection object using the provided socket
         /// </summary>
         /// <param name="socket">an already connected socket</param>
+        /// <param name="mode"></param>
         public NetworkConnection(Socket socket)
         {
             Mode = NetworkMode.Tcp;
@@ -120,7 +121,7 @@ namespace Cyclotron2D.Network
 
         public NetworkConnection(EndPoint localEp, IPAddress ip, int port)
         {
-            Mode = NetworkMode.Tcp;
+            Mode = NetworkMode.Udp;
             LocalEP = localEp;
             RemoteEP = new IPEndPoint(ip, port);
 
@@ -150,7 +151,7 @@ namespace Cyclotron2D.Network
         {
             Disconnect();
 
-            Thread.Sleep(10);
+            Thread.Sleep(20);
 
             Mode = NetworkMode.Udp;
 
