@@ -363,26 +363,27 @@ namespace Cyclotron2D.Network
             if (Game.IsState(GameState.PlayingAsHost))
             {
                 //wait until all clients have received the setup message before stopping tcp
-                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 200)));
+                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 100)));
             }
             else if (Game.IsState(GameState.PlayingAsClient))
             {
                 //wait until host has stopped tcp and then stop after.
-                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 400)));
+                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 50)));
             }
 
             StopTcp();
 
-            if (Game.IsState(GameState.PlayingAsHost))
-            {
-                //wait until all clients have stopped Tcp to start udp
-                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 200)));
-            }
-            else if (Game.IsState(GameState.PlayingAsClient))
-            {
-                //wait until host has started udp then start after
-                Thread.Sleep(100);
-            }
+
+//            if (Game.IsState(GameState.PlayingAsHost))
+//            {
+//                //wait until all clients have stopped Tcp to start udp
+//                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 200)));
+//            }
+//            else if (Game.IsState(GameState.PlayingAsClient))
+//            {
+//                //wait until host has started udp then start after
+//                Thread.Sleep(100);
+//            }
 
 
             StartUdp();
