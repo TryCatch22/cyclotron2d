@@ -56,7 +56,7 @@ namespace Cyclotron2D
             Content.RootDirectory = "Content";
 
             m_graphics = new GraphicsDeviceManager(this);
-            RttService = new RttUpdateService(this) { Enabled = false};
+            RttService = new RttUpdateService(this) { Enabled = true};
             ScreenManager = new ScreenManager(this);
             InputState = new InputState(this);
             Communicator = new NetworkCommunicator(this);
