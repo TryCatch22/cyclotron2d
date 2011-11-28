@@ -63,7 +63,7 @@ namespace Cyclotron2D.Network
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            if (Game.IsState(GameState.PlayingAsHost | GameState.PlayingAsClient))
+            if (Game.IsState(GameState.PlayingAsHost | GameState.PlayingAsClient | GameState.GameLobbyHost | GameState.GameLobbyClient))
             {
                 if (gameTime.TotalGameTime > m_lastPingRound + UpdatePeriod && m_pingOutTimes.Count > 0)
                 {
@@ -97,7 +97,7 @@ namespace Cyclotron2D.Network
 
         private void OnMessageReceived(object sender, MessageEventArgs e)
         {
-            if (Game.IsState(GameState.PlayingAsHost | GameState.PlayingAsClient))
+            if (Game.IsState(GameState.PlayingAsHost | GameState.PlayingAsClient | GameState.GameLobbyHost | GameState.GameLobbyClient))
             {
                 if (e.Message.Type == MessageType.Ping)
                 {

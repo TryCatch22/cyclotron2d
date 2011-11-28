@@ -218,6 +218,7 @@ namespace Cyclotron2D.Screens.Main
             Game.Communicator.AddHost(player, connection);
             m_playersPanel.AddPlayer(player);
             Players.Add(player);
+            Game.RttService.Reset();
             
        }
         
@@ -269,6 +270,7 @@ namespace Cyclotron2D.Screens.Main
             GameScreen.AddPlayer(player);
             m_playersPanel.AddPlayer(player);
             Players.Add(player);
+            Game.RttService.Reset();
 
         }
 
@@ -293,8 +295,9 @@ namespace Cyclotron2D.Screens.Main
             {
                 var player = Game.Communicator.GetPlayer(e.Connection);
 
-
-                //inform other clients of the disconnect and give them a player ID mapping to update
+                if(player != null)
+                {
+                     //inform other clients of the disconnect and give them a player ID mapping to update
                 //warning: This method might fail if people join or leave very close together and the messages arrive out of order client side
 
                 string content = "";
@@ -315,6 +318,9 @@ namespace Cyclotron2D.Screens.Main
                 RemovePlayer(player);
 
                 player.Dispose();
+                }
+
+               
 
             }
             else
@@ -358,34 +364,34 @@ namespace Cyclotron2D.Screens.Main
                             }
                         }
 
-                        Thread.Sleep(400);
-
-                        m_pingOut = DateTime.Now;
-                        Game.Communicator.MessagePlayer(source, new NetworkMessage(MessageType.Ping, "a"));
+//                        Thread.Sleep(400);
+//
+//                        m_pingOut = DateTime.Now;
+//                        Game.Communicator.MessagePlayer(source, new NetworkMessage(MessageType.Ping, "a"));
 
                     }
                     break;
-                case MessageType.Ping:
-                    {
-                        switch (e.Message.Content[0])
-                        {
-                            case 'a':
+//                case MessageType.Ping:
+//                    {
+//                        switch (e.Message.Content[0])
+//                        {
+//                            case 'a':
                                 //client receives initial ping
-                                m_pingOut = DateTime.Now;
-                                Game.Communicator.MessagePlayer(source, new NetworkMessage(MessageType.Ping, "b"));
-                                break;
-                            case 'b':
+//                                m_pingOut = DateTime.Now;
+//                                Game.Communicator.MessagePlayer(source, new NetworkMessage(MessageType.Ping, "b"));
+//                                break;
+//                            case 'b':
                                 //server getting pingback
-                                Game.Communicator.Connections[source].RoundTripTime = DateTime.Now - m_pingOut;
-                                Game.Communicator.MessagePlayer(source, new NetworkMessage(MessageType.Ping, "c"));
-                                break;
-                            case 'c':
+//                                Game.Communicator.Connections[source].RoundTripTime = DateTime.Now - m_pingOut;
+//                                Game.Communicator.MessagePlayer(source, new NetworkMessage(MessageType.Ping, "c"));
+//                                break;
+//                            case 'c':
                                 //client getting pingback
-                                Game.Communicator.Connections[source].RoundTripTime = DateTime.Now - m_pingOut;
-                                break;
-                        }
-                    }
-                    break;
+//                                Game.Communicator.Connections[source].RoundTripTime = DateTime.Now - m_pingOut;
+//                                break;
+//                        }
+//                    }
+//                    break;
                 //now on client side we can add the new player
                 case MessageType.PlayerJoined:
                     {
@@ -475,7 +481,7 @@ namespace Cyclotron2D.Screens.Main
                     Game.Communicator.LocalId = 1;
                     break;
                 case GameState.GameLobbyClient:
-                    //nothing here yet
+                    Game.RttService.Reset();
                     break;
                 case GameState.PlayingAsHost:
                 case GameState.PlayingAsClient:

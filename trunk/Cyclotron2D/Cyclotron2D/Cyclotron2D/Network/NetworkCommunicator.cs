@@ -155,8 +155,14 @@ namespace Cyclotron2D.Network
                 {
                     if (!connection.IsConnected)
                     {
-                        Remove(GetPlayer(connection));
-                        InvokeConnectionLost(new ConnectionEventArgs(connection));
+                        var player = GetPlayer(connection);
+                        if(player != null)
+                        {
+                              
+                              InvokeConnectionLost(new ConnectionEventArgs(connection));
+                              Remove(player);
+                        }
+                      
                     }
 
                 }
@@ -316,8 +322,9 @@ namespace Cyclotron2D.Network
 
         private void OnConnectionDisconnected(object sender, ConnectionEventArgs e)
         {
-            m_disconnected.Add(GetPlayer(e.Connection));
+            
             InvokeConnectionLost(e);
+            m_disconnected.Add(GetPlayer(e.Connection));
         }
 
 
