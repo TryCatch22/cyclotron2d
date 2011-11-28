@@ -1,5 +1,6 @@
 ﻿using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
+using Cyclotron2D.Sounds;
 
 namespace Cyclotron2D.UI.UIElements
 {
@@ -35,6 +36,7 @@ namespace Cyclotron2D.UI.UIElements
             if (IsMouseOver && Game.InputState.IsNewLeftClick)
             {
                 IsChecked = !IsChecked;
+				Sound.PlaySound(Sound.Clink, 0.5f);
             }
         }
 

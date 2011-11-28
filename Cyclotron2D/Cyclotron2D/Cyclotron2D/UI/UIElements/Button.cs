@@ -1,6 +1,7 @@
 ﻿using System;
 using Cyclotron2D.Screens.Base;
 using Microsoft.Xna.Framework;
+using Cyclotron2D.Sounds;
 
 namespace Cyclotron2D.UI.UIElements
 {
@@ -14,6 +15,7 @@ namespace Cyclotron2D.UI.UIElements
 
         protected virtual void OnClick(object sender, EventArgs e)
         {
+			Sound.PlaySound(Sound.Clink, 0.5f);
         }
 
         public event EventHandler Click;

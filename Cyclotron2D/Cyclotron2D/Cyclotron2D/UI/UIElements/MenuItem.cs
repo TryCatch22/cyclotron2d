@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using Cyclotron2D.Sounds;
 
 namespace Cyclotron2D.UI.UIElements
 {
@@ -28,6 +29,7 @@ namespace Cyclotron2D.UI.UIElements
         protected override void OnClick(object sender, EventArgs e)
         {
             Menu.Select(this);
+			Sound.PlaySound(Sound.Clink, 0.5f);
         }
     }
 }
