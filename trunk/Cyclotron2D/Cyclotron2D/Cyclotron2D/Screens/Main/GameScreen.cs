@@ -66,7 +66,7 @@ namespace Cyclotron2D.Screens.Main
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            if (isGameSetup && ActivePlayers.Aggregate(true, (ready, player) => ready && player.Ready))
+            if (isGameSetup && ActivePlayers.Aggregate(true, (ready, player) => ready && player.Ready) && (Game.RttService.UpdatePeriod == RttUpdateService.DefaultUpdatePeriod))
             {
                 if(DateTime.UtcNow > m_startTimeUtc)
                 {
@@ -229,17 +229,16 @@ namespace Cyclotron2D.Screens.Main
 
                         Game.Communicator.MessageAll(new NetworkMessage(type, content));
 
-                        Thread.Sleep(50);
+                     
+                        Game.RttService.Pause();
 
-                        if(UseUdp)Game.Communicator.SwitchToUdp();
-
-
-
+                        if(UseUdp)
+                        {
+                            Game.Communicator.SwitchToUdp();
+                        }
                         Game.RttService.Reset();
 
 
-
-                        //accelerate rtt updates to get better estimate before sending all ready
 
 
                         DebugMessages.Add("Accelerating Pings");
@@ -318,13 +317,15 @@ namespace Cyclotron2D.Screens.Main
 
                         m_engine.SetupGame(players, conditions);
 
+                        Game.RttService.Pause();
+
                        if(UseUdp)
                        {
-                           Thread.Sleep(500);
                            Game.Communicator.SwitchToUdp();
                        }
 
                         Game.RttService.Reset();
+                        Game.RttService.Resume();
 
                         Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
                         m_lastReady = Game.GameTime.TotalGameTime;

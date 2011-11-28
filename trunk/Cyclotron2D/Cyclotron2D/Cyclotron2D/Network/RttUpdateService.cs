@@ -67,9 +67,22 @@ namespace Cyclotron2D.Network
             }
         }
 
+        /// <summary>
+        /// this will resume the service if paused
+        /// </summary>
         public void TriggerPing()
         {
             m_lastPingRound = new TimeSpan(0);
+        }
+
+        public void Pause()
+        {
+            m_lastPingRound = TimeSpan.MaxValue - UpdatePeriod;
+        }
+
+        public void Resume()
+        {
+            TriggerPing();
         }
 
         public override void Update(GameTime gameTime)
