@@ -305,6 +305,8 @@ namespace Cyclotron2D.Network
 
                 msg = NetworkMessage.Build(buffer);
 
+                Debug.Assert(msg.Length < 200, "there should not be a message with more than 200 bytes of content");
+
                 while (msg.Length > msg.Content.Length)
                 {
                     Array.Clear(buffer, 0, MAX_BUFFER_SIZE);
