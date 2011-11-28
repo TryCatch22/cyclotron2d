@@ -123,7 +123,7 @@ namespace Cyclotron2D {
 					var rect = new Rectangle((int)pos.X, (int)pos.Y, (int)message.Size.X, (int)message.Size.Y);
 
 					spriteBatch.Draw(Art.Pixel, rect, Color.White * 0.5f * alpha);
-					spriteBatch.DrawString(Art.Font, s_messages[i++].Text, pos, Color.Purple * alpha);
+					spriteBatch.DrawString(Art.Font, s_messages[i++].Text, pos, Color.Purple * alpha, 0.0f, Vector2.Zero, 0.3f, SpriteEffects.None, 0.0f);
 				}
 			}
 #endif
