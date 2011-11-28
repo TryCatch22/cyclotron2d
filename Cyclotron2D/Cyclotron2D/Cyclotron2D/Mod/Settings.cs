@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,6 +34,8 @@ namespace Cyclotron2D.Mod
 
         public RangedIntegerSetting MaxTailLength { get; private set; }
 
+		public Setting<bool> Mute { get; set; }
+
         public Setting<bool> AllowSuicide { get; set; }
 
         public Setting<bool> DrawGrid { get; set; }
@@ -45,10 +46,11 @@ namespace Cyclotron2D.Mod
 
         public Settings()
         {
-            GridSize = new RangedIntegerSetting("Grid Size ", 5){MinValue = 2, MaxValue = 15};
+			Mute = new Setting<bool>("Mute All Sounds ", false) { Validate = val => true };
+            GridSize = new RangedIntegerSetting("Grid Size ", 5){ MinValue = 2, MaxValue = 15 };
             CycleSpeed = new RangedFloatSetting("Cycle Speed ", 3) { MinValue = 1, MaxValue = 5 };
             MaxTailLength = new RangedIntegerSetting("Max Tail Length ", 0) { MinValue = 0, MaxValue = 3000 };
-            AllowSuicide = new Setting<bool>("Allow Suicide ", false) {Validate = val => true };
+            AllowSuicide = new Setting<bool>("Allow Suicide ", false) { Validate = val => true };
             DrawGrid = new Setting<bool>("Draw Grid ", true) { Validate = val => true };
             PlasmaGrid = new Setting<bool>("Plasma Grid ", false) { Validate = val => true };
             PlayerName = new Setting<string>("Player Name ", "You") { Validate = val => !string.IsNullOrWhiteSpace(val) };
@@ -85,6 +87,7 @@ namespace Cyclotron2D.Mod
         {
             string[] lines = new[]
                                  {
+									 Mute.ToFileString(),
                                      GridSize.ToFileString(),
                                      CycleSpeed.ToFileString(),
                                      MaxTailLength.ToFileString(),
@@ -124,6 +127,10 @@ namespace Cyclotron2D.Mod
                     PlayerName.TrySetValue(dict[PlayerName.Name]);
 
                     bool b;
+					if (bool.TryParse(dict[Mute.Name], out b))
+					{
+						Mute.TrySetValue(b);
+					}
                     if (bool.TryParse(dict[AllowSuicide.Name], out b))
                     {
                         AllowSuicide.TrySetValue(b);

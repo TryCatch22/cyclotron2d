@@ -12,6 +12,7 @@ namespace Cyclotron2D.UI
 
         public Settings Settings { get; private set; }
 
+		private LabelCheckBox m_mute;
         private LabelTextBox m_gridSize;
         private LabelTextBox m_cycleSpeed;
         private LabelTextBox m_maxTailLength;
@@ -29,18 +30,19 @@ namespace Cyclotron2D.UI
         {
 			int labelWidth = 400;
 			TextAlign align = TextAlign.Left;
-			m_drawGrid = new LabelCheckBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
+			m_mute = new LabelCheckBox(game, screen) { LabelWidth = labelWidth, LabelAlign = align };
+			m_drawGrid = new LabelCheckBox(game, screen) { LabelWidth = labelWidth, LabelAlign = align };
             m_plasmaGrid = new LabelCheckBox(game, screen) { LabelWidth = labelWidth, LabelAlign = align };
 
-			m_gridSize = new LabelTextBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
-			m_cycleSpeed = new LabelTextBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
-			m_maxTailLength = new LabelTextBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
-			m_suicide = new LabelCheckBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
-			m_playerName = new LabelTextBox(game, screen) {LabelWidth = labelWidth, LabelAlign = align};
+			m_gridSize = new LabelTextBox(game, screen) { LabelWidth = labelWidth, LabelAlign = align };
+			m_cycleSpeed = new LabelTextBox(game, screen) { LabelWidth = labelWidth, LabelAlign = align };
+			m_maxTailLength = new LabelTextBox(game, screen) { LabelWidth = labelWidth, LabelAlign = align };
+			m_suicide = new LabelCheckBox(game, screen) { LabelWidth = labelWidth, LabelAlign = align };
+			m_playerName = new LabelTextBox(game, screen) { LabelWidth = labelWidth, LabelAlign = align };
 
             m_optionsPanel = new StretchPanel(game, screen);
 
-            m_optionsPanel.AddItems(m_gridSize, m_cycleSpeed, m_maxTailLength, m_suicide, m_drawGrid, m_plasmaGrid, m_playerName);
+            m_optionsPanel.AddItems(m_mute, m_gridSize, m_cycleSpeed, m_maxTailLength, m_suicide, m_drawGrid, m_plasmaGrid, m_playerName);
 
             m_okButton = new Button(game, screen);
         }
@@ -49,8 +51,7 @@ namespace Cyclotron2D.UI
         {
             Settings = settings;
 
-
-
+			m_mute.LabelText = settings.Mute.ToString();
             m_gridSize.LabelText = settings.GridSize.ToString();
             m_cycleSpeed.LabelText = settings.CycleSpeed.ToString();
             m_maxTailLength.LabelText = settings.MaxTailLength.ToString();
@@ -59,7 +60,7 @@ namespace Cyclotron2D.UI
             m_playerName.LabelText = settings.PlayerName.ToString();
             m_plasmaGrid.LabelText = settings.PlasmaGrid.ToString();
 
-
+			m_mute.IsChecked = Settings.Mute.Value;
             m_gridSize.BoxText = Settings.GridSize.Value.ToString();
             m_cycleSpeed.BoxText = Settings.CycleSpeed.Value.ToString();
             m_maxTailLength.BoxText = Settings.MaxTailLength.Value.ToString();
@@ -73,6 +74,7 @@ namespace Cyclotron2D.UI
         {
             base.Initialize();
 
+			m_mute.Label.TextColor = Color.White;
             m_cycleSpeed.Label.TextColor = Color.White;
             m_gridSize.Label.TextColor = Color.White;
             m_maxTailLength.Label.TextColor = Color.White;
@@ -81,12 +83,8 @@ namespace Cyclotron2D.UI
             m_playerName.Label.TextColor = Color.White;
             m_plasmaGrid.Label.TextColor = Color.White;
 
-
             m_okButton.Click += OnOkClicked;
             m_okButton.Text = "Apply";
-
-
-           
         }
 
         public override void Update(GameTime gameTime)
@@ -127,6 +125,7 @@ namespace Cyclotron2D.UI
         {
             try
             {
+				Settings.Mute.TrySetValue(m_mute.IsChecked);
                 Settings.GridSize.TrySetValue(m_gridSize.BoxText);
                 Settings.CycleSpeed.TrySetValue(m_cycleSpeed.BoxText);
                 Settings.MaxTailLength.TrySetValue(m_maxTailLength.BoxText);
