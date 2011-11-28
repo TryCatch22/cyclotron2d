@@ -96,7 +96,7 @@ namespace Cyclotron2D.UI
         {
             base.Update(gameTime);
 
-            m_optionsPanel.Rect = RectangleBuilder.Top(Rect, new Vector2(1f, 0.8f));
+            m_optionsPanel.Rect = RectangleBuilder.Top(Rect, new Vector2(1.0f, 0.8f));
             m_okButton.Rect = RectangleBuilder.BottomRight(Rect, new Vector2(0.2f, 0.17f), new Point(2, 2));
         }
 

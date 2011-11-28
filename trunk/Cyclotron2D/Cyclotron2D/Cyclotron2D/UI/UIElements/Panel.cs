@@ -35,8 +35,6 @@ namespace Cyclotron2D.UI.UIElements
                     Items.Remove(item);
                 }
             }
-   
-
         }
 
         public void DrawElements()
