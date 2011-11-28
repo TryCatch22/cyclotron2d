@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Mod;
 using Cyclotron2D.Screens.Base;
