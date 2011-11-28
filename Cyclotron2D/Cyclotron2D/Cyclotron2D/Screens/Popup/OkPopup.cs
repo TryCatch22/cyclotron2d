@@ -37,9 +37,9 @@ namespace Cyclotron2D.Screens.Popup
             Message.Rect = RectangleBuilder.Centered(Rect, new Vector2(0.6f, 0.6f));
         }
 
-        protected override void HandleInupt(GameTime gameTime)
+        protected override void HandleInput(GameTime gameTime)
         {
-            base.HandleInupt(gameTime);
+            base.HandleInput(gameTime);
             if (Game.InputState.IsNewKeyPress(Keys.Enter))
             {
 				if (OnOkClicked != null)

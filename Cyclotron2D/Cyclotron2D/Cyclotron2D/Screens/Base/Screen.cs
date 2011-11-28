@@ -37,11 +37,11 @@ namespace Cyclotron2D.Screens.Base
             base.Update(gameTime);
             if (HasFocus)
             {
-                HandleInupt(gameTime);
+                HandleInput(gameTime);
             }
         }
 
-        protected virtual void HandleInupt(GameTime gameTime)
+        protected virtual void HandleInput(GameTime gameTime)
         {
         }
 
