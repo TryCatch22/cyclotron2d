@@ -98,7 +98,7 @@ namespace Cyclotron2D.Screens.Main
             var rect = Game.GraphicsDevice.Viewport.Bounds;
             m_mainMenu.Rect = new Rectangle(rect.Width/4, rect.Height/6 + 100, rect.Width/2, 2*rect.Height/3); // Hacked height by 100px to fit title art...
             m_mainMenu.Reset();
-			MediaPlayer.Volume = 0.7f;
+			MediaPlayer.Volume = 0.5f;
         }
 
 		public override void Update(GameTime gameTime)
