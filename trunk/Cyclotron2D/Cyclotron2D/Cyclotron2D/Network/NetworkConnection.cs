@@ -139,7 +139,7 @@ namespace Cyclotron2D.Network
 
         private void InvokeMessageReceived(MessageEventArgs e)
         {
-            Debug.Assert(Mode == NetworkMode.Tcp, "Individual Connections should not bereceiving data under Udp");
+            Debug.Assert(Mode == NetworkMode.Tcp, "Individual Connections should not be receiving data under Udp");
             EventHandler<MessageEventArgs> handler = MessageReceived;
             if (handler != null) handler(this, e);
         }
@@ -265,7 +265,7 @@ namespace Cyclotron2D.Network
      
         private void StartReceiving()
         {
-            Debug.Assert(Mode == NetworkMode.Tcp, "wtf wrong mode on connection");
+
             byte[] buffer = new byte[10];
 
             try
