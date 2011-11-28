@@ -17,14 +17,14 @@ namespace Cyclotron2D.UI.UIElements
         {
             CheckedText = "Yes";
             UncheckedText = "No";
-            Background = Color.BlanchedAlmond;
+			Background = new Color(0, 148, 255, 255);
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
             Text = IsChecked ? "Yes" : "No";
-            TextColor = IsChecked ? Color.Green : Color.Red;
+            TextColor = IsChecked ? Color.White : Color.Black;
 
 
         }
