@@ -307,6 +307,11 @@ namespace Cyclotron2D.Network
 
             SetupUdpSocket();
 
+            foreach (var networkConnection in Connections.Values)
+            {
+                networkConnection.SwitchToUdp(UdpSocket);
+            }
+
 
             Mode = NetworkMode.Udp;
 
