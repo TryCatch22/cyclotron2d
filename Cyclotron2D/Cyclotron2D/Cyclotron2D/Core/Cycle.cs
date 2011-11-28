@@ -12,6 +12,7 @@ using Cyclotron2D.Screens.Main;
 using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Cyclotron2D.Sounds;
 
 namespace Cyclotron2D.Core
 {
@@ -507,6 +508,7 @@ namespace Cyclotron2D.Core
             Dead = true;
             Enabled = false;
             CreateExplosion();
+			Sound.Boom.Play();
 
             DebugMessages.Add(m_player + " confirmed dead.");
         }
