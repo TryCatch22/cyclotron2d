@@ -47,7 +47,7 @@ namespace Cyclotron2D.Mod
         public Settings()
         {
 			Mute = new Setting<bool>("Mute All Sounds ", false) { Validate = val => true };
-            GridSize = new RangedIntegerSetting("Grid Size ", 5){ MinValue = 2, MaxValue = 15 };
+            GridSize = new RangedIntegerSetting("Grid Size ", 12){ MinValue = 2, MaxValue = 15 };
             CycleSpeed = new RangedFloatSetting("Cycle Speed ", 3) { MinValue = 1, MaxValue = 5 };
             MaxTailLength = new RangedIntegerSetting("Max Tail Length ", 0) { MinValue = 0, MaxValue = 3000 };
             AllowSuicide = new Setting<bool>("Allow Suicide ", false) { Validate = val => true };
