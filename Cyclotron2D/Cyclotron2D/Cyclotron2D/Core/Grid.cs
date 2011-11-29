@@ -198,6 +198,7 @@ namespace Cyclotron2D.Core
             // second, we pass the data to the warpy effect.
             m_effect.Parameters["inputTex"].SetValue(m_renderTarget);
             m_effect.Parameters["numPlayers"].SetValue(Cycles.Count);
+			m_effect.Parameters["aspectRatio"].SetValue((float)Game.GraphicsDevice.Viewport.Width / (float)Game.GraphicsDevice.Viewport.Height);
             m_effect.Parameters["cyclePos"].SetValue(positions);
             m_effect.Parameters["cycleVel"].SetValue(velocities);
         }
