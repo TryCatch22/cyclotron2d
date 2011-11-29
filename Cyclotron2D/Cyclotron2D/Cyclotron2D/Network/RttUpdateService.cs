@@ -15,9 +15,6 @@ namespace Cyclotron2D.Network
     public class RttUpdateService : CyclotronComponent
     {
 
-
-
-
         #region Fields
 
         public static readonly TimeSpan DefaultUpdatePeriod = new TimeSpan(0, 0, 0, 1);
@@ -118,7 +115,6 @@ namespace Cyclotron2D.Network
 
 
         #endregion
-
 
         #region Event Handlers
 
