@@ -7,7 +7,7 @@ namespace Cyclotron2D.UI.UIElements
 {
     public abstract class Panel : UIElement
     {
-        protected List<UIElement> Items { get; private set; }
+        public List<UIElement> Items { get; private set; }
 
         public int ItemSpacing { get; set; }
 
