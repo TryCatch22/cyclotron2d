@@ -39,6 +39,8 @@ namespace Cyclotron2D.Screens.Main
 
         public TimeSpan GameStartTime { get { return m_engine.GameStartTime; } }
 
+		private TimeSpan gameScreenSwitch;
+
         public NetworkMessage SetupMessage { get; set; }
 
         private bool m_gameStarted;
@@ -83,6 +85,11 @@ namespace Cyclotron2D.Screens.Main
                 Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
                 m_lastReady = gameTime.TotalGameTime;
             }*/
+
+			if ((gameTime.TotalGameTime - gameScreenSwitch) > new TimeSpan(0, 0, 10) && !m_gameStarted)
+			{
+				Game.ChangeState(GameState.MainMenu);
+			}
         }
         
 
@@ -428,6 +435,8 @@ namespace Cyclotron2D.Screens.Main
                 GameSettings = Settings.Multiplayer;
                 SetupGame(players);
 
+				gameScreenSwitch = Game.GameTime.TotalGameTime;
+				
             }
         }
     }
