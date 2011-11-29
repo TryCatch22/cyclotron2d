@@ -36,6 +36,8 @@ namespace Cyclotron2D.Network
         RealDeath,
 
         AckDeath,
+        AckUdpSetup,
+        DoUdpSwitch
     }
 
 
