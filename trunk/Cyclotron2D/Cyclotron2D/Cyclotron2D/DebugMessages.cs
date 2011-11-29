@@ -105,10 +105,15 @@ namespace Cyclotron2D {
 
 		public static void Update(GameTime gameTime) {
 #if DEBUG
-			foreach (var message in s_messages) {
-				message.TimeLeft -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+			lock (s_msgLock)
+			{
+				foreach (var message in s_messages)
+				{
+					message.TimeLeft -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+				}
+				s_messages.RemoveAll(msg => msg.TimeLeft <= 0);
 			}
-            s_messages.RemoveAll(msg => msg.TimeLeft <= 0);
 #endif
 		}
 
