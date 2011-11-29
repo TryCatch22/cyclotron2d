@@ -1,4 +1,5 @@
 ﻿using System;
+using Cyclotron2D.Graphics;
 using Microsoft.Xna.Framework;
 using Cyclotron2D.Sounds;
 
@@ -30,6 +31,18 @@ namespace Cyclotron2D.UI.UIElements
         {
             Menu.Select(this);
 			Sound.PlaySound(Sound.Clink, 0.5f);
+        }
+
+        public override void Draw(GameTime gameTime)
+        {
+            base.Draw(gameTime);
+
+            if(Menu.PreviewItem == this)
+            {
+                Game.SpriteBatch.Draw(Art.Pixel, Rect, Art.NeonBlue);
+            }
+
+            if(ShouldDrawText(typeof(MenuItem))) DrawText();
         }
     }
 }
