@@ -163,7 +163,9 @@ namespace Cyclotron2D.Screens.Main
                             if(confirmations == ActivePlayers.Count -1)
                             {
                                 Game.Communicator.MessageAll(new NetworkMessage(MessageType.DoUdpSwitch, ""));
-                                Thread.Sleep(50);
+                                
+                                
+                                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, TimeSpan.FromMilliseconds(150)));
 
                                 Game.Communicator.StopTcp();
                                 Game.Communicator.StartUdp();
