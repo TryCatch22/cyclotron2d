@@ -276,7 +276,7 @@ namespace Cyclotron2D.Core
 
 
                         var line = new Line(vertices[i - addedPoints], vertices[i -addedPoints - 1]);
-                        Position = vertices[i - addedPoints].AddOffset(line.Direction, offset);
+                        this.Position = vertices[i - addedPoints].AddOffset(line.Direction, offset);
                         Direction = line.Direction;
 
 
