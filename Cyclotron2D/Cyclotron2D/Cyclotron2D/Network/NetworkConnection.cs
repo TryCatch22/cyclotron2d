@@ -180,7 +180,7 @@ namespace Cyclotron2D.Network
         /// <param name="message"></param>
         public void Send(NetworkMessage message)
         {
-            DebugMessages.AddLogOnly("Sending Message: " + message.Type + "\n" + message.Content + "\n");
+            DebugMessages.AddLogOnly("Sending Message: " + message.Type +" Header:"+ message.HeaderLine + "\n" + message.Content + "\n");
 			try
 			{
 				switch (Mode)
