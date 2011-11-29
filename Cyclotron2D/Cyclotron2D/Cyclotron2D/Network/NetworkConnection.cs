@@ -270,10 +270,19 @@ namespace Cyclotron2D.Network
         {
 
             byte[] buffer = new byte[MAX_BUFFER_SIZE];
-
+            int k = 0;
+            if(oldData != null)
+            {
+                k = oldData.Length;
+                for (int i = 0; i < oldData.Length; i++)
+                {
+                    buffer[i] = oldData[i];
+                }
+            }
+                
             try
             {
-                Socket.BeginReceive(buffer, 0, MAX_BUFFER_SIZE, SocketFlags.None, ReceiveCallback, buffer);
+                Socket.BeginReceive(buffer, k, MAX_BUFFER_SIZE, SocketFlags.None, ReceiveCallback, buffer);
             }
             catch (ObjectDisposedException)
             {
@@ -293,7 +302,7 @@ namespace Cyclotron2D.Network
             }
         }
 
-       
+        private byte[] oldData;
 
         private void ReceiveCallback(IAsyncResult ar)
         {
@@ -320,7 +329,13 @@ namespace Cyclotron2D.Network
                 }
                 if(msg.Content.Length > msg.Length)
                 {
-                    Debug.Assert(false, "stealing data from next message much?");
+                    string content = msg.Content;
+                    msg.Content = content.Substring(0, msg.Length);
+
+                    string extraData = content.Substring(msg.Length);
+
+                    oldData = NetworkMessage.MsgEncoding.GetBytes(extraData);
+                    //Debug.Assert(false, "stealing data from next message much?");
                 }
 
             }

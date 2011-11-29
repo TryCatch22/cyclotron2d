@@ -483,6 +483,10 @@ namespace Cyclotron2D.Network
 
         }
 
+
+        private byte[] oldData;
+
+
         private void ReceiveCallbackUdp(IAsyncResult ar)
         {
             var buffer = ar.AsyncState as byte[];
@@ -510,7 +514,13 @@ namespace Cyclotron2D.Network
 
                 if (msg.Content.Length > msg.Length)
                 {
-                    Debug.Assert(false, "stealing data from next message much?");
+                    string content = msg.Content;
+                    msg.Content = content.Substring(0, msg.Length);
+
+                    string extraData = content.Substring(msg.Length);
+
+                    oldData = NetworkMessage.MsgEncoding.GetBytes(extraData);
+                    //Debug.Assert(false, "stealing data from next message much?");
                 }
 
             }
@@ -546,8 +556,19 @@ namespace Cyclotron2D.Network
         private void StartReceivingUdp()
         {
             byte[] buffer = new byte[NetworkConnection.MAX_BUFFER_SIZE];
+
+            int k = 0;
+            if (oldData != null)
+            {
+                k = oldData.Length;
+                for (int i = 0; i < oldData.Length; i++)
+                {
+                    buffer[i] = oldData[i];
+                }
+            }
+
             EndPoint endpoint = new IPEndPoint(IPAddress.Any, 0);
-            UdpSocket.BeginReceiveFrom(buffer, 0, NetworkConnection.MAX_BUFFER_SIZE, SocketFlags.None, ref endpoint, ReceiveCallbackUdp, buffer);
+            UdpSocket.BeginReceiveFrom(buffer, k, NetworkConnection.MAX_BUFFER_SIZE, SocketFlags.None, ref endpoint, ReceiveCallbackUdp, buffer);
         }
 
 
