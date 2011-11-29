@@ -155,6 +155,7 @@ namespace Cyclotron2D.Core
 
 
         private List<Point> m_lastUpdateInfo;
+        private int msgsDuringFeignDeath;
 
         public void HandleUpdateInfo(List<Point> vertices, bool revive = false)
         {
@@ -166,15 +167,25 @@ namespace Cyclotron2D.Core
             }
             //hide class property for revive calls
             Point Position;
+            if (!Enabled && !Dead)
+            {
+                msgsDuringFeignDeath++;
+            }
+            else if (revive && msgsDuringFeignDeath == 0)
+            {
+                return;
+            }
 
 
-
-            if (revive || !Enabled && !Dead)
+            if (revive)
             {
                 //if reviving, pretend the position is the one from the last update + average lag
                 //or if feigning death still handle messages.
                 var line = new Line(vertices[1], vertices[0]);
                 Position = vertices[0].AddOffset(line.Direction, m_averageLag);
+
+
+
             }
             else
             {

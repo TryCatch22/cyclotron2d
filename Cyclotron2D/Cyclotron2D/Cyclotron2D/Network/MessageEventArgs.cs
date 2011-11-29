@@ -7,9 +7,12 @@ namespace Cyclotron2D.Network
     {
         public NetworkMessage Message { get; private set; }
 
-        public MessageEventArgs(NetworkMessage message)
+        public NetworkConnection Connection { get; private set; }
+
+        public MessageEventArgs(NetworkMessage message, NetworkConnection connection)
         {
             Message = message;
+            Connection = connection;
         }
     }
 
