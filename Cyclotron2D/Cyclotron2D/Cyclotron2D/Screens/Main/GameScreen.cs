@@ -20,32 +20,44 @@ namespace Cyclotron2D.Screens.Main
     /// </summary>
     public class GameScreen : MainScreen
     {
+
+        #region Fields
+
         private Engine m_engine;
 
         private StartRandomizer m_startRandomizer;
-
-        public List<Player> ActivePlayers { get { return m_engine.Players; } }
-
         private List<Player> m_lobbyPlayers;
 
         private bool isGameSetup;
+
+        private TimeSpan setupSendTime = TimeSpan.MaxValue - TimeSpan.FromMilliseconds(500);
+       
+        private NetworkMessage setupMsg;
+      
+		private TimeSpan gameScreenSwitch; 
+        
+        private bool m_gameStarted;
+
+        private DateTime m_startTimeUtc;
+
+        #endregion
+
+        public List<Player> ActivePlayers { get { return m_engine.Players; } }
+
 
         public bool UseUdp { get; set; }
 
         public Settings GameSettings { get; set; }
 
 
+
         public CollisionNotifier CollisionNotifier { get; private set; }
 
         public TimeSpan GameStartTime { get { return m_engine.GameStartTime; } }
 
-		private TimeSpan gameScreenSwitch;
 
         public NetworkMessage SetupMessage { get; set; }
 
-        private bool m_gameStarted;
-
-        private DateTime m_startTimeUtc;
 
         public GameScreen(Game game)
             : base(game, GameState.PlayingAsClient | GameState.PlayingSolo | GameState.PlayingAsHost)
@@ -56,14 +68,13 @@ namespace Cyclotron2D.Screens.Main
             CollisionNotifier = new CollisionNotifier(game, this, m_engine);
             m_startRandomizer = new StartRandomizer(game);
             isGameSetup = false;
+            gameScreenSwitch = TimeSpan.MaxValue - new TimeSpan(0, 0, 10);
         }
 
         public Player GetPlayer(int id)
         {
             return m_engine.GetPlayer(id);
         }
-
-        private TimeSpan m_lastReady;
 
         public override void Update(GameTime gameTime)
         {
@@ -79,14 +90,9 @@ namespace Cyclotron2D.Screens.Main
                     StartGame();
                 }
                 
-            }/*else if (isGameSetup && !m_gameStarted && Game.IsState(GameState.PlayingAsClient) && gameTime.TotalGameTime > m_lastReady + new TimeSpan(0, 0, 0, 0, 800))
-            {
-                //in case ready packet got dropped
-                Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
-                m_lastReady = gameTime.TotalGameTime;
-            }*/
+            }
 
-			if ((gameTime.TotalGameTime - gameScreenSwitch) > new TimeSpan(0, 0, 10) && !m_gameStarted)
+			if (gameTime.TotalGameTime > gameScreenSwitch + new TimeSpan(0, 0, 10) && !m_gameStarted)
 			{
 				Game.ChangeState(GameState.MainMenu);
 			}
@@ -218,7 +224,6 @@ namespace Cyclotron2D.Screens.Main
 
 
                             Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
-                            m_lastReady = Game.GameTime.TotalGameTime;
                         }
                     }
                     break;
@@ -244,8 +249,23 @@ namespace Cyclotron2D.Screens.Main
             return x.PlayerID - y.PlayerID;
         }
 
-        private TimeSpan setupSendTime = TimeSpan.MaxValue - TimeSpan.FromMilliseconds(500);
-        private NetworkMessage setupMsg;
+
+
+        private void Cleanup()
+        {
+            StopGame();
+            CollisionNotifier.Dispose();
+            CollisionNotifier = null;
+            m_engine.Dispose();
+            m_engine = null;
+
+            isGameSetup = false;
+            setupSendTime = TimeSpan.MaxValue - TimeSpan.FromMilliseconds(500);
+            gameScreenSwitch = TimeSpan.MaxValue - new TimeSpan(0, 0, 10);
+
+            setupMsg = null;
+            m_gameStarted = false;
+        }
 
         private void SetupGame(List<Player> players)
         {
@@ -387,6 +407,8 @@ namespace Cyclotron2D.Screens.Main
 
         }
 
+
+
         public void StopGame()
         {
             m_gameStarted = false;
@@ -478,6 +500,10 @@ namespace Cyclotron2D.Screens.Main
 
 				gameScreenSwitch = Game.GameTime.TotalGameTime;
 				
+            }
+            else
+            {
+                Cleanup();
             }
         }
     }
