@@ -360,20 +360,24 @@ namespace Cyclotron2D.Network
             m_doingUdpSwitch = true;
             DebugMessages.AddLogOnly("udp Switch start");
 
-            if (Game.IsState(GameState.PlayingAsHost))
-            {
-                //wait until all clients have received the setup message before stopping tcp
-                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 50)));
-            }
-            else if (Game.IsState(GameState.PlayingAsClient))
-            {
-                //wait until host has stopped tcp and then stop after.
-                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 100)));
-            }
+//            if (Game.IsState(GameState.PlayingAsHost))
+//            {
+//                //wait until all clients have received the setup message before stopping tcp
+//                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 50)));
+//            }
+//            else if (Game.IsState(GameState.PlayingAsClient))
+//            {
+//                //wait until host has stopped tcp and then stop after.
+//                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 100)));
+//            }
+
+            Thread.Sleep(2000);
 
             StopTcp();
 
-            Thread.Sleep(Game.Communicator.MaximumRtt);
+            Thread.Sleep(2000);
+
+            //Thread.Sleep(Game.Communicator.MaximumRtt);
 //            if (Game.IsState(GameState.PlayingAsHost))
 //            {
 //                //wait until all clients have stopped Tcp to start udp
@@ -388,7 +392,8 @@ namespace Cyclotron2D.Network
 
             StartUdp();
 
-            Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 100)));
+            Thread.Sleep(2000);
+            //Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 100)));
 
             DebugMessages.AddLogOnly("udp Switch end");
             m_doingUdpSwitch = false;
