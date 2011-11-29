@@ -246,7 +246,7 @@ namespace Cyclotron2D.Screens.Main
             return x.PlayerID - y.PlayerID;
         }
 
-        private TimeSpan setupSendTime = TimeSpan.MaxValue;
+        private TimeSpan setupSendTime = TimeSpan.MaxValue - TimeSpan.FromMilliseconds(500);
         private NetworkMessage setupMsg;
 
         private void SetupGame(List<Player> players)
