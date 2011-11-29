@@ -44,6 +44,7 @@ namespace Cyclotron2D.Core
             var msg = p.Cycle.GetInfoMessage();
             msg.Type = MessageType.RealDeath;
             msg.Content = p.PlayerID + "\n" + msg.Content;
+            return msg;
         }
 
         public override void Update(GameTime gameTime)
