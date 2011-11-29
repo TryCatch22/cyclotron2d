@@ -345,7 +345,7 @@ namespace Cyclotron2D.Network
 
             StartReceiving();
 
-            InvokeMessageReceived(new MessageEventArgs(msg));
+            InvokeMessageReceived(new MessageEventArgs(msg, this));
         }
 
         #endregion

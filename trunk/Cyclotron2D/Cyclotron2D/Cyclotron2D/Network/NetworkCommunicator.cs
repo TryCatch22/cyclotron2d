@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -31,6 +32,7 @@ namespace Cyclotron2D.Network
 
         private List<RemotePlayer> m_disconnected;
 
+        private ConcurrentQueue<MessageEventArgs> m_receivedMessages;
 
         #region Properties
 
@@ -90,6 +92,8 @@ namespace Cyclotron2D.Network
             LocalId = 0;
             m_disconnected = new List<RemotePlayer>();
             Mode = NetworkMode.Tcp;
+
+            m_receivedMessages = new ConcurrentQueue<MessageEventArgs>();
         }
 
         #endregion
@@ -168,6 +172,18 @@ namespace Cyclotron2D.Network
             m_disconnected.Clear();
 
 
+            while (m_receivedMessages.Count > 0)
+            {
+                MessageEventArgs e;
+                m_receivedMessages.TryDequeue(out e);
+                if(e != null)
+                {
+                    InvokeMessageReceived(e);
+                }
+                
+            }
+
+
             if (gameTime.TotalGameTime - lastConnectionCheck > new TimeSpan(0, 0, 0, 0, 500))
             {
                 foreach (var connection in connections)
@@ -185,6 +201,7 @@ namespace Cyclotron2D.Network
                     }
 
                 }
+
 
 
                 lastConnectionCheck = gameTime.TotalGameTime;
@@ -417,14 +434,22 @@ namespace Cyclotron2D.Network
 
         }
 
+        private void InvokeMessageReceived(MessageEventArgs e)
+        {
+            EventHandler<MessageEventArgs> handler = MessageReceived;
+            if (handler != null) handler(e.Connection, e);
+        }
 
         private void OnMessageReceived(object sender, MessageEventArgs e)
         {
             //            try
             //            {
             DebugMessages.AddLogOnly("Received Message: " + e.Message.Type + "\n" + e.Message.Content + "\n");
-            EventHandler<MessageEventArgs> handler = MessageReceived;
-            if (handler != null) handler(sender, e);
+
+            m_receivedMessages.Enqueue(e);
+
+
+
             //            }
             //            catch (Exception ex)
             //            {
@@ -513,7 +538,7 @@ namespace Cyclotron2D.Network
 
             if (msg != null)
             {
-                OnMessageReceived(GetConnection(msg.Source), new MessageEventArgs(msg));
+                OnMessageReceived(GetConnection(msg.Source), new MessageEventArgs(msg, GetConnection(msg.Source)));
             }
 
         }
