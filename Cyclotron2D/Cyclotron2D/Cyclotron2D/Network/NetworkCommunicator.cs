@@ -381,50 +381,61 @@ namespace Cyclotron2D.Network
             Mode = NetworkMode.Udp;
         }
 
-
-        public void SwitchToUdp()
+        public void StartIgnoreDisconnect()
         {
+            DebugMessages.AddLogOnly("Ignoring disconnects");
             m_doingUdpSwitch = true;
-            DebugMessages.AddLogOnly("udp Switch start");
-
-//            if (Game.IsState(GameState.PlayingAsHost))
-//            {
-//                //wait until all clients have received the setup message before stopping tcp
-//                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 50)));
-//            }
-//            else if (Game.IsState(GameState.PlayingAsClient))
-//            {
-//                //wait until host has stopped tcp and then stop after.
-//                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 100)));
-//            }
-
-            Thread.Sleep(2000);
-
-            StopTcp();
-
-            Thread.Sleep(2000);
-
-            //Thread.Sleep(Game.Communicator.MaximumRtt);
-//            if (Game.IsState(GameState.PlayingAsHost))
-//            {
-//                //wait until all clients have stopped Tcp to start udp
-//                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 200)));
-//            }
-//            else if (Game.IsState(GameState.PlayingAsClient))
-//            {
-//                //wait until host has started udp then start after
-//                Thread.Sleep(100);
-//            }
-
-
-            StartUdp();
-
-            Thread.Sleep(2000);
-            //Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 100)));
-
-            DebugMessages.AddLogOnly("udp Switch end");
-            m_doingUdpSwitch = false;
         }
+
+        public void EndIgnoreDisconnect()
+        {
+            m_doingUdpSwitch = false;
+            DebugMessages.AddLogOnly("Not ignoring disconnects");
+        }
+
+//        public void SwitchToUdp()
+//        {
+//            m_doingUdpSwitch = true;
+//            DebugMessages.AddLogOnly("udp Switch start");
+//
+////            if (Game.IsState(GameState.PlayingAsHost))
+////            {
+////                //wait until all clients have received the setup message before stopping tcp
+////                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 50)));
+////            }
+////            else if (Game.IsState(GameState.PlayingAsClient))
+////            {
+////                //wait until host has stopped tcp and then stop after.
+////                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 100)));
+////            }
+//
+//            Thread.Sleep(2000);
+//
+//            StopTcp();
+//
+//            Thread.Sleep(2000);
+//
+//            //Thread.Sleep(Game.Communicator.MaximumRtt);
+////            if (Game.IsState(GameState.PlayingAsHost))
+////            {
+////                //wait until all clients have stopped Tcp to start udp
+////                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 200)));
+////            }
+////            else if (Game.IsState(GameState.PlayingAsClient))
+////            {
+////                //wait until host has started udp then start after
+////                Thread.Sleep(100);
+////            }
+//
+//
+//            StartUdp();
+//
+//            Thread.Sleep(2000);
+//            //Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 100)));
+//
+//            DebugMessages.AddLogOnly("udp Switch end");
+//            m_doingUdpSwitch = false;
+//        }
 
 
 
