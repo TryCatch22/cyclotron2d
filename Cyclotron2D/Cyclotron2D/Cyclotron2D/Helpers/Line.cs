@@ -2,6 +2,7 @@
 using Cyclotron2D.Core;
 using Cyclotron2D.UI.UIElements;
 using Microsoft.Xna.Framework;
+using System.Diagnostics;
 
 namespace Cyclotron2D.Helpers
 {
@@ -29,8 +30,10 @@ namespace Cyclotron2D.Helpers
             {
                 if(Orientation == Orientation.Horizontal)
                 {
+                    Debug.Assert(End.X != Start.X, "same position!!");
                     return End.X > Start.X ? Direction.Right : Direction.Left;
                 }
+                Debug.Assert(End.Y != Start.Y, "same position!!");
                 return End.Y > Start.Y ? Direction.Down : Direction.Up; 
             }
         }
