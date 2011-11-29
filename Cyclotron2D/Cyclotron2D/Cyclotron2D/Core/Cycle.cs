@@ -162,20 +162,19 @@ namespace Cyclotron2D.Core
             m_lastUpdateInfo = vertices;
             if(vertices == null)
             {
-                
                 return;
             }
             //hide class property for revive calls
             Point Position;
             if (!Enabled && !Dead)
             {
-                msgsDuringFeignDeath++;
+                msgsDuringFeignDeath++;	//Counts incoming msgs while fake "dead"
             }
             else if (revive && msgsDuringFeignDeath == 0)
             {
+				//If a revive call, without any msgs received meanwhile
                 return;
             }
-
 
             if (revive)
             {
@@ -183,9 +182,6 @@ namespace Cyclotron2D.Core
                 //or if feigning death still handle messages.
                 var line = new Line(vertices[1], vertices[0]);
                 Position = vertices[0].AddOffset(line.Direction, m_averageLag);
-
-
-
             }
             else
             {
@@ -193,11 +189,8 @@ namespace Cyclotron2D.Core
             }
             Point last = m_vertices[m_vertices.Count - 1];
             int i = 0;
-            
 
             while(i < vertices.Count && vertices[i] != last) i++;
-
-
 
             Debug.Assert(i < vertices.Count, "have we missed more than 4 turns since the last message ??");
             
