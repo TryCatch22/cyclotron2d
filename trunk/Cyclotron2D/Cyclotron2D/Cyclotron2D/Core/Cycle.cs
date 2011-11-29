@@ -28,6 +28,11 @@ namespace Cyclotron2D.Core
     {
         #region Fields
 
+
+        private List<Point> m_lastUpdateInfo;
+        private Direction m_lastUpdateDir;
+        private int msgsDuringFeignDeath;
+
         private Player m_player;
         private Direction m_scheduledDirection;
 
@@ -154,44 +159,45 @@ namespace Cyclotron2D.Core
         }
 
 
-        private List<Point> m_lastUpdateInfo;
-        private Direction m_lastUpdateDir;
-        private int msgsDuringFeignDeath;
 
         public void HandleUpdateInfo(Direction dir, List<Point> vertices, bool revive = false)
         {
+
             m_lastUpdateInfo = vertices;
             m_lastUpdateDir = dir;
-            if(vertices == null)
-            {
-                return;
-            }
+            
             //hide class property for revive calls
             Point Position;
-            if (!Enabled && !Dead)
+            if (!Enabled && !Dead)//feign death
             {
                 msgsDuringFeignDeath++;	//Counts incoming msgs while fake "dead"
             }
-            else if (revive && msgsDuringFeignDeath == 0)
+            else
             {
-				//If a revive call, without any msgs received meanwhile
+                msgsDuringFeignDeath = 0;
+            }
+
+
+            if (vertices == null || Dead || !Enabled)
+            {
                 return;
             }
 
             if (revive)
             {
                 //if reviving, pretend the position is the one from the last update + average lag
-                //or if feigning death still handle messages.
                 Position = vertices[0].AddOffset(dir, m_averageLag);
             }
             else
             {
                 Position = this.Position;
             }
-            Point last = m_vertices[m_vertices.Count - 1];
+
+
+            Point lastTurn = m_vertices[m_vertices.Count - 1];
             int i = 0;
 
-            while(i < vertices.Count && vertices[i] != last) i++;
+            while(i < vertices.Count && vertices[i] != lastTurn) i++;
 
             Debug.Assert(i < vertices.Count, "have we missed more than 4 turns since the last message ??");
             
@@ -598,7 +604,7 @@ namespace Cyclotron2D.Core
 
         public void Revive()
         {
-            if (!Dead && !Enabled && !m_player.Winner)
+            if (!Dead && !Enabled && !m_player.Winner && msgsDuringFeignDeath > 0)
             {
                 Enabled = true;
                 DebugMessages.Add(m_player + " Reviving");
