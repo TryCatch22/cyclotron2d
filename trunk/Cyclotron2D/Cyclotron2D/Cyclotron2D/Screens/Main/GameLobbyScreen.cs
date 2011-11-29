@@ -421,9 +421,13 @@ namespace Cyclotron2D.Screens.Main
 
                             if (nId == -1)
                             {
-                                DebugMessages.Add("Player " + oId + " Left");
-                                RemovePlayer(player);
-                                player.Dispose();
+                                if(player != null)
+                                {
+                                    DebugMessages.Add("Player " + oId + " Left");
+                                    RemovePlayer(player);
+                                    player.Dispose();
+                                }
+
                             }
                             else
                             {
