@@ -124,18 +124,37 @@ namespace Cyclotron2D.Network
             {
                 if (e.Message.Type == MessageType.Ping)
                 {
-                    if(e.Message.Content == "out")
+					Debug.Assert(e.Message.ContentLines.Count == 2 || e.Message.ContentLines.Count == 3, "Message must have 2 or 3 lines, fool");
+
+					var messageContent = e.Message.ContentLines[0];
+					int receivedAt, timeTakenToRespondOut, timeTakenToRespondIn;
+					if (messageContent == "in")
+					{
+						timeTakenToRespondOut = Int32.Parse(e.Message.ContentLines[1]);
+						receivedAt = Int32.Parse(e.Message.ContentLines[2]);
+						timeTakenToRespondIn = (int)(Game.GameTime.TotalGameTime.TotalMilliseconds - receivedAt);
+					}
+					else
+					{
+						receivedAt = Int32.Parse(e.Message.ContentLines[1]);
+						timeTakenToRespondOut = (int)(Game.GameTime.TotalGameTime.TotalMilliseconds - receivedAt);
+						timeTakenToRespondIn = 0; // has to be assigned
+					}
+
+                    if(messageContent == "out")
                     {
-                        Game.Communicator.MessagePlayer(Game.Communicator.GetPlayer(e.Message.Source), new NetworkMessage(MessageType.Ping, "in"));
+						var message = new NetworkMessage(MessageType.Ping, "in\n" + timeTakenToRespondOut);
+                        Game.Communicator.MessagePlayer(Game.Communicator.GetPlayer(e.Message.Source), message);
                     }
-                    else if (e.Message.Content == "in")
+                    else if (messageContent == "in")
                     {
                         var connection = sender as NetworkConnection;
                         {
                             if (connection != null && m_pingOutTimes.ContainsKey(connection))
                             {
                                 //Debug.Assert(m_pingOutTimes.ContainsKey(connection), "update too soon");
-                                var newRtt = Game.GameTime.TotalGameTime - m_pingOutTimes[connection];
+								var timeTaken = new TimeSpan(0, 0, 0, 0, timeTakenToRespondOut + timeTakenToRespondIn);
+								var newRtt = Game.GameTime.TotalGameTime - m_pingOutTimes[connection] - timeTaken;
                                 connection.RoundTripTime = (connection.RoundTripTime + newRtt).Div(2);
 
                                 DebugMessages.AddLogOnly("Updated Rtt for " + Game.Communicator.GetPlayer(e.Message.Source) + " Rtt: " + connection.RoundTripTime);

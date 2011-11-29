@@ -171,18 +171,23 @@ namespace Cyclotron2D.Network
 
             m_disconnected.Clear();
 
-
+			MessageEventArgs pingMessage = null;
             while (m_receivedMessages.Count > 0)
             {
                 MessageEventArgs e;
                 m_receivedMessages.TryDequeue(out e);
-                if(e != null)
-                {
-                    InvokeMessageReceived(e);
-                }
-                
+				if (e != null)
+				{
+					if (e.Message.Type == MessageType.Ping)
+						pingMessage = e;
+					else
+						InvokeMessageReceived(e);
+				}
             }
-
+			if (pingMessage != null)
+			{
+				InvokeMessageReceived(pingMessage);
+			}
 
             if (gameTime.TotalGameTime - lastConnectionCheck > new TimeSpan(0, 0, 0, 0, 500))
             {
@@ -451,6 +456,10 @@ namespace Cyclotron2D.Network
             //            {
             DebugMessages.AddLogOnly("Received Message: " + e.Message.Type + "\n" + e.Message.Content + "\n");
 
+			if (e.Message.Type == MessageType.Ping)
+			{
+				e.Message.Content += "\n" + (int)Game.GameTime.TotalGameTime.TotalMilliseconds;
+			}
             m_receivedMessages.Enqueue(e);
 
 
