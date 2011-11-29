@@ -437,6 +437,10 @@ namespace Cyclotron2D.Screens.Main
                 case MessageType.SetupGame:
                     {
                         GameScreen.SetupMessage = e.Message;
+
+                        Game.Communicator.StartIgnoreDisconnect();
+                        Game.RttService.Pause();
+
                         Game.ChangeState(GameState.PlayingAsClient);
                     }
                     break;

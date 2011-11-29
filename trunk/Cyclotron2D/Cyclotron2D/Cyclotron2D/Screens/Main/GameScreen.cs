@@ -162,19 +162,17 @@ namespace Cyclotron2D.Screens.Main
                             confirmations++;
                             if(confirmations == ActivePlayers.Count -1)
                             {
-                                Game.Communicator.MessageAll(new NetworkMessage(MessageType.DoUdpSwitch, ""));
+                                Game.Communicator.MessageAll(new NetworkMessage(MessageType.StopTcp, ""));
                                 
                                 
                                 Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, TimeSpan.FromMilliseconds(150)));
 
                                 Game.Communicator.StopTcp();
-                                Game.Communicator.StartUdp();
 
                                 Thread.Sleep(Game.Communicator.MaximumRtt.Mult(2));
 
                                 Game.Communicator.EndIgnoreDisconnect();
                                 Game.RttService.Reset();
-                                Game.RttService.Resume();
 
                                 DebugMessages.Add("Accelerating Pings");
                                 Game.RttService.UpdatePeriod = TimeSpanExtention.Max(RttUpdateService.DefaultUpdatePeriod.Div(5), new TimeSpan(0, 0, 0, 0, 100));
@@ -204,12 +202,10 @@ namespace Cyclotron2D.Screens.Main
                             }
                             m_startTimeUtc = DateTime.UtcNow + TimeSpan.Parse(e.Message.Content);
                         }
-                        else if (e.Message.Type == MessageType.DoUdpSwitch)
+                        else if (e.Message.Type == MessageType.StopTcp)
                         {
 
                             Game.Communicator.StopTcp();
-                            Thread.Sleep(50);
-                            Game.Communicator.StartUdp();
 
                             Thread.Sleep(Game.Communicator.MaximumRtt.Mult(2));
 
@@ -293,7 +289,9 @@ namespace Cyclotron2D.Screens.Main
                         {
                             foreach (var kvp in Game.Communicator.Connections)
                             {
-                                content += kvp.Key.PlayerID + " " + kvp.Value.RemoteEP + "\n";
+                                var ep = kvp.Value.RemoteEP as IPEndPoint;
+                                EndPoint newEp = new IPEndPoint(ep.Address, ep.Port + 1);
+                                content += kvp.Key.PlayerID + " " + newEp + "\n";
                             }
 
                             type = MessageType.SetupGameUdp;
@@ -306,12 +304,7 @@ namespace Cyclotron2D.Screens.Main
 
                         Game.RttService.Pause();
 
-
-
-
-
-
-
+                        Game.Communicator.StartUdp();
                     }
                     break;
                 case GameState.PlayingAsClient:
@@ -324,9 +317,6 @@ namespace Cyclotron2D.Screens.Main
                         if(UseUdp)
                         {
                             DebugMessages.AddLogOnly("Joining Udp Game");
-                            //start ignoring disconnects right away
-                            Game.Communicator.StartIgnoreDisconnect();
-                            Game.RttService.Pause();
                         }
                         else
                         {
@@ -370,7 +360,11 @@ namespace Cyclotron2D.Screens.Main
 
                                 if(player is RemotePlayer)
                                 {
-                                    Game.Communicator.Add(player as RemotePlayer, new NetworkConnection(localEp, ip, port));
+                                    var ep = localEp as IPEndPoint;
+                                    var newEp = new IPEndPoint(ep.Address, ep.Port + 1);
+
+
+                                    Game.Communicator.Add(player as RemotePlayer, new NetworkConnection(newEp, ip, port));
                                 }
                                
                              }
@@ -378,6 +372,7 @@ namespace Cyclotron2D.Screens.Main
 
                         m_engine.SetupGame(players, conditions);
 
+                        Game.Communicator.StartUdp();
 
                         Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.AckUdpSetup, ""));
 
