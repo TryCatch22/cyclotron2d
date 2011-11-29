@@ -48,7 +48,7 @@ namespace Cyclotron2D.Core.Players
 
                         Direction dir = (Direction) int.Parse(sDir);
 
-                        List<Point> vertices = e.Message.ContentLines.Select(PointExtention.FromString).ToList();
+                        List<Point> vertices = lines.Select(PointExtention.FromString).ToList();
                         Cycle.HandleUpdateInfo(dir, vertices);
                     }
                     break;
