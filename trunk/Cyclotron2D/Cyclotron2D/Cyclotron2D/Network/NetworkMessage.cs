@@ -58,7 +58,9 @@ namespace Cyclotron2D.Network
 
         public byte Source { get; set; }
 
-        public string HeaderLine { get { return (byte) Type + " " + Source + " " + Length; } }
+        public long SequenceNumber { get; set; }
+
+        public string HeaderLine { get { return (byte) Type + " " + Source + " " + SequenceNumber +" "+Length; } }
 
         private int length = 0;
 
@@ -102,9 +104,12 @@ namespace Cyclotron2D.Network
                 byte source = byte.Parse(header.Substring(0, header.IndexOf(' ')));
                 header = header.Substring(header.IndexOf(' ') + 1);
 
+                long seqnum = long.Parse(header.Substring(0, header.IndexOf(' ')));
+                header = header.Substring(header.IndexOf(' ') + 1);
+
                 int size = int.Parse(header);
 
-                return new NetworkMessage(type, content) { Source = source, Length = size };
+                return new NetworkMessage(type, content) { Source = source, Length = size, SequenceNumber = seqnum};
 
             }
             catch (Exception e )

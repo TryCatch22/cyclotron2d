@@ -26,6 +26,8 @@ namespace Cyclotron2D.Network
 
         private bool m_ignoreDisconnects;
 
+
+
         #endregion
 
         private List<RemotePlayer> m_disconnected;

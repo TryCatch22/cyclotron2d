@@ -69,6 +69,8 @@ namespace Cyclotron2D.Network
 
         #endregion
 
+        private long m_lastSeqNum;
+
         #region Properties
 
         public Socket Socket { get; private set; }
@@ -180,6 +182,7 @@ namespace Cyclotron2D.Network
         /// <param name="message"></param>
         public void Send(NetworkMessage message)
         {
+            message.SequenceNumber = ++m_lastSeqNum;
             DebugMessages.AddLogOnly("Sending Message: " + message.Type +" Header:"+ message.HeaderLine + "\n" + message.Content + "\n");
 			try
 			{
