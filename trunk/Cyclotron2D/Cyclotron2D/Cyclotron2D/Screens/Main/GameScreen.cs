@@ -90,6 +90,11 @@ namespace Cyclotron2D.Screens.Main
 			{
 				Game.ChangeState(GameState.MainMenu);
 			}
+
+            if(gameTime.TotalGameTime > setupSendTime + TimeSpan.FromMilliseconds(500) && confirmations!= ActivePlayers.Count)
+            {
+                Game.Communicator.MessageAll(setupMsg);
+            }
         }
         
 
@@ -239,6 +244,9 @@ namespace Cyclotron2D.Screens.Main
             return x.PlayerID - y.PlayerID;
         }
 
+        private TimeSpan setupSendTime = TimeSpan.MaxValue;
+        private NetworkMessage setupMsg;
+
         private void SetupGame(List<Player> players)
         {
             Sorter.Sort(players, ComparePlayerID);
@@ -286,9 +294,10 @@ namespace Cyclotron2D.Screens.Main
 
                             type = MessageType.SetupGameUdp;
                         }
-
-                        Game.Communicator.MessageAll(new NetworkMessage(type, content));
-
+                       //game setup message
+                        setupMsg = new NetworkMessage(type, content);
+                        Game.Communicator.MessageAll(setupMsg);
+                        setupSendTime = Game.GameTime.TotalGameTime;
                         Game.Communicator.StartIgnoreDisconnect();
 
                         Game.RttService.Pause();
