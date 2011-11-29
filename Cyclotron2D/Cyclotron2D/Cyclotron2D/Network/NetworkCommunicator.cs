@@ -26,7 +26,7 @@ namespace Cyclotron2D.Network
 
         private TimeSpan lastConnectionCheck;
 
-        private bool m_doingUdpSwitch;
+        private bool m_ignoreDisconnects;
 
         #endregion
 
@@ -196,7 +196,7 @@ namespace Cyclotron2D.Network
                     if (!connection.IsConnected)
                     {
                         var player = GetPlayer(connection);
-                        if (player != null && !m_doingUdpSwitch)
+                        if (player != null && !m_ignoreDisconnects)
                         {
 
                             InvokeConnectionLost(new ConnectionEventArgs(connection));
@@ -217,7 +217,7 @@ namespace Cyclotron2D.Network
 
         public void SendDebugMessage(string message)
         {
-            while (m_doingUdpSwitch) Thread.Yield();
+          //  while (m_ignoreDisconnects) Thread.Yield();
 
             foreach (var networkConnection in Connections.Values)
             {
@@ -243,7 +243,7 @@ namespace Cyclotron2D.Network
 				return;
 			}
 
-            while (m_doingUdpSwitch) Thread.Yield();
+         //   while (m_ignoreDisconnects) Thread.Yield();
 
             if (Connections.ContainsKey(player))
             {
@@ -261,7 +261,7 @@ namespace Cyclotron2D.Network
         {
             message.Source = source;
 
-            while (m_doingUdpSwitch) Thread.Yield();
+            //while (m_ignoreDisconnects) Thread.Yield();
 
             foreach (RemotePlayer remotePlayer in Connections.Keys.Where(key => key != player))
             {
@@ -278,7 +278,7 @@ namespace Cyclotron2D.Network
         {
             message.Source = source;
 
-            while (m_doingUdpSwitch) Thread.Yield();
+          //  while (m_ignoreDisconnects) Thread.Yield();
 
             lock (Connections)
             {
@@ -384,12 +384,12 @@ namespace Cyclotron2D.Network
         public void StartIgnoreDisconnect()
         {
             DebugMessages.AddLogOnly("Ignoring disconnects");
-            m_doingUdpSwitch = true;
+            m_ignoreDisconnects = true;
         }
 
         public void EndIgnoreDisconnect()
         {
-            m_doingUdpSwitch = false;
+            m_ignoreDisconnects = false;
             DebugMessages.AddLogOnly("Not ignoring disconnects");
         }
 
@@ -447,7 +447,7 @@ namespace Cyclotron2D.Network
 
         private void OnConnectionDisconnected(object sender, ConnectionEventArgs e)
         {
-            if (!m_doingUdpSwitch)
+            if (!m_ignoreDisconnects)
             {
                 InvokeConnectionLost(e);
                 m_disconnected.Add(GetPlayer(e.Connection));

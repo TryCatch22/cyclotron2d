@@ -134,8 +134,6 @@ namespace Cyclotron2D.Screens.Main
                             //if all players are ready 
                             if (ActivePlayers.Aggregate(true, (ready, p) => ready && p.Ready))
                             {
-                                //string content = (DateTime.UtcNow + new TimeSpan(0, 0, 0, 2)).ToString("r");
-
 
                                 //if we are still in intensive rtt update mode then wait until we aer done before calculating and sending all ready.
                                 while (Game.RttService.UpdatePeriod != RttUpdateService.DefaultUpdatePeriod) Thread.Yield();
