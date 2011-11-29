@@ -73,6 +73,8 @@ namespace Cyclotron2D.Network
 
         public Socket Socket { get; private set; }
 
+        public Socket UdpSocket { get; private set; }
+
         public bool IsConnected { get { return Mode == NetworkMode.Tcp ? SocketProbe.IsConnectedTcp(Socket) : SocketProbe.IsConnectedUdp(Socket); } }
 
         public EndPoint LocalEP { get; private set; }
@@ -116,7 +118,12 @@ namespace Cyclotron2D.Network
             Mode = NetworkMode.Tcp;
         }
 
-
+        /// <summary>
+        /// Constructor for Udp mode directly, you still need to cal lswitchUdp and provide the socket
+        /// </summary>
+        /// <param name="localEp"></param>
+        /// <param name="ip"></param>
+        /// <param name="port"></param>
         public NetworkConnection(EndPoint localEp, IPAddress ip, int port)
         {
             Mode = NetworkMode.Udp;
@@ -146,34 +153,27 @@ namespace Cyclotron2D.Network
 
         #region Public Methods
 
-        public void SwitchToUdp(Socket UdpSocket)
+        public void StartUdp(Socket udpSocket)
         {
-            if(IsConnected)
-            {
-                Disconnect();
+            UdpSocket = udpSocket;
 
-                Thread.Sleep(20);
+            if(Mode != NetworkMode.Udp)
+            {
+                 var local = LocalEP as IPEndPoint; 
+                var remote = RemoteEP as IPEndPoint;
+
+
+                LocalEP = new IPEndPoint(local.Address, local.Port + 1);
+                RemoteEP = new IPEndPoint(remote.Address, remote.Port + 1);
+
+
+                Mode = NetworkMode.Udp;
             }
 
-
-
-            Socket = UdpSocket;
-            Mode = NetworkMode.Udp;
+           
 
 
         }
-
-//        public static void KillUdpListen()
-//        {
-//            if(UdpListenSocket != null)
-//            {
-//                UdpListenSocket.Close();
-//                UdpListenSocket = null;
-//            }
-//        }
-
-
-
 
         /// <summary>
         /// Sends the message async
@@ -193,7 +193,7 @@ namespace Cyclotron2D.Network
 						break;
 					case NetworkMode.Udp:
 						{
-							Socket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, (ar => Socket.EndSend(ar)), null);
+							UdpSocket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, (ar => UdpSocket.EndSend(ar)), null);
 						}
 						break;
 				}
@@ -252,7 +252,7 @@ namespace Cyclotron2D.Network
         }
 
 
-        public void Disconnect()
+        public void DisconnectTcp()
         {
             if (Socket != null)
             {

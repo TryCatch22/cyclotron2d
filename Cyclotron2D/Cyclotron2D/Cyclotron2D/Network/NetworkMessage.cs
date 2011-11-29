@@ -37,7 +37,7 @@ namespace Cyclotron2D.Network
 
         AckDeath,
         AckUdpSetup,
-        DoUdpSwitch
+        StopTcp
     }
 
 

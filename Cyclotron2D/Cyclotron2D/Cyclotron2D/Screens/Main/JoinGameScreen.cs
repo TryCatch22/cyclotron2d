@@ -42,7 +42,7 @@ namespace Cyclotron2D.Screens.Main {
 			base.Update(gameTime);
 			if (!Host.IsConnected && Host.Socket != null && Host.Socket.Connected)
 			{
-				Host.Disconnect();
+				Host.DisconnectTcp();
 				DebugMessages.Add("Connection Lost");
 			}
 		}
@@ -122,7 +122,7 @@ namespace Cyclotron2D.Screens.Main {
 			base.OnStateChanged(sender, e);
 			if (IsValidState && Host != null)
 			{
-				Host.Disconnect();
+				Host.DisconnectTcp();
 				Host = null;
 				Host = new NetworkConnection();
 			}
@@ -147,7 +147,7 @@ namespace Cyclotron2D.Screens.Main {
 
 		private void CancelConnection()
 		{
-			Host.Disconnect();
+			Host.DisconnectTcp();
 			Game.ChangeState(GameState.MainMenu);
 		}
 

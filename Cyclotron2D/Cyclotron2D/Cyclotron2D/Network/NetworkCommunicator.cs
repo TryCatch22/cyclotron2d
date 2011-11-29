@@ -5,11 +5,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using Cyclotron2D.Components;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Helpers;
-using Cyclotron2D.State;
 using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Network
@@ -136,7 +134,7 @@ namespace Cyclotron2D.Network
                         var connection = Connections[player];
                         connection.MessageReceived -= OnMessageReceived;
                         connection.Disconnected -= OnConnectionDisconnected;
-                        connection.Disconnect();
+                        connection.DisconnectTcp();
                         Connections.Remove(player);
 
                         DebugMessages.Add("Removing " + player + " from Communicator.");
@@ -148,12 +146,7 @@ namespace Cyclotron2D.Network
 
         public void Remove(RemotePlayer player)
         {
-
             m_disconnected.Add(player);
-            lock (Connections)
-            {
-            }
-
         }
 
 
@@ -363,7 +356,7 @@ namespace Cyclotron2D.Network
             DebugMessages.AddLogOnly("Stopping tcp");
             foreach (var networkConnection in Connections.Values)
             {
-                networkConnection.Disconnect();
+                networkConnection.DisconnectTcp();
             }
         }
 
@@ -374,7 +367,7 @@ namespace Cyclotron2D.Network
 
             foreach (var networkConnection in Connections.Values)
             {
-                networkConnection.SwitchToUdp(UdpSocket);
+                networkConnection.StartUdp(UdpSocket);
             }
 
 
@@ -500,7 +493,9 @@ namespace Cyclotron2D.Network
 
                 var first = Connections.Values.ToArray()[0];
 
-                UdpSocket.Bind(first.LocalEP);
+                var endPoint = first.LocalEP as IPEndPoint;
+
+                UdpSocket.Bind(new IPEndPoint(endPoint.Address, endPoint.Port + 1));
 
                 StartReceivingUdp();
             }
