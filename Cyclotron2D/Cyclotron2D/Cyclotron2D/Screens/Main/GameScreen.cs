@@ -263,6 +263,8 @@ namespace Cyclotron2D.Screens.Main
             setupSendTime = TimeSpan.MaxValue - TimeSpan.FromMilliseconds(500);
             gameScreenSwitch = TimeSpan.MaxValue - new TimeSpan(0, 0, 10);
 
+            m_lobbyPlayers.Clear();
+
             setupMsg = null;
             m_gameStarted = false;
         }
