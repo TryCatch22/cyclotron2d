@@ -39,6 +39,13 @@ namespace Cyclotron2D.Core
         }
 
 
+        private NetworkMessage GetDeathMsg(Player p)
+        {
+            var msg = p.Cycle.GetInfoMessage();
+            msg.Type = MessageType.RealDeath;
+            msg.Content = p.PlayerID + "\n" + msg.Content;
+        }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -55,7 +62,7 @@ namespace Cyclotron2D.Core
                         allConfirmed = false;
                         if(gameTime.TotalGameTime > kvp.Value.LastNotification + MaxAckDelay)
                         {
-                            Game.Communicator.MessagePlayer(kvp.Key, new NetworkMessage(MessageType.RealDeath, deadPlayer.PlayerID.ToString()));
+                            Game.Communicator.MessagePlayer(kvp.Key, GetDeathMsg(deadPlayer));
                             kvp.Value.LastNotification = gameTime.TotalGameTime;
                         }
                     }
@@ -77,9 +84,7 @@ namespace Cyclotron2D.Core
         public void NotifyRealDeath(Player p)
         {
 
-            var msg = p.Cycle.GetInfoMessage();
-            msg.Type = MessageType.RealDeath;
-            msg.Content = p.PlayerID + "\n" + msg.Content;
+            var msg = GetDeathMsg(p);
 
             Game.Communicator.MessageAll(msg);
 

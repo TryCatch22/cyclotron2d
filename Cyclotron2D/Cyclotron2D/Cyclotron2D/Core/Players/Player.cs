@@ -130,6 +130,7 @@ namespace Cyclotron2D.Core.Players
                     {
                         var lines = e.Message.ContentLines;
                         lines.RemoveAt(0);
+                        lines.RemoveAt(0);
 
                         List<Point> vertices = lines.Select(PointExtention.FromString).ToList();
 
