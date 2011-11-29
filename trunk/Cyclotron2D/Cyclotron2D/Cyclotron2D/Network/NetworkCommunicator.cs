@@ -458,7 +458,7 @@ namespace Cyclotron2D.Network
         {
             //            try
             //            {
-            DebugMessages.AddLogOnly("Received Message: " + e.Message.Type + "\n" + e.Message.Content + "\n");
+            DebugMessages.AddLogOnly("Received Message: " + e.Message.Type +" Header:" + e.Message.HeaderLine + "\n" + e.Message.Content + "\n");
 
 			if (e.Message.Type == MessageType.Ping)
 			{

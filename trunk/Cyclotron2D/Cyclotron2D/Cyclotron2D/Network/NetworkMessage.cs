@@ -58,6 +58,8 @@ namespace Cyclotron2D.Network
 
         public byte Source { get; set; }
 
+        public string HeaderLine { get { return (byte) Type + " " + Source + " " + Length; } }
+
         private int length = 0;
 
         public int Length { get { return length == 0 ? MsgEncoding.GetByteCount(Content) : length; } set { length = value; } }
@@ -72,16 +74,7 @@ namespace Cyclotron2D.Network
             Content = content;
         }
 
-        public byte[] Data
-        {
-            get
-            {
-                string header = (byte) Type + " " + Source + " " + Length;
-
-                return MsgEncoding.GetBytes(header + EndOfHeader + Content);
-
-            }
-        }
+        public byte[] Data { get { return MsgEncoding.GetBytes(HeaderLine + EndOfHeader + Content); } }
 
 
         public void AddContent(byte[] data)
