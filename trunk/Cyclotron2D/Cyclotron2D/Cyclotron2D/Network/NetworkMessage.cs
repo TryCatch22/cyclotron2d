@@ -48,7 +48,7 @@ namespace Cyclotron2D.Network
     public class NetworkMessage
     {
 
-        protected static Encoding encoding = Encoding.ASCII;//because its the shortest one and i dont think we will need other characters
+        public static Encoding MsgEncoding = Encoding.ASCII;//because its the shortest one and i dont think we will need other characters
 
         public static string EndOfHeader = "\n\n";
 
@@ -58,7 +58,7 @@ namespace Cyclotron2D.Network
 
         private int length = 0;
 
-        public int Length { get { return length == 0 ? encoding.GetByteCount(Content) : length; } set { length = value; } }
+        public int Length { get { return length == 0 ? MsgEncoding.GetByteCount(Content) : length; } set { length = value; } }
 
         public string Content { get; set; }
 
@@ -76,7 +76,7 @@ namespace Cyclotron2D.Network
             {
                 string header = (byte) Type + " " + Source + " " + Length;
 
-                return encoding.GetBytes(header + EndOfHeader + Content);
+                return MsgEncoding.GetBytes(header + EndOfHeader + Content);
 
             }
         }
@@ -84,7 +84,7 @@ namespace Cyclotron2D.Network
 
         public void AddContent(byte[] data)
         {
-            Content += encoding.GetString(data).TrimEnd(new []{'\0'});
+            Content += MsgEncoding.GetString(data).TrimEnd(new []{'\0'});
         }
 
         public static NetworkMessage Build(byte[] data)
@@ -96,7 +96,7 @@ namespace Cyclotron2D.Network
 
             try
             {
-                string s = encoding.GetString(data).TrimEnd(new[] { '\0' });
+                string s = MsgEncoding.GetString(data).TrimEnd(new[] { '\0' });
 
                 string header = s.Substring(0, s.IndexOf(EndOfHeader));
                 string content = s.Substring(header.Length + EndOfHeader.Length);
