@@ -584,7 +584,7 @@ namespace Cyclotron2D.Network
             }
 
             EndPoint endpoint = new IPEndPoint(IPAddress.Any, 0);
-            UdpSocket.BeginReceiveFrom(buffer, k, NetworkConnection.MAX_BUFFER_SIZE, SocketFlags.None, ref endpoint, ReceiveCallbackUdp, buffer);
+            UdpSocket.BeginReceiveFrom(buffer, k, NetworkConnection.MAX_BUFFER_SIZE - k, SocketFlags.None, ref endpoint, ReceiveCallbackUdp, buffer);
         }
 
 
