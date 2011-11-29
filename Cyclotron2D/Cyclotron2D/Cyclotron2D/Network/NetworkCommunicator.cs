@@ -565,6 +565,8 @@ namespace Cyclotron2D.Network
                 {
                     buffer[i] = oldData[i];
                 }
+
+                oldData = null;
             }
 
             EndPoint endpoint = new IPEndPoint(IPAddress.Any, 0);

@@ -278,6 +278,8 @@ namespace Cyclotron2D.Network
                 {
                     buffer[i] = oldData[i];
                 }
+
+                oldData = null;
             }
                 
             try
