@@ -94,6 +94,7 @@ namespace Cyclotron2D.Screens.Main
             if(gameTime.TotalGameTime > setupSendTime + TimeSpan.FromMilliseconds(500) && confirmations!= ActivePlayers.Count)
             {
                 Game.Communicator.MessageAll(setupMsg);
+                setupSendTime = gameTime.TotalGameTime;
             }
         }
         
