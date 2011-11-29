@@ -233,6 +233,11 @@ namespace Cyclotron2D.Network
         /// <param name="source">overrides default local source to pretend to be another player</param>
         public void MessagePlayer(RemotePlayer player, NetworkMessage message, byte source)
         {
+			if (player == null)
+			{
+				return;
+			}
+
             while (m_doingUdpSwitch) Thread.Yield();
 
             if (Connections.ContainsKey(player))
