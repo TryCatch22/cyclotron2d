@@ -182,27 +182,28 @@ namespace Cyclotron2D.Network
         public void Send(NetworkMessage message)
         {
             DebugMessages.AddLogOnly("Sending Message: " + message.Type + "\n" + message.Content + "\n");
-            try
-            {
-                switch (Mode)
-                {
-                    case NetworkMode.Tcp:
-                        {
-                            Socket.BeginSend(message.Data, 0, message.Data.Length, SocketFlags.None, (ar => Socket.EndSend(ar)), null);
-                        }
-                        break;
-                    case NetworkMode.Udp:
-                        {
-                            Socket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, (ar => Socket.EndSend(ar)), null);
-                        }
-                        break;
-                }
-            }
-            catch (SocketException ex)
-            {
-                DebugMessages.Add("Socket exception on send: " + ex.Message);
-                InvokeDisconnected(new ConnectionEventArgs(this));
-            }
+			try
+			{
+				switch (Mode)
+				{
+					case NetworkMode.Tcp:
+						{
+							Socket.BeginSend(message.Data, 0, message.Data.Length, SocketFlags.None, (ar => Socket.EndSend(ar)), null);
+						}
+						break;
+					case NetworkMode.Udp:
+						{
+							Socket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, (ar => Socket.EndSend(ar)), null);
+						}
+						break;
+				}
+			}
+			catch (SocketException ex)
+			{
+				DebugMessages.Add("Socket exception on send: " + ex.Message);
+				InvokeDisconnected(new ConnectionEventArgs(this));
+			}
+			catch (ObjectDisposedException) { }
            
         }
 
