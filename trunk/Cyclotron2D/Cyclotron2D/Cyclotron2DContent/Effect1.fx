@@ -35,13 +35,19 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-	const float intensity = 2;
-	const float inverseScale = 4;//12;
+	const float intensity = 5;
+	const float inverseScale = 4;
 
 	float2 coord = input.TexCoord;
-	for (int i = 0; i < numPlayers; i++) {
-		float dist = length(coord - cyclePos[i]);
+
+	int i = 0;
+	[unroll(5)] while (i < numPlayers)
+	{
+		float2 displacement = coord - cyclePos[i];
+		displacement.x *= 1.64;
+		float dist = length(displacement);
 		coord -= intensity * cycleVel[i] * lerp(0, 1, max(0, 1 - inverseScale * dist));
+		i++;
 	}
 
 	float4 color = tex2D(inputSampler, coord);
