@@ -4,6 +4,7 @@ float4x4 Projection;
 
 texture inputTex;
 int numPlayers;
+float aspectRatio;
 float2 cyclePos[6];
 float2 cycleVel[6];
 
@@ -44,7 +45,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	[unroll(5)] while (i < numPlayers)
 	{
 		float2 displacement = coord - cyclePos[i];
-		displacement.x *= 1.64;
+		displacement.x *= aspectRatio;
 		float dist = length(displacement);
 		coord -= intensity * cycleVel[i] * lerp(0, 1, max(0, 1 - inverseScale * dist));
 		i++;
