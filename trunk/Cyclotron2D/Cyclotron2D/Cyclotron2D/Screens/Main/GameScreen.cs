@@ -91,11 +91,14 @@ namespace Cyclotron2D.Screens.Main
 				Game.ChangeState(GameState.MainMenu);
 			}
 
-            if(gameTime.TotalGameTime > setupSendTime + TimeSpan.FromMilliseconds(500) && confirmations!= ActivePlayers.Count)
-            {
-                Game.Communicator.MessageAll(setupMsg);
-                setupSendTime = gameTime.TotalGameTime;
-            }
+			if (Game.IsState(GameState.PlayingAsHost))
+			{
+				if (gameTime.TotalGameTime > setupSendTime + TimeSpan.FromMilliseconds(500) && confirmations != ActivePlayers.Count)
+				{
+					Game.Communicator.MessageAll(setupMsg);
+					setupSendTime = gameTime.TotalGameTime;
+				}
+			}
         }
         
 
