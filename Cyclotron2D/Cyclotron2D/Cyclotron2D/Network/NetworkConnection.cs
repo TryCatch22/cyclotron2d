@@ -284,7 +284,7 @@ namespace Cyclotron2D.Network
                 
             try
             {
-                Socket.BeginReceive(buffer, k, MAX_BUFFER_SIZE, SocketFlags.None, ReceiveCallback, buffer);
+                Socket.BeginReceive(buffer, k, MAX_BUFFER_SIZE - k, SocketFlags.None, ReceiveCallback, buffer);
             }
             catch (ObjectDisposedException)
             {
