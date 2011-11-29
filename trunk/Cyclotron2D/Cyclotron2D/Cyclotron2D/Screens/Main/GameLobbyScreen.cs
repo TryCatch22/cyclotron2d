@@ -489,16 +489,8 @@ namespace Cyclotron2D.Screens.Main
                 case GameState.GameLobbyClient:
                     Game.RttService.Reset();
                     break;
-                case GameState.PlayingAsHost:
-                case GameState.PlayingAsClient:
-                    {
-                        if (e.OldState == GameState.GameLobbyHost || e.OldState == GameState.GameLobbyClient)
-                        {
-                            Cleanup();
-                        }
-                    }
-                    break;
                 default:
+                    Cleanup();
                     return;
             }
 
