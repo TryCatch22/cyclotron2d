@@ -269,11 +269,11 @@ namespace Cyclotron2D.Network
         private void StartReceiving()
         {
 
-            byte[] buffer = new byte[10];
+            byte[] buffer = new byte[MAX_BUFFER_SIZE];
 
             try
             {
-                Socket.BeginReceive(buffer, 0, 10, SocketFlags.None, ReceiveCallback, buffer);
+                Socket.BeginReceive(buffer, 0, MAX_BUFFER_SIZE, SocketFlags.None, ReceiveCallback, buffer);
             }
             catch (ObjectDisposedException)
             {
@@ -317,6 +317,10 @@ namespace Cyclotron2D.Network
                     buffer = new byte[msg.Length - msg.Content.Length];
                     Socket.Receive(buffer);
                     msg.AddContent(buffer);
+                }
+                if(msg.Content.Length > msg.Length)
+                {
+                    Debug.Assert(false, "stealing data from next message much?");
                 }
 
             }

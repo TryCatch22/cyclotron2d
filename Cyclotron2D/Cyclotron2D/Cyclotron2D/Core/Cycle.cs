@@ -180,10 +180,10 @@ namespace Cyclotron2D.Core
             {
                 Position = this.Position;
             }
-            
-
             Point last = m_vertices[m_vertices.Count - 1];
             int i = 0;
+            
+
             while(i < vertices.Count && vertices[i] != last) i++;
 
 
