@@ -242,12 +242,12 @@ namespace Cyclotron2D.Screens.Main
 
 
                         DebugMessages.Add("Accelerating Pings");
-                        Game.RttService.UpdatePeriod = RttUpdateService.DefaultUpdatePeriod.Div(5);
+                        Game.RttService.UpdatePeriod = TimeSpanExtention.Max(RttUpdateService.DefaultUpdatePeriod.Div(5), new TimeSpan(0, 0, 0, 0, 100));
                         Game.RttService.TriggerPing();
 
                         new Thread(() =>
                                        {
-                                           Thread.Sleep(RttUpdateService.DefaultUpdatePeriod.Mult(2));
+                                           Thread.Sleep( TimeSpanExtention.Max(RttUpdateService.DefaultUpdatePeriod.Mult(2), new TimeSpan(0, 0, 0, 0, 200)));
 
                                            Game.RttService.UpdatePeriod = RttUpdateService.DefaultUpdatePeriod;
                                            DebugMessages.Add("Deccelerating Pings");
