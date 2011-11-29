@@ -333,8 +333,6 @@ namespace Cyclotron2D.Screens.Main
             }
         }
 
-        private DateTime m_pingOut;
-
         private void OnMessageReceived(object sender, MessageEventArgs e)
         {
             //only handle messages if we are in one of our states
