@@ -32,7 +32,6 @@ namespace Cyclotron2D.UI
             m_lifetimeHeader = new TextElement(game, screen) {Text = "Time", Background = new Color(210, 210, 210)};
 
 
-
         }
 
         public void Initialize(List<Player> players)
@@ -66,9 +65,6 @@ namespace Cyclotron2D.UI
 
             m_playerPanel.Rect = new Rectangle(Rect.X, Rect.Y, Rect.Width * 4/5, Rect.Height);
             m_lifetimesPanel.Rect = new Rectangle(Rect.X + Rect.Width*4/5, Rect.Y, Rect.Width*1/5, Rect.Height);
-
-            
-
         }
 
         private void SortPlayers()
@@ -93,7 +89,6 @@ namespace Cyclotron2D.UI
                 m_lifetimesPanel.Draw(gameTime);
             }
         }
-
 
         /// <summary>
         /// Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.
