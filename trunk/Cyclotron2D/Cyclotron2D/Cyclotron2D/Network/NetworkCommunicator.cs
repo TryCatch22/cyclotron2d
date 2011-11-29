@@ -477,6 +477,12 @@ namespace Cyclotron2D.Network
                     UdpSocket.ReceiveFrom(buffer, ref remote);
                     msg.AddContent(buffer);
                 }
+
+                if (msg.Content.Length > msg.Length)
+                {
+                    Debug.Assert(false, "stealing data from next message much?");
+                }
+
             }
             catch (ObjectDisposedException)
             {
