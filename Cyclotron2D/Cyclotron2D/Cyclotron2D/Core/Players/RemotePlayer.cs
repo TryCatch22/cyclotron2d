@@ -42,8 +42,14 @@ namespace Cyclotron2D.Core.Players
                     break;
                 case MessageType.PlayerInfoUpdate:
                     {
+                        var lines = e.Message.ContentLines;
+                        string sDir = lines[0];
+                        lines.RemoveAt(0);
+
+                        Direction dir = (Direction) int.Parse(sDir);
+
                         List<Point> vertices = e.Message.ContentLines.Select(PointExtention.FromString).ToList();
-                        Cycle.HandleUpdateInfo(vertices);
+                        Cycle.HandleUpdateInfo(dir, vertices);
                     }
                     break;
                 default:

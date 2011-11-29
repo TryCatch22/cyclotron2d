@@ -155,11 +155,13 @@ namespace Cyclotron2D.Core
 
 
         private List<Point> m_lastUpdateInfo;
+        private Direction m_lastUpdateDir;
         private int msgsDuringFeignDeath;
 
-        public void HandleUpdateInfo(List<Point> vertices, bool revive = false)
+        public void HandleUpdateInfo(Direction dir, List<Point> vertices, bool revive = false)
         {
             m_lastUpdateInfo = vertices;
+            m_lastUpdateDir = dir;
             if(vertices == null)
             {
                 return;
@@ -180,8 +182,7 @@ namespace Cyclotron2D.Core
             {
                 //if reviving, pretend the position is the one from the last update + average lag
                 //or if feigning death still handle messages.
-                var line = new Line(vertices[1], vertices[0]);
-                Position = vertices[0].AddOffset(line.Direction, m_averageLag);
+                Position = vertices[0].AddOffset(dir, m_averageLag);
             }
             else
             {
@@ -238,9 +239,9 @@ namespace Cyclotron2D.Core
                     {
                         // the player must have turned since the last message.
 
-                        Line l = new Line(vertices[1], vertices[0]);
+                     //   Line l = new Line(vertices[1], vertices[0]);
 
-                        TurnAt(l.Direction, l.Start);
+                        TurnAt(dir, vertices[1]);
 
                         DebugMessages.AddLogOnly(m_player + "Detected turn, handling ...");
 
@@ -274,10 +275,8 @@ namespace Cyclotron2D.Core
                             }
                         }
 
-
-                        var line = new Line(vertices[i - addedPoints], vertices[i -addedPoints - 1]);
-                        this.Position = vertices[i - addedPoints].AddOffset(line.Direction, offset);
-                        Direction = line.Direction;
+                        this.Position = vertices[i - addedPoints].AddOffset(dir, offset);
+                        Direction = dir;
 
 
 
@@ -295,6 +294,8 @@ namespace Cyclotron2D.Core
         public NetworkMessage GetInfoMessage()
         {
             string content = "";
+
+            content += (int) Direction + "\n";
 
             content += Position + "\n";
 
@@ -601,7 +602,7 @@ namespace Cyclotron2D.Core
             {
                 Enabled = true;
                 DebugMessages.Add(m_player + " Reviving");
-                HandleUpdateInfo(m_lastUpdateInfo, true);
+                HandleUpdateInfo(m_lastUpdateDir, m_lastUpdateInfo, true);
             }
 
         }
