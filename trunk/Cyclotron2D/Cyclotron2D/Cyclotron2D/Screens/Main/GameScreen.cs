@@ -99,7 +99,7 @@ namespace Cyclotron2D.Screens.Main
 
 			if (Game.IsState(GameState.PlayingAsHost))
 			{
-				if (gameTime.TotalGameTime > setupSendTime + TimeSpan.FromMilliseconds(500) && confirmations != ActivePlayers.Count)
+				if (gameTime.TotalGameTime > setupSendTime + TimeSpan.FromMilliseconds(500) && confirmations < ActivePlayers.Count -1)
 				{
 					Game.Communicator.MessageAll(setupMsg);
 					setupSendTime = gameTime.TotalGameTime;
@@ -168,6 +168,7 @@ namespace Cyclotron2D.Screens.Main
                             confirmations++;
                             if(confirmations == ActivePlayers.Count -1)
                             {
+                                Thread.Sleep(15);
                                 Game.Communicator.MessageAll(new NetworkMessage(MessageType.StopTcp, ""));
                                 
                                 
@@ -394,9 +395,14 @@ namespace Cyclotron2D.Screens.Main
 
                         m_engine.SetupGame(players, conditions);
 
+                        Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.AckUdpSetup, ""));
+
+                        Thread.Sleep(15);
+
+
                         Game.Communicator.StartUdp();
 
-                        Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.AckUdpSetup, ""));
+                       
 
                       
 
