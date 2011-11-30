@@ -14,12 +14,12 @@ namespace Cyclotron2D.Core.Players
     public class RemotePlayer : Player
     {
 
-        private long m_lastReceivedSeqNum;
+        private long m_lastUpdateSeqNum;
 
         public RemotePlayer(Game game, Screen screen)
             : base(game, screen)
         {
-            m_lastReceivedSeqNum = 0;
+            m_lastUpdateSeqNum = 0;
         }
 
         public override string Name { get; set; }
@@ -48,7 +48,7 @@ namespace Cyclotron2D.Core.Players
                 case MessageType.PlayerInfoUpdate:
                     {
 
-                        if (e.Message.SequenceNumber > m_lastReceivedSeqNum)
+                        if (e.Message.SequenceNumber > m_lastUpdateSeqNum || m_lastUpdateSeqNum == 0)
                         {
                             var lines = e.Message.ContentLines;
                             string sDir = lines[0];
@@ -59,7 +59,7 @@ namespace Cyclotron2D.Core.Players
                             List<Point> vertices = lines.Select(PointExtention.FromString).ToList();
                             Cycle.HandleUpdateInfo(dir, vertices);
 
-                            m_lastReceivedSeqNum = e.Message.SequenceNumber;
+                            m_lastUpdateSeqNum = e.Message.SequenceNumber;
                         }
 
 
