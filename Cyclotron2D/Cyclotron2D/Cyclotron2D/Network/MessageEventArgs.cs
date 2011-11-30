@@ -34,9 +34,9 @@ namespace Cyclotron2D.Network
 
         public NetworkConnection Connection { get; private set; }
 
-        public ConnectionEventArgs(NetworkConnection socket)
+        public ConnectionEventArgs(NetworkConnection connection)
         {
-            Connection = socket;
+            Connection = connection;
         }
 
 
