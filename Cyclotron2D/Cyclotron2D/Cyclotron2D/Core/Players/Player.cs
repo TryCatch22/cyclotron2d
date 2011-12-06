@@ -32,7 +32,13 @@ namespace Cyclotron2D.Core.Players
 
         public abstract string Name { get; set; }
 
-        public Cycle Cycle { get; protected set; }
+
+        private Cycle m_cycl;
+
+        public Cycle Cycle { get { return m_cycl; } protected set
+        {
+            m_cycl = value;
+        } }
 
         public bool Ready { get; set; }
 
@@ -90,7 +96,7 @@ namespace Cyclotron2D.Core.Players
             {
                 if (!Cycle.Enabled && !Cycle.Dead)
                 {
-                    TimeSpan delay = TimeSpanExtention.Max(GameScreen.CollisionNotifier.MaxAckDelay.Mult(2), new TimeSpan(0, 0, 0, 0, 200));
+                    TimeSpan delay = TimeSpanExtension.Max(GameScreen.CollisionNotifier.MaxAckDelay.Mult(2), new TimeSpan(0, 0, 0, 0, 200));
                     if (gameTime.TotalGameTime > Cycle.FeigningDeathStart + delay)
                     {
                         Cycle.Revive();
@@ -132,7 +138,7 @@ namespace Cyclotron2D.Core.Players
                         lines.RemoveAt(0);
                         lines.RemoveAt(0);
 
-                        List<Point> vertices = lines.Select(PointExtention.FromString).ToList();
+                        List<Point> vertices = lines.Select(PointExtension.FromString).ToList();
 
                         Cycle.Kill(vertices);
                     }

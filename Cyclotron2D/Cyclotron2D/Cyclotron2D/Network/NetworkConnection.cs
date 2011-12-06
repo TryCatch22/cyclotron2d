@@ -160,7 +160,7 @@ namespace Cyclotron2D.Network
 
             if(Mode != NetworkMode.Udp)
             {
-                 var local = LocalEP as IPEndPoint; 
+                var local = LocalEP as IPEndPoint; 
                 var remote = RemoteEP as IPEndPoint;
 
 
@@ -247,7 +247,7 @@ namespace Cyclotron2D.Network
             }
             catch (Exception ex)
             {
-                DebugMessages.Add(ex.Message);
+                DebugMessages.Add("ConnectTo Exception:" + ex.Message);
             }
 
             return connected;
@@ -302,7 +302,7 @@ namespace Cyclotron2D.Network
             catch (SocketException ex)
             {
                 //forcibly disconnected from remote host?
-                DebugMessages.Add(ex.Message);
+                DebugMessages.AddLogOnly("TCP StartReceiving Exception: " + ex.Message);
                 return;
             }
         }
@@ -357,7 +357,7 @@ namespace Cyclotron2D.Network
             catch(SocketException ex)
             {
                 //forcibly disconnected from remote host?
-                DebugMessages.Add(ex.Message);
+                DebugMessages.AddLogOnly("TCP ReceiveCallback Exception: " + ex.Message);
                 return;
             }
 

@@ -218,7 +218,8 @@ namespace Cyclotron2D.Screens.Main
             Game.Communicator.AddHost(player, connection);
             m_playersPanel.AddPlayer(player);
             Players.Add(player);
-            Game.RttService.Reset();
+            //Game.RttService.Reset();
+            Game.RttService.Add(connection);
             
        }
         
@@ -266,11 +267,12 @@ namespace Cyclotron2D.Screens.Main
             if (player is RemotePlayer && socket != null)
             {
                 Game.Communicator.Add(player as RemotePlayer, socket);
+                Game.RttService.Add(Game.Communicator.GetConnection(player.PlayerID));
             }
             GameScreen.AddPlayer(player);
             m_playersPanel.AddPlayer(player);
             Players.Add(player);
-            Game.RttService.Reset();
+            //Game.RttService.Reset();
 
         }
 
@@ -487,7 +489,7 @@ namespace Cyclotron2D.Screens.Main
                     Game.Communicator.LocalId = 1;
                     break;
                 case GameState.GameLobbyClient:
-                    Game.RttService.Reset();
+                 //   Game.RttService.Reset();
                     break;
                 default:
                     Cleanup();

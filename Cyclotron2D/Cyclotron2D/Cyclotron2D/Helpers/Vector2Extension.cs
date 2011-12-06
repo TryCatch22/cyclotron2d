@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 
 namespace Cyclotron2D.Helpers
 {
-    public static class Vector2Extention
+    public static class Vector2Extension
     {
         public static Point RoundToPoint(this Vector2 v)
         {
@@ -36,7 +36,7 @@ namespace Cyclotron2D.Helpers
         }
     }
 
-    public static class PointExtention
+    public static class PointExtension
     {
         public static int LengthSquared(this Point p)
         {
@@ -79,7 +79,7 @@ namespace Cyclotron2D.Helpers
         }
     }
 
-    public static class RectanlgeExtention
+    public static class RectanlgeExtension
     {
         public static Vector2 Size(this Rectangle r)
         {
@@ -138,7 +138,7 @@ namespace Cyclotron2D.Helpers
     }
 
 
-    public static class TimeSpanExtention
+    public static class TimeSpanExtension
     {
         public static TimeSpan Mult(this TimeSpan ts, int i)
         {
