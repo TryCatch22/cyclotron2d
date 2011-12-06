@@ -117,7 +117,7 @@
     <Compile Include="Helpers\PointOffset.cs" />
     <Compile Include="Helpers\RectangleBuilder.cs" />
     <Compile Include="Helpers\Sorter.cs" />
-    <Compile Include="Helpers\Vector2Extention.cs" />
+    <Compile Include="Helpers\Vector2Extension.cs" />
     <Compile Include="Network\MessageEventArgs.cs" />
     <Compile Include="Network\NetworkCommunicator.cs" />
     <Compile Include="Network\PlayerMonitor.cs" />

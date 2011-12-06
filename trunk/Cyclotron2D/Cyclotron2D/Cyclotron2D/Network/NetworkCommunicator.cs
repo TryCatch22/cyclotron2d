@@ -173,9 +173,10 @@ namespace Cyclotron2D.Network
                 m_receivedMessages.TryDequeue(out e);
 				if (e != null)
 				{
-					if (e.Message.Type == MessageType.Ping)
+                    //keep only most recent ping message
+					if (e.Message.Type == MessageType.Ping && (pingMessage == null || e.Message.SequenceNumber > pingMessage.Message.SequenceNumber))
 						pingMessage = e;
-					else
+					else if(e.Message.Type != MessageType.Ping)
 						InvokeMessageReceived(e);
 				}
             }
@@ -212,7 +213,6 @@ namespace Cyclotron2D.Network
 
         public void SendDebugMessage(string message)
         {
-          //  while (m_ignoreDisconnects) Thread.Yield();
 
             foreach (var networkConnection in Connections.Values)
             {
@@ -238,8 +238,6 @@ namespace Cyclotron2D.Network
 				return;
 			}
 
-         //   while (m_ignoreDisconnects) Thread.Yield();
-
             if (Connections.ContainsKey(player))
             {
                 message.Source = source;
@@ -256,8 +254,6 @@ namespace Cyclotron2D.Network
         {
             message.Source = source;
 
-            //while (m_ignoreDisconnects) Thread.Yield();
-
             foreach (RemotePlayer remotePlayer in Connections.Keys.Where(key => key != player))
             {
                 Connections[remotePlayer].Send(message);
@@ -272,8 +268,6 @@ namespace Cyclotron2D.Network
         public void MessageAll(NetworkMessage message, byte source)
         {
             message.Source = source;
-
-          //  while (m_ignoreDisconnects) Thread.Yield();
 
             lock (Connections)
             {
@@ -388,50 +382,6 @@ namespace Cyclotron2D.Network
             DebugMessages.AddLogOnly("Not ignoring disconnects");
         }
 
-//        public void SwitchToUdp()
-//        {
-//            m_doingUdpSwitch = true;
-//            DebugMessages.AddLogOnly("udp Switch start");
-//
-////            if (Game.IsState(GameState.PlayingAsHost))
-////            {
-////                //wait until all clients have received the setup message before stopping tcp
-////                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 50)));
-////            }
-////            else if (Game.IsState(GameState.PlayingAsClient))
-////            {
-////                //wait until host has stopped tcp and then stop after.
-////                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 100)));
-////            }
-//
-//            Thread.Sleep(2000);
-//
-//            StopTcp();
-//
-//            Thread.Sleep(2000);
-//
-//            //Thread.Sleep(Game.Communicator.MaximumRtt);
-////            if (Game.IsState(GameState.PlayingAsHost))
-////            {
-////                //wait until all clients have stopped Tcp to start udp
-////                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, new TimeSpan(0, 0, 0, 0, 200)));
-////            }
-////            else if (Game.IsState(GameState.PlayingAsClient))
-////            {
-////                //wait until host has started udp then start after
-////                Thread.Sleep(100);
-////            }
-//
-//
-//            StartUdp();
-//
-//            Thread.Sleep(2000);
-//            //Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt.Mult(2), new TimeSpan(0, 0, 0, 0, 100)));
-//
-//            DebugMessages.AddLogOnly("udp Switch end");
-//            m_doingUdpSwitch = false;
-//        }
-
 
 
         #endregion
@@ -458,26 +408,14 @@ namespace Cyclotron2D.Network
 
         private void OnMessageReceived(object sender, MessageEventArgs e)
         {
-            //            try
-            //            {
             DebugMessages.AddLogOnly("Received Message: " + e.Message.Type +" Header:" + e.Message.HeaderLine + "\n" + e.Message.Content + "\n");
 
-			if (e.Message.Type == MessageType.Ping)
-			{
-				e.Message.Content += "\n" + (int)Game.GameTime.TotalGameTime.TotalMilliseconds;
-			}
             m_receivedMessages.Enqueue(e);
 
-
-
-            //            }
-            //            catch (Exception ex)
-            //            {
-            //                DebugMessages.AddLogOnly("Game Crashed On Message Handle: " + ex.Message + "\n" + ex.StackTrace);
-            //                DebugMessages.FlushLog();
-            //                throw;
-            //            }
-
+            if (e.Message.Type == MessageType.Ping && e.Message.Content == "in")
+            {
+                e.Message.Content += "\n" + Game.GameTime.TotalGameTime;
+            }
         }
 
         #endregion

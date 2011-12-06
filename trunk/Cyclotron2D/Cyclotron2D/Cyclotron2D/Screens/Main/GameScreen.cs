@@ -23,6 +23,8 @@ namespace Cyclotron2D.Screens.Main
 
         #region Fields
 
+        private int m_udpSetupConfirmations;
+
         private Engine m_engine;
 
         private StartRandomizer m_startRandomizer;
@@ -67,6 +69,7 @@ namespace Cyclotron2D.Screens.Main
             m_engine = new Engine(game, this);
             CollisionNotifier = new CollisionNotifier(game, this, m_engine);
             m_startRandomizer = new StartRandomizer(game);
+            m_startTimeUtc = DateTime.MaxValue;
             isGameSetup = false;
             gameScreenSwitch = TimeSpan.MaxValue - new TimeSpan(0, 0, 10);
         }
@@ -81,30 +84,40 @@ namespace Cyclotron2D.Screens.Main
             base.Update(gameTime);
             if (isGameSetup && ActivePlayers.Aggregate(true, (ready, player) => ready && player.Ready) && (Game.RttService.UpdatePeriod == RttUpdateService.DefaultUpdatePeriod))
             {
+
+                //send the allready message only once
+                if(m_startTimeUtc == DateTime.MaxValue)
+                {
+                    SendAllReady();
+                }
+
+                //if game is ready to start, gogo
                 if(DateTime.UtcNow > m_startTimeUtc)
                 {
                     StartGame();
-                }else if (DateTime.UtcNow + gameTime.ElapsedGameTime > m_startTimeUtc)
+
+                }//if game is almost ready to start sleep the difference.
+                else if (DateTime.UtcNow + gameTime.ElapsedGameTime > m_startTimeUtc)
                 {
-                    Thread.Sleep(DateTime.UtcNow + gameTime.ElapsedGameTime - m_startTimeUtc);
+                    Thread.Sleep(m_startTimeUtc - DateTime.UtcNow);
                     StartGame();
                 }
                 
             }
-
+            //timeout to get back to main menu if nothing happens after 10 seconds
 			if (gameTime.TotalGameTime > gameScreenSwitch + new TimeSpan(0, 0, 10) && !m_gameStarted)
 			{
 				Game.ChangeState(GameState.MainMenu);
 			}
 
-			if (Game.IsState(GameState.PlayingAsHost))
-			{
-				if (gameTime.TotalGameTime > setupSendTime + TimeSpan.FromMilliseconds(500) && confirmations < ActivePlayers.Count -1)
-				{
-					Game.Communicator.MessageAll(setupMsg);
-					setupSendTime = gameTime.TotalGameTime;
-				}
-			}
+//			if (Game.IsState(GameState.PlayingAsHost))
+//			{
+//				if (gameTime.TotalGameTime > setupSendTime + TimeSpan.FromMilliseconds(500) && m_udpSetupConfirmations < ActivePlayers.Count -1)
+//				{
+//					Game.Communicator.MessageAll(setupMsg);
+//					setupSendTime = gameTime.TotalGameTime;
+//				}
+//			}
         }
         
 
@@ -125,6 +138,22 @@ namespace Cyclotron2D.Screens.Main
 
         #endregion
 
+
+
+        private void SendAllReady()
+        {
+            TimeSpan baseDelay = new TimeSpan(0, 0, 0, 1);
+            TimeSpan maxRtt = Game.Communicator.MaximumRtt;
+
+            foreach (var kvp in Game.Communicator.Connections)
+            {
+                string content = ((maxRtt - kvp.Value.RoundTripTime).Div(2) + baseDelay).ToString("G");
+                Game.Communicator.MessagePlayer(kvp.Key, new NetworkMessage(MessageType.AllReady, content));
+            }
+
+            m_startTimeUtc = DateTime.UtcNow + maxRtt.Div(2) + baseDelay;
+        }
+
         private void OnMessageReceived(object sender, MessageEventArgs e)
         {
 
@@ -140,58 +169,30 @@ namespace Cyclotron2D.Screens.Main
                                 player.Ready = true;
                             }
 
-                            //if all players are ready 
-                            if (ActivePlayers.Aggregate(true, (ready, p) => ready && p.Ready))
-                            {
-
-                                //if we are still in intensive rtt update mode then wait until we aer done before calculating and sending all ready.
-                                while (Game.RttService.UpdatePeriod != RttUpdateService.DefaultUpdatePeriod) Thread.Yield();
-
-
-
-                                TimeSpan baseDelay = new TimeSpan(0, 0, 0, 1);
-                                TimeSpan maxRtt = Game.Communicator.MaximumRtt;
-
-                                foreach (var kvp in Game.Communicator.Connections)
-                                {
-                                    string content = ((maxRtt - kvp.Value.RoundTripTime).Div(2) + baseDelay).ToString();
-                                    Game.Communicator.MessagePlayer(kvp.Key, new NetworkMessage(MessageType.AllReady, content));
-                                }
-
-                                m_startTimeUtc = DateTime.UtcNow + maxRtt.Div(2) + baseDelay;
-
-                            }
-
                         }
                         else if (e.Message.Type == MessageType.AckUdpSetup)
                         {
-                            confirmations++;
-                            if(confirmations == ActivePlayers.Count -1)
+                            m_udpSetupConfirmations++;
+                            if(m_udpSetupConfirmations == ActivePlayers.Count -1)
                             {
-                                Thread.Sleep(15);
+
+                                AcceleratePings();
+
+                                 Thread.Sleep(15);
                                 Game.Communicator.MessageAll(new NetworkMessage(MessageType.StopTcp, ""));
-                                
-                                
-                                Thread.Sleep(TimeSpanExtention.Max(Game.Communicator.MaximumRtt, TimeSpan.FromMilliseconds(150)));
 
                                 Game.Communicator.StopTcp();
 
                                 Thread.Sleep(Game.Communicator.MaximumRtt.Mult(2));
-
                                 Game.Communicator.EndIgnoreDisconnect();
-                                Game.RttService.Reset();
+                              //  Game.RttService.Reset();
 
-                                DebugMessages.Add("Accelerating Pings");
-                                Game.RttService.UpdatePeriod = TimeSpanExtention.Max(RttUpdateService.DefaultUpdatePeriod.Div(5), new TimeSpan(0, 0, 0, 0, 100));
-                                Game.RttService.TriggerPing();
 
-                                new Thread(() =>
-                                {
-                                    Thread.Sleep(TimeSpanExtention.Max(RttUpdateService.DefaultUpdatePeriod.Mult(2), new TimeSpan(0, 0, 0, 0, 200)));
-
-                                    Game.RttService.UpdatePeriod = RttUpdateService.DefaultUpdatePeriod;
-                                    DebugMessages.Add("Deccelerating Pings");
-                                }).Start();
+                                //more ping time
+                                Thread.Sleep(TimeSpanExtension.Max(RttUpdateService.DefaultUpdatePeriod.Mult(2), new TimeSpan(0, 0, 0, 0, 200)));
+                                    
+                                DebugMessages.AddLogOnly("Decelarating pings");
+                                Game.RttService.UpdatePeriod = RttUpdateService.DefaultUpdatePeriod;
 
                             }
                         }
@@ -211,20 +212,17 @@ namespace Cyclotron2D.Screens.Main
                         }
                         else if (e.Message.Type == MessageType.StopTcp)
                         {
-
                             Game.Communicator.StopTcp();
 
                             Thread.Sleep(Game.Communicator.MaximumRtt.Mult(2));
 
                             Game.Communicator.EndIgnoreDisconnect();
 
-                            Game.RttService.Reset();
+                          //  Game.RttService.Reset();
                             Game.RttService.Resume();
-                            
-
-
 
                             Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
+                           
                         }
                     }
                     break;
@@ -232,6 +230,14 @@ namespace Cyclotron2D.Screens.Main
 
 
 
+        }
+
+
+        private void AcceleratePings()
+        {
+            DebugMessages.Add("Accelerating Pings");
+            Game.RttService.UpdatePeriod = TimeSpanExtension.Max(RttUpdateService.DefaultUpdatePeriod.Div(5), new TimeSpan(0, 0, 0, 0, 100));
+            Game.RttService.TriggerPing();
         }
 
         private void StartGame()
@@ -243,7 +249,7 @@ namespace Cyclotron2D.Screens.Main
             }
         }
 
-        private int confirmations;
+
 
         private static int ComparePlayerID(Player x, Player y)
         {
@@ -268,6 +274,9 @@ namespace Cyclotron2D.Screens.Main
 
             setupMsg = null;
             m_gameStarted = false;
+
+            GameSettings = Settings.SinglePlayer;
+            m_startTimeUtc = DateTime.MaxValue;
         }
 
         private void SetupGame(List<Player> players)
@@ -322,7 +331,9 @@ namespace Cyclotron2D.Screens.Main
                        //game setup message
                         setupMsg = new NetworkMessage(type, content);
                         Game.Communicator.MessageAll(setupMsg);
+                        //todo: remove?
                         setupSendTime = Game.GameTime.TotalGameTime;
+                        
                         Game.Communicator.StartIgnoreDisconnect();
 
                         Game.RttService.Pause();
@@ -365,7 +376,7 @@ namespace Cyclotron2D.Screens.Main
                                 sep = lines[i].IndexOf(' ');
                                 direction = lines[i].Substring(0, sep);
                                 vector = lines[i].Substring(sep + 1);
-                                conditions.Add(new StartCondition(Vector2Extention.FromString(vector), (Direction)int.Parse(direction)));
+                                conditions.Add(new StartCondition(Vector2Extension.FromString(vector), (Direction)int.Parse(direction)));
                              }
                              else if (UseUdp)
                              {
@@ -505,7 +516,7 @@ namespace Cyclotron2D.Screens.Main
                 players.AddRange(m_lobbyPlayers);
                 GameSettings = Settings.Multiplayer;
                 SetupGame(players);
-
+                //for timeout
 				gameScreenSwitch = Game.GameTime.TotalGameTime;
 				
             }

@@ -42,7 +42,7 @@ namespace Cyclotron2D.Core.Players
                         string direction = e.Message.Content.Substring(0, sep);
                         string point = e.Message.Content.Substring(sep + 1);
 
-                        InvokeDirectionChange(new DirectionChangeEventArgs((Direction)int.Parse(direction), PointExtention.FromString(point)));
+                        InvokeDirectionChange(new DirectionChangeEventArgs((Direction)int.Parse(direction), PointExtension.FromString(point)));
                     }
                     break;
                 case MessageType.PlayerInfoUpdate:
@@ -56,7 +56,7 @@ namespace Cyclotron2D.Core.Players
 
                             Direction dir = (Direction)int.Parse(sDir);
 
-                            List<Point> vertices = lines.Select(PointExtention.FromString).ToList();
+                            List<Point> vertices = lines.Select(PointExtension.FromString).ToList();
                             Cycle.HandleUpdateInfo(dir, vertices);
 
                             m_lastUpdateSeqNum = e.Message.SequenceNumber;
