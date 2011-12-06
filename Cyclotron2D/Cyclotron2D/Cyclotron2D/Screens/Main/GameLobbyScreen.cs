@@ -88,7 +88,7 @@ namespace Cyclotron2D.Screens.Main
             StartGameButton.Text = "Start Game";
             StartGameButton.Click += OnStartGameClicked;
 
-            GameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
+            GameScreen = Game.ScreenManager.GetMainScreen<GameScreen>();
 
             Debug.Assert(GameScreen != null, "GameScreen should not be null at Initialize.");
 

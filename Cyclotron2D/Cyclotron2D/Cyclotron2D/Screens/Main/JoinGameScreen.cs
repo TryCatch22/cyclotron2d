@@ -130,8 +130,8 @@ namespace Cyclotron2D.Screens.Main {
 
 		private void CreateHost()
 		{
-			var lobbyScreen = Game.ScreenManager.GetMainScreen<GameLobbyScreen>() as GameLobbyScreen;
-			var gameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
+			var lobbyScreen = Game.ScreenManager.GetMainScreen<GameLobbyScreen>();
+			var gameScreen = Game.ScreenManager.GetMainScreen<GameScreen>();
 
 			if (lobbyScreen != null && gameScreen != null)
 			{
@@ -194,8 +194,8 @@ namespace Cyclotron2D.Screens.Main {
 
 			if (int.TryParse(lines[0], out id))
 			{
-				var lobbyScreen = Game.ScreenManager.GetMainScreen<GameLobbyScreen>() as GameLobbyScreen;
-				var gameScreen = Game.ScreenManager.GetMainScreen<GameScreen>() as GameScreen;
+				var lobbyScreen = Game.ScreenManager.GetMainScreen<GameLobbyScreen>();
+				var gameScreen = Game.ScreenManager.GetMainScreen<GameScreen>();
 
 
 				if (lobbyScreen != null && gameScreen != null)
