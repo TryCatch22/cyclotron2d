@@ -120,7 +120,6 @@
     <Compile Include="Helpers\Vector2Extension.cs" />
     <Compile Include="Network\MessageEventArgs.cs" />
     <Compile Include="Network\NetworkCommunicator.cs" />
-    <Compile Include="Network\PlayerMonitor.cs" />
     <Compile Include="Network\GameLobby.cs" />
     <Compile Include="Network\NetworkConnection.cs" />
     <Compile Include="Network\RttUpdateService.cs" />

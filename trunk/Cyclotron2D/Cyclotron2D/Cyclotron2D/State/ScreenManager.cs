@@ -116,9 +116,9 @@ namespace Cyclotron2D.State
         #region Public Methods
 
 
-        public MainScreen GetMainScreen<T>()
+        public T GetMainScreen<T>() where T :MainScreen
         {
-            return (from screen in Screens.Keys where screen is T select screen).FirstOrDefault();
+            return (from screen in Screens.Keys where screen is T select screen).FirstOrDefault() as T;
         }
 
         public void AddScreen(Screen screen)
