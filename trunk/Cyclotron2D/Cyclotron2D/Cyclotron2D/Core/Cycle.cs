@@ -500,11 +500,11 @@ namespace Cyclotron2D.Core
             int i = 0;
             while (i < vertices.Count && vertices[i] != last) i++;
 
-            if(i > vertices.Count)
+            if(i > vertices.Count || i == 0)
             {
                 DebugMessages.Add(m_player + " SERIOUS Problem on kill");
             }
-            else if (i > 1)
+            else
             {
                 for (int j = i-1; j > 0; j--)
                 {
@@ -513,10 +513,7 @@ namespace Cyclotron2D.Core
 
                 Position = vertices[0];
             }
-            else if (i == 1)
-            {
-                Position = vertices[0];
-            }
+
 
             Kill();
 
