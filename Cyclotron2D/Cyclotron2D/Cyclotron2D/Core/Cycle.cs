@@ -608,14 +608,39 @@ namespace Cyclotron2D.Core
             return false;
         }
 
-        public void Revive()
+        public bool Revive()
         {
-            if (!Dead && !Enabled && !m_player.Winner && msgsDuringFeignDeath > 0)
+            if(m_player is RemotePlayer)
             {
-                Enabled = true;
-                DebugMessages.Add(m_player + " Reviving");
-                HandleUpdateInfo(m_lastUpdateDir, m_lastUpdateInfo, true);
+                if (!Dead && !Enabled && !m_player.Winner && msgsDuringFeignDeath > 0)
+                {
+                    Enabled = true;
+                    DebugMessages.Add(m_player + " Reviving");
+                    HandleUpdateInfo(m_lastUpdateDir, m_lastUpdateInfo, true);
+                    return true;
+                }
+                return false;
             }
+            else
+            {
+                var myline = new Line(m_vertices.Last(), Position);
+                Player killer;
+                bool ambiguous;
+                if(CheckHeadLine(myline, out killer, out ambiguous) && !ambiguous)
+                {
+                    CollisionType type = killer == null ? CollisionType.Wall : killer == m_player ? CollisionType.Self : CollisionType.Player;
+                    InvokeCollided(new CycleCollisionEventArgs(type, killer, false, m_player));
+                    return false;
+                }
+                else
+                {
+                    Enabled = true;
+                    DebugMessages.Add(m_player + " Reviving");
+                    return true;
+                }
+              
+            }
+            
 
         }
 
