@@ -302,8 +302,8 @@ namespace Cyclotron2D.Core
                             }
                         }
 
-                        this.Position = vertices[i - addedPoints].AddOffset(dir, offset);
-                        supposedDirection = dir;
+                        Position = revive ? supposedPosition : vertices[i - addedPoints].AddOffset(dir, offset);
+                        Direction = dir;
 
 
 
