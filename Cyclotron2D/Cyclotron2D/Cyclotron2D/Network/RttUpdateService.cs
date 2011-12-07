@@ -59,6 +59,8 @@ namespace Cyclotron2D.Network
                     m_pingOutTimes.Add(networkConnection, new TimeSpan(0));
                 }
             }
+
+            TriggerPing();
         }
 
         /// <summary>
@@ -72,11 +74,6 @@ namespace Cyclotron2D.Network
         public void Pause()
         {
             m_lastPingRound = TimeSpan.MaxValue - UpdatePeriod;
-        }
-
-        public void Resume()
-        {
-            TriggerPing();
         }
 
         public override void Update(GameTime gameTime)
@@ -129,7 +126,7 @@ namespace Cyclotron2D.Network
                     {
                         var connection = sender as NetworkConnection;
                         {
-                            if (connection != null && m_pingOutTimes.ContainsKey(connection))
+                            if (connection != null && m_pingOutTimes.ContainsKey(connection) && m_pingOutTimes[connection] != TimeSpan.Zero)
                             {
                                 var receiveTime = TimeSpan.Parse(e.Message.ContentLines[1]);
                                 var newRtt = receiveTime - m_pingOutTimes[connection];
