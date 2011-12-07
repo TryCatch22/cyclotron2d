@@ -167,8 +167,8 @@ namespace Cyclotron2D.Core
             m_lastUpdateDir = dir;
             
             //hide class property for revive calls
-            Point Position;
-        //    if (!Enabled && !Dead)//feign death
+           // Point Position;
+            if (!Enabled && !Dead)//feign death
             {
                 msgsDuringFeignDeath++;	//Counts incoming msgs while fake "dead"
             }
