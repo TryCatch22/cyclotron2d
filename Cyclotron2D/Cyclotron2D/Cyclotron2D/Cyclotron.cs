@@ -53,7 +53,10 @@ namespace Cyclotron2D
         public Cyclotron()
         {
 			DebugMessages.LogMessages = true;
+
             IsFixedTimeStep = true;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(18);
+
             Content.RootDirectory = "Content";
 
             m_graphics = new GraphicsDeviceManager(this);
