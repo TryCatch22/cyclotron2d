@@ -95,15 +95,7 @@ namespace Cyclotron2D.Core.Players
                     TimeSpan delay = GameScreen.CollisionNotifier.MaxAckDelay.Mult(2);
                     if (gameTime.TotalGameTime > Cycle.FeigningDeathStart + delay)
                     {
-                        if(this is RemotePlayer)
-                        {
-                            Cycle.Revive();
-                        }
-                        else
-                        {
-                           // if(Cycle.c)
-                        }
-                        
+                        Cycle.Revive();
                     }
 
                 }
