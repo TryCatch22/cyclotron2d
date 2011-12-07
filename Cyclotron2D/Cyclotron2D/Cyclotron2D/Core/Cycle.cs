@@ -168,7 +168,7 @@ namespace Cyclotron2D.Core
             
             //hide class property for revive calls
             Point Position;
-            if (!Enabled && !Dead)//feign death
+        //    if (!Enabled && !Dead)//feign death
             {
                 msgsDuringFeignDeath++;	//Counts incoming msgs while fake "dead"
             }
@@ -189,10 +189,10 @@ namespace Cyclotron2D.Core
                 Position = vertices[0].AddOffset(dir, m_averageLag);
                 Direction = dir;
             }
-            else
-            {
-                Position = this.Position;
-            }
+//            else
+//            {
+//                Position = this.Position;
+//            }
 
 
             Point lastTurn = m_vertices[m_vertices.Count - 1];
