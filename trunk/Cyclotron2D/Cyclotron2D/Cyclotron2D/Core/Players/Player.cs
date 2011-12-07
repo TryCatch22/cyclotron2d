@@ -90,7 +90,7 @@ namespace Cyclotron2D.Core.Players
 
             if (Cycle != null && gameTime.TotalGameTime > Cycle.GameStart && Game.IsState(GameState.PlayingAsClient | GameState.PlayingAsHost))
             {
-                if (!Cycle.Enabled && !Cycle.Dead)
+                if (!Cycle.Enabled && !Cycle.Dead && !Winner)
                 {
                     TimeSpan delay = GameScreen.CollisionNotifier.MaxAckDelay.Mult(2);
                     if (gameTime.TotalGameTime > Cycle.FeigningDeathStart + delay)
