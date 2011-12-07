@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace Cyclotron2D.Network
 {
@@ -183,7 +182,7 @@ namespace Cyclotron2D.Network
         public void Send(NetworkMessage message)
         {
             message.SequenceNumber = ++m_lastSeqNum;
-            DebugMessages.AddLogOnly("Sending Message: " + message.Type +" Header:"+ message.HeaderLine + "\n" + message.Content + "\n");
+            DebugMessages.AddLogOnly("Sending Message: " + message.Type +", to: "+ RemoteEP + ", SeqId: " +message.SequenceNumber+ "\n" + message.Content + "\n");
 			try
 			{
 				switch (Mode)

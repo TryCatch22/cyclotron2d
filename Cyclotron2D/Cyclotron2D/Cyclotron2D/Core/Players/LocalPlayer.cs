@@ -1,9 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using Cyclotron2D.Mod;
-using Cyclotron2D.Network;
+﻿using Cyclotron2D.Mod;
 using Cyclotron2D.Screens.Base;
-using Cyclotron2D.Screens.Main;
 using Cyclotron2D.Screens.Popup;
 using Cyclotron2D.State;
 using Microsoft.Xna.Framework;
@@ -23,7 +19,7 @@ namespace Cyclotron2D.Core.Players
         /// <summary>
         /// sends notifications about bike state every NotifyPeriod gameloops for Udp
         /// </summary>
-        public const int NotifyPeriod = 5;
+        public const int NotifyPeriod = 15;
 
         private int m_currentPeriod = 0;
 

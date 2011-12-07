@@ -108,7 +108,6 @@ namespace Cyclotron2D
                 if(State == GameState.MainMenu)
                 {
                     DebugMessages.FlushLog();
-                    Communicator.ClearAll();
                 }
 
             }

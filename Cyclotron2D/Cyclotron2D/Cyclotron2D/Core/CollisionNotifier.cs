@@ -25,7 +25,7 @@ namespace Cyclotron2D.Core
 
         private Engine Engine { get; set; }
 
-        public TimeSpan MaxAckDelay { get { return Game.Communicator.AverageRtt.Mult(2); } }
+        public TimeSpan MaxAckDelay { get { return TimeSpanExtension.Max(Game.Communicator.AverageRtt.Mult(2), Game.Communicator.MaximumRtt); } }
 
         private Dictionary<Player, Dictionary<RemotePlayer, Confirmation>> m_confirmations;
 
