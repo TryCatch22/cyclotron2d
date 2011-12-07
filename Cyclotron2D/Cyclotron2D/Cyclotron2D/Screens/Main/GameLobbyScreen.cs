@@ -206,6 +206,7 @@ namespace Cyclotron2D.Screens.Main
                 m_playersPanel.RemovePlayer(player);
                 Players.Remove(player);
             }
+            Players = new List<Player>();
         }
 
         #endregion
@@ -251,7 +252,7 @@ namespace Cyclotron2D.Screens.Main
         {
             var rem = new RemotePlayer(Game, GameScreen) {PlayerID = Players.Count + 1};
             AddPlayer(rem, e.Socket);
-           // rem.SubscribeConnection();
+
             string content = rem.PlayerID + "\n" + Settings.SinglePlayer.PlayerName.Value;
             Game.Communicator.MessagePlayer(rem, new NetworkMessage(MessageType.Welcome, content));
             
@@ -272,7 +273,6 @@ namespace Cyclotron2D.Screens.Main
             GameScreen.AddPlayer(player);
             m_playersPanel.AddPlayer(player);
             Players.Add(player);
-            //Game.RttService.Reset();
 
         }
 
