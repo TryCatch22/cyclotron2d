@@ -199,13 +199,14 @@ namespace Cyclotron2D.Core
 
             while(i < vertices.Count && vertices[i] != lastTurn) i++;
 
-            Debug.Assert(i < vertices.Count, "have we missed more than 4 turns since the last message ??");
+          //  Debug.Assert(i < vertices.Count, "have we missed more than 4 turns since the last message ??");
             
 
             switch (i)
             {
                 case 0:
                     //this will most likely never happen maybe at the very start...
+                    DebugMessages.AddLogOnly("Investigate matching last turn at current position from message");
                     break;
                 case 1:
                     {
@@ -236,6 +237,14 @@ namespace Cyclotron2D.Core
 
 
                         m_averageLag = (m_averageLag + lag)/2;
+
+                        /*
+                         Experimental Code. Reducing the average lag gradually by 'tweaking' the position
+                         */
+
+                        Position.AddOffset(Direction, -m_averageLag/(Math.Abs(m_averageLag)));
+
+                        //End Experimental
 
                         DebugMessages.AddLogOnly(m_player + " handling update info, all normal, avg delay: " + m_averageLag + " pixels");
 
