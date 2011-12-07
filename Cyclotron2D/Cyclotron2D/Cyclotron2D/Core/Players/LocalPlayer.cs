@@ -75,7 +75,7 @@ namespace Cyclotron2D.Core.Players
                 m_gameEnded = true;
             }
             
-            if (Cycle != null && !m_gameEnded && gameTime.TotalGameTime > Cycle.GameStart && m_currentPeriod == 0 && Game.IsState(GameState.PlayingAsClient | GameState.PlayingAsHost))
+            if (Cycle != null && !m_gameEnded && gameTime.TotalGameTime > Cycle.GameStart && m_currentPeriod == 0 && Game.IsState(GameState.PlayingAsClient | GameState.PlayingAsHost) && Cycle.Enabled)
             {
                 NotifyPeers();
             }

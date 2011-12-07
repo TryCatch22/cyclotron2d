@@ -92,7 +92,7 @@ namespace Cyclotron2D.Core.Players
             {
                 if (!Cycle.Enabled && !Cycle.Dead)
                 {
-                    TimeSpan delay = GameScreen.CollisionNotifier.MaxAckDelay;
+                    TimeSpan delay = GameScreen.CollisionNotifier.MaxAckDelay.Mult(2);
                     if (gameTime.TotalGameTime > Cycle.FeigningDeathStart + delay)
                     {
                         Cycle.Revive();
