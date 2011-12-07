@@ -218,8 +218,7 @@ namespace Cyclotron2D.Screens.Main
 
                             Game.Communicator.EndIgnoreDisconnect();
 
-                          //  Game.RttService.Reset();
-                            Game.RttService.Resume();
+                            Game.RttService.Reset();
 
                             Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
                            
@@ -237,7 +236,7 @@ namespace Cyclotron2D.Screens.Main
         {
             DebugMessages.Add("Accelerating Pings");
             Game.RttService.UpdatePeriod = TimeSpanExtension.Max(RttUpdateService.DefaultUpdatePeriod.Div(5), new TimeSpan(0, 0, 0, 0, 100));
-            Game.RttService.TriggerPing();
+            Game.RttService.Reset();
         }
 
         private void StartGame()
