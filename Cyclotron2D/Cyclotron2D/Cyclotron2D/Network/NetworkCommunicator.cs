@@ -435,7 +435,7 @@ namespace Cyclotron2D.Network
 
                 var endPoint = first.LocalEP as IPEndPoint;
 
-                UdpSocket.Bind(new IPEndPoint(endPoint.Address, endPoint.Port + 1));
+                UdpSocket.Bind(new IPEndPoint(endPoint.Address, NetworkConnection.UDP_GAME_PORT));
 
                 StartReceivingUdp();
             }

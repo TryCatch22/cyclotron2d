@@ -324,7 +324,7 @@ namespace Cyclotron2D.Screens.Main
                             foreach (var kvp in Game.Communicator.Connections)
                             {
                                 var ep = kvp.Value.RemoteEP as IPEndPoint;
-                                EndPoint newEp = new IPEndPoint(ep.Address, ep.Port + 1);
+                                EndPoint newEp = new IPEndPoint(ep.Address, NetworkConnection.UDP_GAME_PORT);
                                 content += kvp.Key.PlayerID + " " + newEp + "\n";
                             }
 
