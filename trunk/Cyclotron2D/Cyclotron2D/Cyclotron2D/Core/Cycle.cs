@@ -241,8 +241,8 @@ namespace Cyclotron2D.Core
                         /*
                          Experimental Code. Reducing the average lag gradually by 'tweaking' the position
                          */
-
-                        Position.AddOffset(Direction, -m_averageLag/(Math.Abs(m_averageLag)));
+                        if(m_averageLag != 0)
+                            Position.AddOffset(Direction, -m_averageLag/(Math.Abs(m_averageLag)));
 
                         //End Experimental
 
