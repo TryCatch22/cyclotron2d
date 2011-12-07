@@ -55,7 +55,7 @@ namespace Cyclotron2D
 			DebugMessages.LogMessages = true;
 
             IsFixedTimeStep = true;
-            TargetElapsedTime = TimeSpan.FromMilliseconds(18);
+            TargetElapsedTime = TimeSpan.FromMilliseconds(20);
 
             Content.RootDirectory = "Content";
 
