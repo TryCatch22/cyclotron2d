@@ -66,6 +66,8 @@ namespace Cyclotron2D.Network
 
         public const int MAX_BUFFER_SIZE = 512;
 
+        public const int UDP_GAME_PORT = 9082;
+
         #endregion
 
         private long m_lastSeqNum;
@@ -163,8 +165,8 @@ namespace Cyclotron2D.Network
                 var remote = RemoteEP as IPEndPoint;
 
 
-                LocalEP = new IPEndPoint(local.Address, local.Port + 1);
-                RemoteEP = new IPEndPoint(remote.Address, remote.Port + 1);
+                LocalEP = new IPEndPoint(local.Address, UDP_GAME_PORT);
+                RemoteEP = new IPEndPoint(remote.Address, UDP_GAME_PORT);
 
 
                 Mode = NetworkMode.Udp;
