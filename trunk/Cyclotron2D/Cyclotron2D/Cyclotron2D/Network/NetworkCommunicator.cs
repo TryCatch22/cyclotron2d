@@ -480,7 +480,6 @@ namespace Cyclotron2D.Network
                     string extraData = content.Substring(msg.Length);
 
                     oldData = NetworkMessage.MsgEncoding.GetBytes(extraData);
-                    //Debug.Assert(false, "stealing data from next message much?");
                 }
 
             }

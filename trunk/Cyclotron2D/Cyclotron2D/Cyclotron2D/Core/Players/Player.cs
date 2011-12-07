@@ -20,11 +20,6 @@ namespace Cyclotron2D.Core.Players
 
         private static ColorMap s_map;
 
-        protected Player(Game game, Screen screen) : base(game, screen)
-        {
-            Ready = false;
-            SubscribeConnection();
-        }
 
 
 
@@ -32,13 +27,7 @@ namespace Cyclotron2D.Core.Players
 
         public abstract string Name { get; set; }
 
-
-        private Cycle m_cycl;
-
-        public Cycle Cycle { get { return m_cycl; } protected set
-        {
-            m_cycl = value;
-        } }
+        public Cycle Cycle { get; protected set; }
 
         public bool Ready { get; set; }
 
@@ -54,6 +43,17 @@ namespace Cyclotron2D.Core.Players
 
         public TimeSpan SurvivalTime { get; set; }
 
+        #region Constructor
+
+        protected Player(Game game, Screen screen)
+            : base(game, screen)
+        {
+            Ready = false;
+            SubscribeConnection();
+        }
+
+        #endregion
+
         #region Events
 
         public event EventHandler<DirectionChangeEventArgs> DirectionChange;
@@ -65,7 +65,6 @@ namespace Cyclotron2D.Core.Players
         }
 
         #endregion
-
 
         public override string ToString()
         {
@@ -87,16 +86,13 @@ namespace Cyclotron2D.Core.Players
             if(Cycle != null && Cycle.Enabled && gameTime.TotalGameTime > Cycle.GameStart)
             {
                 SurvivalTime = gameTime.TotalGameTime - Cycle.GameStart;
-
-                
-
             }
 
             if (Cycle != null && gameTime.TotalGameTime > Cycle.GameStart && Game.IsState(GameState.PlayingAsClient | GameState.PlayingAsHost))
             {
                 if (!Cycle.Enabled && !Cycle.Dead)
                 {
-                    TimeSpan delay = TimeSpanExtension.Max(GameScreen.CollisionNotifier.MaxAckDelay.Mult(2), new TimeSpan(0, 0, 0, 0, 200));
+                    TimeSpan delay = GameScreen.CollisionNotifier.MaxAckDelay;
                     if (gameTime.TotalGameTime > Cycle.FeigningDeathStart + delay)
                     {
                         Cycle.Revive();
