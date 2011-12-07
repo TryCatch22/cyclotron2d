@@ -187,12 +187,15 @@ namespace Cyclotron2D.Screens.Main
                                 Game.Communicator.EndIgnoreDisconnect();
                               //  Game.RttService.Reset();
 
-
-                                //more ping time
-                                Thread.Sleep(TimeSpanExtension.Max(RttUpdateService.DefaultUpdatePeriod.Mult(2), new TimeSpan(0, 0, 0, 0, 200)));
+                                new Thread(() =>
+                                {
+                                    Thread.Sleep(TimeSpan.FromSeconds(1.5));
                                     
-                                DebugMessages.AddLogOnly("Decelarating pings");
-                                Game.RttService.UpdatePeriod = RttUpdateService.DefaultUpdatePeriod;
+                                    DebugMessages.AddLogOnly("Decelarating pings");
+                                    Game.RttService.UpdatePeriod = RttUpdateService.DefaultUpdatePeriod;
+                                }).Start();
+                                //more ping time
+                          
 
                             }
                         }
@@ -235,7 +238,7 @@ namespace Cyclotron2D.Screens.Main
         private void AcceleratePings()
         {
             DebugMessages.Add("Accelerating Pings");
-            Game.RttService.UpdatePeriod = TimeSpanExtension.Max(RttUpdateService.DefaultUpdatePeriod.Div(5), new TimeSpan(0, 0, 0, 0, 100));
+            Game.RttService.UpdatePeriod = TimeSpan.FromMilliseconds(300);
             Game.RttService.Reset();
         }
 
