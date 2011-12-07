@@ -178,9 +178,9 @@ namespace Cyclotron2D.Screens.Main
 
                                 AcceleratePings();
 
-                                 Thread.Sleep(15);
+                                
                                 Game.Communicator.MessageAll(new NetworkMessage(MessageType.StopTcp, ""));
-
+                                Thread.Sleep(15);
                                 Game.Communicator.StopTcp();
 
                                 Thread.Sleep(Game.Communicator.MaximumRtt.Mult(2));
