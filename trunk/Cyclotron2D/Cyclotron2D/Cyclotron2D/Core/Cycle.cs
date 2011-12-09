@@ -187,10 +187,6 @@ namespace Cyclotron2D.Core
             m_lastUpdateInfo = vertices;
             m_lastUpdateDir = dir;
 
-        //    Point supposedPosition;
-        //    Direction supposedDirection;
-
-
             if (!Enabled && !Dead)//feign death
             {
                 msgsDuringFeignDeath++;	//Counts incoming msgs while fake "dead"
@@ -205,26 +201,12 @@ namespace Cyclotron2D.Core
             {
                 return;
             }
-//
-//            if (revive)
-//            {
-                //if reviving, pretend the position is the one from the last update + target lag
-//                supposedPosition = vertices[0].AddOffset(dir, TargetPixelLag);
-//                supposedDirection = dir;
-//            }
-//            else
-//            {
-//                supposedPosition = Position;
-//                supposedDirection = Direction;
-//            }
-
 
             Point lastTurn = m_vertices[m_vertices.Count - 1];
             int i = 0;
 
+            //find last turn in message
             while(i < vertices.Count && vertices[i] != lastTurn) i++;
-
-          //  Debug.Assert(i < vertices.Count, "have we missed more than 4 turns since the last message ??");
             
 
             switch (i)
@@ -235,10 +217,6 @@ namespace Cyclotron2D.Core
                     break;
                 case 1:
                     {
-//                        Debug.Assert(
-//                            ((supposedDirection == Direction.Down || supposedDirection == Direction.Up) && supposedPosition.X == vertices[0].X && supposedPosition.X == vertices[1].X) ||
-//                            ((supposedDirection == Direction.Left || supposedDirection == Direction.Right) && supposedPosition.Y == vertices[0].Y && supposedPosition.Y == vertices[1].Y), "Something is wrong noob.");
-
                         //this should be the most common case (all is well), update the average lag here if not reviving, otherwise value is way off
                         if(!revive)
                         {
@@ -266,71 +244,31 @@ namespace Cyclotron2D.Core
                         }
 
                         /*
-                         Experimental Code. Reducing the average lag gradually by 'tweaking' the position
+                         Reducing the average lag gradually by 'tweaking' the position
                          */
-                        if(m_averageLag != 0)
-                        {
-                            int target = TargetPixelLag;
-                            int offset = Math.Sign(target - m_averageLag);
-                            Position.AddOffset(Direction, offset);
-                            DebugMessages.AddLogOnly("Tweak: "+offset+" targetLag: " + target);
-                        }
-                            
+                        int target = TargetPixelLag;
+                        int offset = Math.Sign(target - m_averageLag);
+                        Position = Position.AddOffset(Direction, offset);
+                        DebugMessages.AddLogOnly("Tweak: "+offset+" targetLag: " + target);
 
-                        //End Experimental
 
                         DebugMessages.AddLogOnly(m_player + " handling update info, all normal, avg delay: " + m_averageLag + " pixels");
 
                     }
                     break;
                 case 2:
-//                    {
-                        // the player must have turned since the last message.
-//
-                      //  int elapsedDistance = (int)vertices[0].Distance(vertices[1]);
-//
-//                        m_vertices.Add(vertices[1]);
-//                        
-//                        Position = vertices[1].AddOffset(dir, elapsedDistance + TargetPixelLag);
-//                        Direction = dir;
-//
-//                        DebugMessages.AddLogOnly(m_player + "Detected turn, handling ...");
-//
-//                    }
-//                    break;
                 case 3:
                 case 4:
                     {
-                        //string msg = i == 3 ? "Missed a turn from " + m_player + " trying to catch up ..." 
-                        //                    : "Missed two turns from " + m_player + " pls lag less";
-
-                      //  string msg = ;
-
                         DebugMessages.Add("Detected " + (i-1) + " turn" +(i == 2 ? "":"s") + " from " + m_player + " catching up ...");
-
-
-
-                     //   int length =(int)supposedPosition.Distance(vertices[i]);
-
-                  
-
-                      //  int offset = length;
-
-                      //  int addedPoints = 0;
 
                         for (int j = i-1; j > 0; j--)
                         {
                             m_vertices.Add(vertices[j]);
-                        //    addedPoints++;
                         }
-
-
 
                         Position = vertices[0].AddOffset(dir, TargetPixelLag);
                         Direction = dir;
-
-
-
 
                     }
                     break;
