@@ -12,13 +12,6 @@ using Microsoft.Xna.Framework;
 namespace Cyclotron2D.Core
 {
 
-    internal class Confirmation
-    {
-        public bool Confirmed { get; set; }
-
-        public TimeSpan LastNotification { get; set; }
-    }
-
     //takes care of managing conflicts on collisions from host to clients
     public class CollisionNotifier: ScreenComponent
     {

@@ -92,7 +92,7 @@ namespace Cyclotron2D.Core.Players
             {
                 if (!Cycle.Enabled && !Cycle.Dead && !Winner)
                 {
-                    TimeSpan delay = GameScreen.CollisionNotifier.MaxAckDelay.Mult(2);
+                    TimeSpan delay = Game.ReliableUdpSender.MaxAckDelay.Mult(2);
                     if (gameTime.TotalGameTime > Cycle.FeigningDeathStart + delay)
                     {
                         Cycle.Revive();
@@ -104,6 +104,14 @@ namespace Cyclotron2D.Core.Players
 
 
           
+        }
+
+        public NetworkMessage GetDeathMsg()
+        {
+            var msg = Cycle.GetInfoMessage();
+            msg.Type = MessageType.RealDeath;
+            msg.Content = PlayerID + "\n" + msg.Content;
+            return msg;
         }
 
         protected virtual void OnCycleEnabledChanged(object sender, EventArgs e)

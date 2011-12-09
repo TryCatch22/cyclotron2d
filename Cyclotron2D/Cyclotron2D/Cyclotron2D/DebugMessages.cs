@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Cyclotron2D.Graphics;
 using Microsoft.Xna.Framework;

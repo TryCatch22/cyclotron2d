@@ -121,7 +121,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\CollisionNotifier.cs" />
+    <None Include="Core\CollisionNotifier.cs" />
     <Compile Include="Core\CycleCollisionEventArgs.cs" />
     <Compile Include="Graphics\Art.cs" />
     <Compile Include="Core\Players\AIPlayer.cs" />
@@ -136,6 +136,7 @@
     <Compile Include="Network\NetworkCommunicator.cs" />
     <Compile Include="Network\GameLobby.cs" />
     <Compile Include="Network\NetworkConnection.cs" />
+    <Compile Include="Network\ReliableUdpSender.cs" />
     <Compile Include="Network\RttUpdateService.cs" />
     <Compile Include="Screens\Base\MainScreen.cs" />
     <Compile Include="Screens\Base\PopupScreen.cs" />

@@ -222,7 +222,8 @@ namespace Cyclotron2D.Core.Players
                     case CollisionType.Wall:
                         {
                             //we killed ourselves some way or another. we are the authoritative source for these cases
-                            GameScreen.CollisionNotifier.NotifyRealDeath(this);
+                           // GameScreen.CollisionNotifier.NotifyRealDeath(this);
+                            Game.ReliableUdpSender.SendReliableAll(GetDeathMsg());
                             Cycle.Kill();
                         }
                         break;
@@ -231,7 +232,8 @@ namespace Cyclotron2D.Core.Players
                             if (!e.AmbiguousCollision)
                             {
                                 //we collided into a confirmed portion of the other players tail
-                                GameScreen.CollisionNotifier.NotifyRealDeath(this);
+                               // GameScreen.CollisionNotifier.NotifyRealDeath(this);
+                                Game.ReliableUdpSender.SendReliableAll(GetDeathMsg());
                                 Cycle.Kill();
 
                             }

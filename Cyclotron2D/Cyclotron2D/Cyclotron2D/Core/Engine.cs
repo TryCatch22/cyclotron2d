@@ -255,7 +255,8 @@ namespace Cyclotron2D.Core
             else if (e.Type == CollisionType.Player && e.AmbiguousCollision && Game.State == GameState.PlayingAsHost)
             {
                 //currently the host will decide on ambiguous collisions.
-                GameScreen.CollisionNotifier.NotifyRealDeath(e.Victim);
+                //GameScreen.CollisionNotifier.NotifyRealDeath(e.Victim);
+                Game.ReliableUdpSender.SendReliableAll(e.Victim.GetDeathMsg());
                 cycle.Kill();
             }
             else if(e.Victim is RemotePlayer || e.AmbiguousCollision)

@@ -345,6 +345,8 @@ namespace Cyclotron2D.Network
                 UdpSocket = null;
             }
 
+            Game.ReliableUdpSender.ClearAll();
+
         }
 
         public void StopTcp()
@@ -366,6 +368,7 @@ namespace Cyclotron2D.Network
                 networkConnection.StartUdp(UdpSocket);
             }
 
+            Game.ReliableUdpSender.Initialize(Connections.Keys.ToList());
 
             Mode = NetworkMode.Udp;
         }

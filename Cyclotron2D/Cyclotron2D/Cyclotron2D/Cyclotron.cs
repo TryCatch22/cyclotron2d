@@ -46,6 +46,8 @@ namespace Cyclotron2D
 
         public NetworkCommunicator Communicator { get; private set; }
 
+        public ReliableUdpSender ReliableUdpSender { get; private set; }
+
         #endregion
 
         #region Constructor
@@ -64,6 +66,7 @@ namespace Cyclotron2D
             ScreenManager = new ScreenManager(this);
             InputState = new InputState(this);
             Communicator = new NetworkCommunicator(this);
+            ReliableUdpSender = new ReliableUdpSender(this);
 
             m_graphics.PreferredBackBufferHeight = 700;
             m_graphics.PreferredBackBufferWidth = 1150;
