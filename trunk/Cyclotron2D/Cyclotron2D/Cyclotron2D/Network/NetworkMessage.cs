@@ -37,7 +37,9 @@ namespace Cyclotron2D.Network
 
         AckDeath,
         AckUdpSetup,
-        StopTcp
+        StopTcp,
+
+        MsgReceived
     }
 
 
@@ -58,9 +60,11 @@ namespace Cyclotron2D.Network
 
         public byte Source { get; set; }
 
+        public bool RequiresConfirmation { get; set; }
+
         public long SequenceNumber { get; set; }
 
-        public string HeaderLine { get { return (byte) Type + " " + Source + " " + SequenceNumber +" "+Length; } }
+        public string HeaderLine { get { return (byte) Type + " " + Source + " " + SequenceNumber + " " + Length + " " + RequiresConfirmation; } }
 
         private int length = 0;
 
@@ -107,9 +111,12 @@ namespace Cyclotron2D.Network
                 long seqnum = long.Parse(header.Substring(0, header.IndexOf(' ')));
                 header = header.Substring(header.IndexOf(' ') + 1);
 
-                int size = int.Parse(header);
+                int size = int.Parse(header.Substring(0, header.IndexOf(' ')));
+                header = header.Substring(header.IndexOf(' ') + 1);
 
-                return new NetworkMessage(type, content) { Source = source, Length = size, SequenceNumber = seqnum};
+                bool reply = bool.Parse(header);
+
+                return new NetworkMessage(type, content) { Source = source, Length = size, SequenceNumber = seqnum, RequiresConfirmation = reply};
 
             }
             catch (Exception e )

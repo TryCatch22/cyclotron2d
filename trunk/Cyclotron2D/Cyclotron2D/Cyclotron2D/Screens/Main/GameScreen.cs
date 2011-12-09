@@ -53,7 +53,7 @@ namespace Cyclotron2D.Screens.Main
 
 
 
-        public CollisionNotifier CollisionNotifier { get; private set; }
+     //   public CollisionNotifier CollisionNotifier { get; private set; }
 
         public TimeSpan GameStartTime { get { return m_engine.GameStartTime; } }
 
@@ -67,7 +67,7 @@ namespace Cyclotron2D.Screens.Main
             GameSettings = Settings.SinglePlayer;
             m_lobbyPlayers = new List<Player>();
             m_engine = new Engine(game, this);
-            CollisionNotifier = new CollisionNotifier(game, this, m_engine);
+        //    CollisionNotifier = new CollisionNotifier(game, this, m_engine);
             m_startRandomizer = new StartRandomizer(game);
             m_startTimeUtc = DateTime.MaxValue;
             isGameSetup = false;
@@ -263,8 +263,8 @@ namespace Cyclotron2D.Screens.Main
         private void Cleanup()
         {
             StopGame();
-            CollisionNotifier.Dispose();
-            CollisionNotifier = null;
+            //CollisionNotifier.Dispose();
+         //   CollisionNotifier = null;
             m_engine.Dispose();
             m_engine = null;
 
@@ -288,11 +288,11 @@ namespace Cyclotron2D.Screens.Main
             if (m_engine != null)
             {
                 m_engine.Dispose();
-                CollisionNotifier.Dispose();
+                //CollisionNotifier.Dispose();
             }
 
             m_engine = new Engine(Game, this);
-            CollisionNotifier = new CollisionNotifier(Game, this, m_engine);
+          //  CollisionNotifier = new CollisionNotifier(Game, this, m_engine);
 
             switch (Game.State)
             {
@@ -463,7 +463,7 @@ namespace Cyclotron2D.Screens.Main
             {
                 m_engine.Dispose();
                 m_engine = null;
-                CollisionNotifier.Dispose();
+                //CollisionNotifier.Dispose();
                 UnsubscribeCommunicator();
             }
             base.Dispose(disposing);
