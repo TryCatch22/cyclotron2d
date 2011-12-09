@@ -148,7 +148,8 @@ namespace Cyclotron2D.Screens.Main
             foreach (var kvp in Game.Communicator.Connections)
             {
                 string content = ((maxRtt - kvp.Value.RoundTripTime).Div(2) + baseDelay).ToString("G");
-                Game.Communicator.MessagePlayer(kvp.Key, new NetworkMessage(MessageType.AllReady, content));
+                //Game.Communicator.MessagePlayer(kvp.Key, new NetworkMessage(MessageType.AllReady, content));
+                Game.ReliableUdpSender.SendReliable(kvp.Key, new NetworkMessage(MessageType.AllReady, content));
             }
 
             m_startTimeUtc = DateTime.UtcNow + maxRtt.Div(2) + baseDelay;
@@ -178,8 +179,8 @@ namespace Cyclotron2D.Screens.Main
 
                                 AcceleratePings();
 
-                                
-                                Game.Communicator.MessageAll(new NetworkMessage(MessageType.StopTcp, ""));
+                                Game.ReliableUdpSender.SendReliableAll(new NetworkMessage(MessageType.StopTcp, ""));
+                              //  Game.Communicator.MessageAll(new NetworkMessage(MessageType.StopTcp, ""));
                                 Thread.Sleep(15);
                                 Game.Communicator.StopTcp();
 
@@ -223,7 +224,8 @@ namespace Cyclotron2D.Screens.Main
 
                             Game.RttService.Reset();
 
-                            Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
+                           // Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
+                            Game.ReliableUdpSender.SendReliable(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
                            
                         }
                     }
@@ -333,9 +335,9 @@ namespace Cyclotron2D.Screens.Main
                        //game setup message
                         setupMsg = new NetworkMessage(type, content);
                         Game.Communicator.MessageAll(setupMsg);
-                        //todo: remove?
-                        setupSendTime = Game.GameTime.TotalGameTime;
-                        
+
+                        Thread.Sleep(15);
+
                         Game.Communicator.StartIgnoreDisconnect();
 
                         Game.RttService.Pause();
