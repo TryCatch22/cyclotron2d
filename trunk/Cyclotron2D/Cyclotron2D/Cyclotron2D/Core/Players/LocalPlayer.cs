@@ -44,23 +44,33 @@ namespace Cyclotron2D.Core.Players
             if (Cycle == null || gameTime.TotalGameTime < Cycle.GameStart) return;
 
             InputState input = Game.InputState;
-
+            bool turn = false;
             var pos = Cycle.GetNextGridCrossing();
             if (input.IsNewKeyPress(Keys.Up))
             {
                 InvokeDirectionChange(new DirectionChangeEventArgs(Direction.Up, pos));
+                turn = true;
             }
             else if (input.IsNewKeyPress(Keys.Down))
             {
                 InvokeDirectionChange(new DirectionChangeEventArgs(Direction.Down, pos));
+                turn = true;
             }
             else if (input.IsNewKeyPress(Keys.Left))
             {
                 InvokeDirectionChange(new DirectionChangeEventArgs(Direction.Left, pos));
+                turn = true;
             }
             else if (input.IsNewKeyPress(Keys.Right))
             {
                 InvokeDirectionChange(new DirectionChangeEventArgs(Direction.Right, pos));
+                turn = true;
+            }
+
+            //trigger an early update message right after the turn
+            if(turn && !m_gameEnded && gameTime.TotalGameTime > Cycle.GameStart && Game.IsState(GameState.PlayingAsClient | GameState.PlayingAsHost) && Cycle.Enabled)
+            {
+                NotifyPeers();
             }
         }
 
@@ -95,12 +105,9 @@ namespace Cyclotron2D.Core.Players
         
         #endregion
 
-        #region Subscription
-
-
-        #endregion
 
         #region Event Handlers
+
 
         protected override void OnCycleCollided(object sender, CycleCollisionEventArgs e)
         {
