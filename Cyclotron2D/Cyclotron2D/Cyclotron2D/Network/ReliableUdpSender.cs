@@ -34,6 +34,7 @@ namespace Cyclotron2D.Network
             : base(game)
         {
             m_confirmations = new Dictionary<RemotePlayer, Dictionary<long, Tuple<NetworkMessage, TimeSpan>>>();
+            SubscribeCommunicator();
         }
 
         #region Subscription
@@ -129,10 +130,10 @@ namespace Cyclotron2D.Network
         {
 
             msg.RequiresConfirmation = true;
-            Game.Communicator.MessageAll(msg);
 
             foreach (var key in m_confirmations.Keys)
             {
+                Game.Communicator.MessagePlayer(key, msg);
                 m_confirmations[key].Add(msg.SequenceNumber, new Tuple<NetworkMessage, TimeSpan>(msg, Game.GameTime.TotalGameTime));
             }
         }
