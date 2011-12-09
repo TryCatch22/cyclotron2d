@@ -269,7 +269,13 @@ namespace Cyclotron2D.Core
                          Experimental Code. Reducing the average lag gradually by 'tweaking' the position
                          */
                         if(m_averageLag != 0)
-                            Position.AddOffset(Direction,  Math.Sign(m_averageLag - TargetPixelLag));
+                        {
+                            int target = TargetPixelLag;
+                            int offset = Math.Sign(m_averageLag - target);
+                            Position.AddOffset(Direction, offset);
+                            DebugMessages.AddLogOnly("Tweak: "+offset+" targetLag: " + target);
+                        }
+                            
 
                         //End Experimental
 
@@ -300,7 +306,7 @@ namespace Cyclotron2D.Core
 
                       //  string msg = ;
 
-                        DebugMessages.Add("Detected " + i + " turn" +(i == 2 ? "":"s") + " from " + m_player + " catching up ...");
+                        DebugMessages.Add("Detected " + (i-1) + " turn" +(i == 2 ? "":"s") + " from " + m_player + " catching up ...");
 
 
 
