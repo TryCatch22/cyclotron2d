@@ -271,7 +271,7 @@ namespace Cyclotron2D.Core
                         if(m_averageLag != 0)
                         {
                             int target = TargetPixelLag;
-                            int offset = Math.Sign(m_averageLag - target);
+                            int offset = Math.Sign(target - m_averageLag);
                             Position.AddOffset(Direction, offset);
                             DebugMessages.AddLogOnly("Tweak: "+offset+" targetLag: " + target);
                         }
