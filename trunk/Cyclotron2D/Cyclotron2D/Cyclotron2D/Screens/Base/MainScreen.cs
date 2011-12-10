@@ -26,5 +26,20 @@ namespace Cyclotron2D.Screens.Base
         /// Indicates whether the current GameState is associated to this MainScreen
         /// </summary>
         public bool IsValidState { get { return (Game.State & States) == Game.State; } }
+
+
+        protected override void OnStateChanged(object sender, StateChangedEventArgs e)
+        {
+            base.OnStateChanged(sender, e);
+            if(!IsValidState && (States & (e.OldState)) == e.OldState)
+            {
+                //we are leaving one of our valid states for a non valid state
+                OnLeavingValidState();
+            }
+        }
+
+        protected virtual void OnLeavingValidState()
+        {
+        }
     }
 }

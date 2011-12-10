@@ -52,7 +52,7 @@ namespace Cyclotron2D.Mod
             MaxTailLength = new RangedIntegerSetting("Max Tail Length ", 0) { MinValue = 0, MaxValue = 3000 };
             AllowSuicide = new Setting<bool>("Allow Suicide ", false) { Validate = val => true };
             DrawGrid = new Setting<bool>("Draw Grid ", true) { Validate = val => true };
-            PlasmaGrid = new Setting<bool>("Plasma Grid ", false) { Validate = val => true };
+            PlasmaGrid = new Setting<bool>("Plasma Grid ", true) { Validate = val => true };
             PlayerName = new Setting<string>("Player Name ", "You") { Validate = val => !string.IsNullOrWhiteSpace(val) };
         }
 

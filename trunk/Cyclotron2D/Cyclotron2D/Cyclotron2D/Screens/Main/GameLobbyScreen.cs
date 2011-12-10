@@ -366,34 +366,9 @@ namespace Cyclotron2D.Screens.Main
                             }
                         }
 
-//                        Thread.Sleep(400);
-//
-//                        m_pingOut = DateTime.Now;
-//                        Game.Communicator.MessagePlayer(source, new NetworkMessage(MessageType.Ping, "a"));
-
                     }
                     break;
-//                case MessageType.Ping:
-//                    {
-//                        switch (e.Message.Content[0])
-//                        {
-//                            case 'a':
-                                //client receives initial ping
-//                                m_pingOut = DateTime.Now;
-//                                Game.Communicator.MessagePlayer(source, new NetworkMessage(MessageType.Ping, "b"));
-//                                break;
-//                            case 'b':
-                                //server getting pingback
-//                                Game.Communicator.Connections[source].RoundTripTime = DateTime.Now - m_pingOut;
-//                                Game.Communicator.MessagePlayer(source, new NetworkMessage(MessageType.Ping, "c"));
-//                                break;
-//                            case 'c':
-                                //client getting pingback
-//                                Game.Communicator.Connections[source].RoundTripTime = DateTime.Now - m_pingOut;
-//                                break;
-//                        }
-//                    }
-//                    break;
+
                 //now on client side we can add the new player
                 case MessageType.PlayerJoined:
                     {
@@ -490,14 +465,16 @@ namespace Cyclotron2D.Screens.Main
                     AddPlayer(new LocalPlayer(Game, GameScreen){PlayerID = 1});
                     Game.Communicator.LocalId = 1;
                     break;
-                case GameState.GameLobbyClient:
-                 //   Game.RttService.Reset();
-                    break;
                 default:
-                    Cleanup();
                     return;
             }
 
+        }
+
+        protected override void OnLeavingValidState()
+        {
+            base.OnLeavingValidState();
+            Cleanup();
         }
 
         #endregion

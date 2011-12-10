@@ -31,8 +31,6 @@ namespace Cyclotron2D.Screens.Main
         private List<Player> m_lobbyPlayers;
 
         private bool isGameSetup;
-
-        private TimeSpan setupSendTime = TimeSpan.MaxValue - TimeSpan.FromMilliseconds(500);
        
         private NetworkMessage setupMsg;
       
@@ -52,9 +50,6 @@ namespace Cyclotron2D.Screens.Main
         public Settings GameSettings { get; set; }
 
 
-
-     //   public CollisionNotifier CollisionNotifier { get; private set; }
-
         public TimeSpan GameStartTime { get { return m_engine.GameStartTime; } }
 
 
@@ -67,7 +62,6 @@ namespace Cyclotron2D.Screens.Main
             GameSettings = Settings.SinglePlayer;
             m_lobbyPlayers = new List<Player>();
             m_engine = new Engine(game, this);
-        //    CollisionNotifier = new CollisionNotifier(game, this, m_engine);
             m_startRandomizer = new StartRandomizer(game);
             m_startTimeUtc = DateTime.MaxValue;
             isGameSetup = false;
@@ -107,17 +101,10 @@ namespace Cyclotron2D.Screens.Main
             //timeout to get back to main menu if nothing happens after 10 seconds
 			if (gameTime.TotalGameTime > gameScreenSwitch + new TimeSpan(0, 0, 10) && !m_gameStarted)
 			{
+                DebugMessages.Add("Setup Timeout!");
 				Game.ChangeState(GameState.MainMenu);
 			}
 
-//			if (Game.IsState(GameState.PlayingAsHost))
-//			{
-//				if (gameTime.TotalGameTime > setupSendTime + TimeSpan.FromMilliseconds(500) && m_udpSetupConfirmations < ActivePlayers.Count -1)
-//				{
-//					Game.Communicator.MessageAll(setupMsg);
-//					setupSendTime = gameTime.TotalGameTime;
-//				}
-//			}
         }
         
 
@@ -269,7 +256,6 @@ namespace Cyclotron2D.Screens.Main
             m_engine = null;
 
             isGameSetup = false;
-            setupSendTime = TimeSpan.MaxValue - TimeSpan.FromMilliseconds(500);
             gameScreenSwitch = TimeSpan.MaxValue - new TimeSpan(0, 0, 10);
 
             m_lobbyPlayers.Clear();
@@ -457,7 +443,6 @@ namespace Cyclotron2D.Screens.Main
             {
                 m_engine.Dispose();
                 m_engine = null;
-                //CollisionNotifier.Dispose();
                 UnsubscribeCommunicator();
             }
             base.Dispose(disposing);
@@ -482,11 +467,9 @@ namespace Cyclotron2D.Screens.Main
             if (m_gameStarted)
                 return;
 
-            List<Player> players = null;
-
             if (e.NewState == GameState.PlayingSolo && e.OldState == GameState.MainMenu)
             {
-                players = new List<Player>
+                List<Player> players = new List<Player>
                               {
                                   new LocalPlayer(Game, this),
                                   new AIPlayer(Game, this),
@@ -508,18 +491,18 @@ namespace Cyclotron2D.Screens.Main
             else if (Game.IsState(GameState.PlayingAsHost | GameState.PlayingAsClient))
             {
                 //get players from network and then start game
-                players = new List<Player>();
-                players.AddRange(m_lobbyPlayers);
                 GameSettings = Settings.Multiplayer;
-                SetupGame(players);
+                SetupGame(m_lobbyPlayers);
                 //for timeout
 				gameScreenSwitch = Game.GameTime.TotalGameTime;
 				
             }
-            else
-            {
-                Cleanup();
-            }
+        }
+
+        protected override void OnLeavingValidState()
+        {
+            base.OnLeavingValidState();
+            Cleanup();
         }
     }
 }
