@@ -148,7 +148,6 @@ namespace Cyclotron2D.Screens.Main
             foreach (var kvp in Game.Communicator.Connections)
             {
                 string content = ((maxRtt - kvp.Value.RoundTripTime).Div(2) + baseDelay).ToString("G");
-                //Game.Communicator.MessagePlayer(kvp.Key, new NetworkMessage(MessageType.AllReady, content));
                 Game.ReliableUdpSender.SendReliable(kvp.Key, new NetworkMessage(MessageType.AllReady, content));
             }
 
@@ -171,7 +170,7 @@ namespace Cyclotron2D.Screens.Main
                             }
 
                         }
-                        else if (e.Message.Type == MessageType.AckUdpSetup)
+                        else if (e.Message.Type == MessageType.UdpReady)
                         {
                             m_udpSetupConfirmations++;
                             if(m_udpSetupConfirmations == ActivePlayers.Count -1)
@@ -180,22 +179,23 @@ namespace Cyclotron2D.Screens.Main
                                 AcceleratePings();
 
                                 Game.ReliableUdpSender.SendReliableAll(new NetworkMessage(MessageType.StopTcp, ""));
-                              //  Game.Communicator.MessageAll(new NetworkMessage(MessageType.StopTcp, ""));
+
                                 Thread.Sleep(15);
                                 Game.Communicator.StopTcp();
 
                                 Thread.Sleep(Game.Communicator.MaximumRtt.Mult(2));
                                 Game.Communicator.EndIgnoreDisconnect();
-                              //  Game.RttService.Reset();
+
 
                                 new Thread(() =>
-                                {
+                                { 
+                                    //more ping time
                                     Thread.Sleep(TimeSpan.FromSeconds(1.5));
                                     
                                     DebugMessages.AddLogOnly("Decelarating pings");
                                     Game.RttService.UpdatePeriod = RttUpdateService.DefaultUpdatePeriod;
                                 }).Start();
-                                //more ping time
+                               
                           
 
                             }
@@ -224,7 +224,6 @@ namespace Cyclotron2D.Screens.Main
 
                             Game.RttService.Reset();
 
-                           // Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
                             Game.ReliableUdpSender.SendReliable(Game.Communicator.Host, new NetworkMessage(MessageType.Ready, ""));
                            
                         }
@@ -411,17 +410,9 @@ namespace Cyclotron2D.Screens.Main
 
                         m_engine.SetupGame(players, conditions);
 
-                        Game.Communicator.MessagePlayer(Game.Communicator.Host, new NetworkMessage(MessageType.AckUdpSetup, ""));
-
-                        Thread.Sleep(15);
-
-
                         Game.Communicator.StartUdp();
 
-                       
-
-                      
-
+                        Game.ReliableUdpSender.SendReliable(Game.Communicator.Host, new NetworkMessage(MessageType.UdpReady, ""));
                     }
                     break;
                     

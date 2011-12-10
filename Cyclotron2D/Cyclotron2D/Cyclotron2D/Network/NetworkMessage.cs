@@ -35,7 +35,7 @@ namespace Cyclotron2D.Network
     
         RealDeath,
 
-        AckUdpSetup,
+        UdpReady,
 
         StopTcp,
 
