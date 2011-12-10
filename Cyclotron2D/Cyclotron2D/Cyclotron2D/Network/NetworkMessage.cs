@@ -100,7 +100,7 @@ namespace Cyclotron2D.Network
                 string s = MsgEncoding.GetString(data).TrimEnd(new[] { '\0' });
 
                 string[] header = s.Substring(0, s.IndexOf(EndOfHeader)).Split(new []{' '});
-                string content = s.Substring(header.Length + EndOfHeader.Length);
+                string content = s.Substring(s.IndexOf(EndOfHeader) + EndOfHeader.Length);
 
                 return new NetworkMessage((MessageType)byte.Parse(header[0]), content)
                            {
