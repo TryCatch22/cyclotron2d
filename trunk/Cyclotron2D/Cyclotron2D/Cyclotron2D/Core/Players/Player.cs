@@ -174,9 +174,13 @@ namespace Cyclotron2D.Core.Players
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && Cycle != null)
+            if (disposing)
             {
-                UnsubscribeCycle();
+                if(Cycle != null)
+                {
+                    UnsubscribeCycle();
+                }
+
                 UnsubscribeConnection();
             }
             base.Dispose(disposing);

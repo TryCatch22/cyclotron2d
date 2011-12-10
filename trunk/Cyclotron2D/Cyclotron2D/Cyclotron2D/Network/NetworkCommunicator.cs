@@ -166,24 +166,38 @@ namespace Cyclotron2D.Network
 
             m_disconnected.Clear();
 
-			MessageEventArgs pingMessage = null;
+			Dictionary<byte,MessageEventArgs> pingArgs = new Dictionary<byte, MessageEventArgs>();
+
             while (m_receivedMessages.Count > 0)
             {
                 MessageEventArgs e;
                 m_receivedMessages.TryDequeue(out e);
 				if (e != null)
 				{
-                    //keep only most recent ping message
-					if (e.Message.Type == MessageType.Ping && (pingMessage == null || e.Message.SequenceNumber > pingMessage.Message.SequenceNumber))
-						pingMessage = e;
-					else if(e.Message.Type != MessageType.Ping)
-						InvokeMessageReceived(e);
+                    //keep only most recent ping in message from each player
+					if (e.Message.Type == MessageType.Ping && e.Message.Content == "in")
+					{
+					    if(!pingArgs.ContainsKey(e.Message.Source))
+					    {
+					        pingArgs.Add(e.Message.Source, e);
+					    }
+					    else if(pingArgs[e.Message.Source].Message.SequenceNumber < e.Message.SequenceNumber)
+					    {
+					        pingArgs[e.Message.Source] = e;
+					    }
+					}
+					else // not a ping in msg
+					{
+					    InvokeMessageReceived(e);
+					}
+						
 				}
             }
-			if (pingMessage != null)
-			{
-				InvokeMessageReceived(pingMessage);
-			}
+            //invoke all valid ping ins.
+            foreach (var messageEventArgs in pingArgs.Values)
+            {
+                InvokeMessageReceived(messageEventArgs);
+            }
 
             if (gameTime.TotalGameTime - lastConnectionCheck > new TimeSpan(0, 0, 0, 0, 500))
             {

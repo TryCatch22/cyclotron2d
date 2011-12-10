@@ -182,7 +182,9 @@ namespace Cyclotron2D.Screens.Main
                 Lobby = null;
             }
 
-            foreach (var player in m_playersPanel.Players)
+            var players = Players.ToList();
+
+            foreach (var player in players)
             {
                 RemovePlayer(player);
                 player.Dispose();
@@ -300,26 +302,26 @@ namespace Cyclotron2D.Screens.Main
                 if(player != null)
                 {
                      //inform other clients of the disconnect and give them a player ID mapping to update
-                //warning: This method might fail if people join or leave very close together and the messages arrive out of order client side
+                    //warning: This method might fail if people join or leave very close together and the messages arrive out of order client side
 
-                string content = "";
+                    string content = "";
 
-                foreach (Player t in Players)
-                {
-                    int id = t.PlayerID;
-                    int newid = id == player.PlayerID ? -1 : (t.PlayerID < player.PlayerID ? t.PlayerID : t.PlayerID - 1);
-                    content += id + " " + newid + "\n";
-                    if (newid != -1)
+                    foreach (Player t in Players)
                     {
-                        t.PlayerID = newid;
+                        int id = t.PlayerID;
+                        int newid = id == player.PlayerID ? -1 : (t.PlayerID < player.PlayerID ? t.PlayerID : t.PlayerID - 1);
+                        content += id + " " + newid + "\n";
+                        if (newid != -1)
+                        {
+                            t.PlayerID = newid;
+                        }
                     }
-                }
 
-                Game.Communicator.MessageOtherPlayers(player, new NetworkMessage(MessageType.PlayerLeft, content));
+                    Game.Communicator.MessageOtherPlayers(player, new NetworkMessage(MessageType.PlayerLeft, content));
 
-                RemovePlayer(player);
+                    RemovePlayer(player);
 
-                player.Dispose();
+                    player.Dispose();
                 }
 
                
@@ -329,7 +331,7 @@ namespace Cyclotron2D.Screens.Main
             {
                 //client side, we lost connection to the host. we can leave the lobby
                 DebugMessages.Add("Lost connection with host");
-                CancelGame(); //todo make sure this is not trigered by hosts switch to udp
+                CancelGame(); 
                 Game.ChangeState(GameState.MainMenu);
 
             }

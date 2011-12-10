@@ -265,8 +265,7 @@ namespace Cyclotron2D.Screens.Main
         private void Cleanup()
         {
             StopGame();
-            //CollisionNotifier.Dispose();
-         //   CollisionNotifier = null;
+
             m_engine.Dispose();
             m_engine = null;
 
@@ -290,11 +289,9 @@ namespace Cyclotron2D.Screens.Main
             if (m_engine != null)
             {
                 m_engine.Dispose();
-                //CollisionNotifier.Dispose();
             }
 
             m_engine = new Engine(Game, this);
-          //  CollisionNotifier = new CollisionNotifier(Game, this, m_engine);
 
             switch (Game.State)
             {
@@ -399,14 +396,16 @@ namespace Cyclotron2D.Screens.Main
                                 if(player is RemotePlayer)
                                 {
                                     var ep = localEp as IPEndPoint;
-                                    var newEp = new IPEndPoint(ep.Address, ep.Port + 1);
+                                    var newEp = new IPEndPoint(ep.Address, NetworkConnection.UDP_GAME_PORT);
 
 
-                                    Game.Communicator.Add(player as RemotePlayer, new NetworkConnection(newEp, ip, port));
+                                    Game.Communicator.Add(player as RemotePlayer, new NetworkConnection(newEp, new IPEndPoint(ip, port)));
                                 }
                                
                              }
                         }
+
+                        Game.RttService.Reset();
 
                         m_engine.SetupGame(players, conditions);
 
