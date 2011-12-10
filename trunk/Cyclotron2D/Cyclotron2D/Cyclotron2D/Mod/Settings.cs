@@ -34,15 +34,15 @@ namespace Cyclotron2D.Mod
 
         public RangedIntegerSetting MaxTailLength { get; private set; }
 
-		public Setting<bool> Mute { get; set; }
+		public Setting<bool> Mute { get; private set; }
 
-        public Setting<bool> AllowSuicide { get; set; }
+        public Setting<bool> AllowSuicide { get; private set; }
 
-        public Setting<bool> DrawGrid { get; set; }
+        public Setting<bool> DrawGrid { get; private set; }
 
-        public Setting<bool> PlasmaGrid { get; set; }
+        public Setting<bool> PlasmaGrid { get; private set; }
 
-        public Setting<string> PlayerName { get; set; }
+        public Setting<string> PlayerName { get; private set; }
 
         public Settings()
         {
