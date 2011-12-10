@@ -180,10 +180,10 @@ namespace Cyclotron2D.Network
         /// Sends the message async
         /// </summary>
         /// <param name="message"></param>
-        public void Send(NetworkMessage message)
+        public void Send(NetworkMessage message, string playerName)
         {
             message.SequenceNumber = ++m_lastSeqNum;
-            DebugMessages.AddLogOnly("Sending Message: " + message.Type +", to: "+ RemoteEP + ", SeqId: " +message.SequenceNumber+ "\n" + message.Content + "\n");
+            DebugMessages.AddLogOnly("Sending Message: " + message.Type +", To: "+ playerName + ", SeqId: " +message.SequenceNumber+ "\n" + message.Content + "\n");
 			try
 			{
 				switch (Mode)

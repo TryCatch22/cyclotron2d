@@ -228,9 +228,9 @@ namespace Cyclotron2D.Network
         public void SendDebugMessage(string message)
         {
 
-            foreach (var networkConnection in Connections.Values)
+            foreach (var kvp in Connections)
             {
-                networkConnection.Send(new NetworkMessage(MessageType.Debug, message) { Source = (byte)LocalId });
+                kvp.Value.Send(new NetworkMessage(MessageType.Debug, message) { Source = (byte)LocalId }, kvp.Key.ToString());
             }
         }
 
@@ -255,7 +255,7 @@ namespace Cyclotron2D.Network
             if (Connections.ContainsKey(player))
             {
                 message.Source = source;
-                Connections[player].Send(message);
+                Connections[player].Send(message, player.ToString());
             }
         }
 
@@ -270,7 +270,7 @@ namespace Cyclotron2D.Network
 
             foreach (RemotePlayer remotePlayer in Connections.Keys.Where(key => key != player))
             {
-                Connections[remotePlayer].Send(message);
+                Connections[remotePlayer].Send(message, remotePlayer.ToString());
             }
         }
 
@@ -287,7 +287,7 @@ namespace Cyclotron2D.Network
             {
                 foreach (RemotePlayer remotePlayer in Connections.Keys)
                 {
-                    Connections[remotePlayer].Send(message);
+                    Connections[remotePlayer].Send(message, remotePlayer.ToString());
                 }
             }
 
@@ -425,8 +425,7 @@ namespace Cyclotron2D.Network
 
         private void OnMessageReceived(object sender, MessageEventArgs e)
         {
-            DebugMessages.AddLogOnly("Received Message: " + e.Message.Type +" Header:" + e.Message.HeaderLine + "\n" + e.Message.Content + "\n");
-
+            DebugMessages.AddLogOnly("Received Message: " + e.Message.Type +", From: " + GetPlayer(e.Message.Source) +  ", SeqId: " + e.Message.SequenceNumber + "\n" + e.Message.Content + "\n");
             m_receivedMessages.Enqueue(e);
 
             if (e.Message.Type == MessageType.Ping && e.Message.Content == "in")
