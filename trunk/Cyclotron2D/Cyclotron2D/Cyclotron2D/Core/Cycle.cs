@@ -260,7 +260,7 @@ namespace Cyclotron2D.Core
                 case 3:
                 case 4:
                     {
-                        DebugMessages.Add("Detected " + (i-1) + " turn" +(i == 2 ? "":"s") + " from " + m_player + " catching up ...");
+                        DebugMessages.AddLogOnly("Detected " + (i-1) + " turn" +(i == 2 ? "":"s") + " from " + m_player + " catching up ...");
 
                         for (int j = i-1; j > 0; j--)
                         {
