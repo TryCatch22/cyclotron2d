@@ -362,6 +362,7 @@ namespace Cyclotron2D.Screens.Main
                         var localEp = Game.Communicator.Connections[Game.Communicator.Host].LocalEP;
                         List<StartCondition> conditions = new List<StartCondition>();
 
+
                         for (int i = 0; i < lines.Count; i++)
                         {
 
@@ -391,7 +392,7 @@ namespace Cyclotron2D.Screens.Main
                                 var ip = IPAddress.Parse(ipString);
                                 int port = int.Parse(portString);
 
-                                var player = m_engine.GetPlayer(playerId);
+                                var player = (from p in players where p.PlayerID == playerId select p).FirstOrDefault();
 
                                 if(player is RemotePlayer)
                                 {
