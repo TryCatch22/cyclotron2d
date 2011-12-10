@@ -130,12 +130,6 @@ namespace Cyclotron2D.Core.Players
                 int id = int.Parse(e.Message.ContentLines[0]);
                 if (PlayerID == id)
                 {
-                    var authority = GameScreen.GetPlayer(e.Message.Source) as RemotePlayer;
-                    if(authority != null)
-                    {
-                        Game.Communicator.MessagePlayer(authority, new NetworkMessage(MessageType.AckDeath, id.ToString()));
-                    }
-
                     if(!Cycle.Dead)
                     {
                         var lines = e.Message.ContentLines;

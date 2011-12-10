@@ -274,6 +274,7 @@ namespace Cyclotron2D.Screens.Main
             gameScreenSwitch = TimeSpan.MaxValue - new TimeSpan(0, 0, 10);
 
             m_lobbyPlayers.Clear();
+            m_udpSetupConfirmations = 0;
 
             setupMsg = null;
             m_gameStarted = false;
