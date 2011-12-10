@@ -35,8 +35,8 @@ namespace Cyclotron2D.Network
     
         RealDeath,
 
-        AckDeath,
         AckUdpSetup,
+
         StopTcp,
 
         MsgReceived
@@ -99,24 +99,16 @@ namespace Cyclotron2D.Network
             {
                 string s = MsgEncoding.GetString(data).TrimEnd(new[] { '\0' });
 
-                string header = s.Substring(0, s.IndexOf(EndOfHeader));
+                string[] header = s.Substring(0, s.IndexOf(EndOfHeader)).Split(new []{' '});
                 string content = s.Substring(header.Length + EndOfHeader.Length);
 
-                MessageType type = (MessageType)byte.Parse(header.Substring(0, header.IndexOf(' ')));
-                header = header.Substring(header.IndexOf(' ') + 1);
-
-                byte source = byte.Parse(header.Substring(0, header.IndexOf(' ')));
-                header = header.Substring(header.IndexOf(' ') + 1);
-
-                long seqnum = long.Parse(header.Substring(0, header.IndexOf(' ')));
-                header = header.Substring(header.IndexOf(' ') + 1);
-
-                int size = int.Parse(header.Substring(0, header.IndexOf(' ')));
-                header = header.Substring(header.IndexOf(' ') + 1);
-
-                bool reply = bool.Parse(header);
-
-                return new NetworkMessage(type, content) { Source = source, Length = size, SequenceNumber = seqnum, RequiresConfirmation = reply};
+                return new NetworkMessage((MessageType)byte.Parse(header[0]), content)
+                           {
+                               Source = byte.Parse(header[1]),
+                               SequenceNumber = long.Parse(header[2]), 
+                               Length = int.Parse(header[3]), 
+                               RequiresConfirmation = bool.Parse(header[4])
+                           };
 
             }
             catch (Exception e )
