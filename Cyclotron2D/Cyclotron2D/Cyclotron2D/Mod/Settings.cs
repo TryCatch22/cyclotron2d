@@ -53,7 +53,7 @@ namespace Cyclotron2D.Mod
             AllowSuicide = new Setting<bool>("Allow Suicide ", false) { Validate = val => true };
             DrawGrid = new Setting<bool>("Draw Grid ", true) { Validate = val => true };
             PlasmaGrid = new Setting<bool>("Plasma Grid ", true) { Validate = val => true };
-            PlayerName = new Setting<string>("Player Name ", "You") { Validate = val => !string.IsNullOrWhiteSpace(val) };
+            PlayerName = new Setting<string>("Player Name ", "Flynn") { Validate = val => !string.IsNullOrWhiteSpace(val) };
         }
 
         private static Dictionary<string, string> ReadSettings()
