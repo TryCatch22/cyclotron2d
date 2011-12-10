@@ -107,10 +107,9 @@ namespace Cyclotron2D.Network
             RoundTripTime = new TimeSpan(0);
             if (SocketProbe.IsConnectedTcp(socket))
             {
-
                 LocalEP = Socket.LocalEndPoint;
                 RemoteEP = Socket.RemoteEndPoint;
-               // ClearReceiveBuffer();
+
                 StartReceiving();
             }
 
@@ -127,11 +126,11 @@ namespace Cyclotron2D.Network
         /// <param name="localEp"></param>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        public NetworkConnection(EndPoint localEp, IPAddress ip, int port)
+        public NetworkConnection(EndPoint localEp, EndPoint remoteEp)
         {
             Mode = NetworkMode.Udp;
             LocalEP = localEp;
-            RemoteEP = new IPEndPoint(ip, port);
+            RemoteEP =  remoteEp;
 
         }
 
