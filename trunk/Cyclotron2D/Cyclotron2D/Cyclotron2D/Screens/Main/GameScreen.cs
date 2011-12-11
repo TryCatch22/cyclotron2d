@@ -66,6 +66,7 @@ namespace Cyclotron2D.Screens.Main
             m_startTimeUtc = DateTime.MaxValue;
             isGameSetup = false;
             gameScreenSwitch = TimeSpan.MaxValue - new TimeSpan(0, 0, 10);
+            m_pendingSetupConfirmations = new List<long>();
         }
 
         public Player GetPlayer(int id)
@@ -186,6 +187,25 @@ namespace Cyclotron2D.Screens.Main
                           
 
                             }
+                        }else if (e.Message.Type == MessageType.MsgReceived)
+                        {
+                            long seqId = long.Parse(e.Message.Content);
+                            if(m_pendingSetupConfirmations.Contains(seqId))
+                            {
+                                m_pendingSetupConfirmations.Remove(seqId);
+                                if(m_pendingSetupConfirmations.Count == 0)
+                                {
+
+                                    Thread.Sleep(15);
+
+                                    Game.Communicator.StartIgnoreDisconnect();
+
+                                    Game.RttService.Pause();
+
+                                    Game.Communicator.StartUdp();
+                                }
+
+                            }
                         }
 
 
@@ -264,9 +284,14 @@ namespace Cyclotron2D.Screens.Main
             setupMsg = null;
             m_gameStarted = false;
 
+            m_pendingSetupConfirmations = new List<long>();
+
             GameSettings = Settings.SinglePlayer;
             m_startTimeUtc = DateTime.MaxValue;
         }
+
+
+        private List<long> m_pendingSetupConfirmations; 
 
         private void SetupGame(List<Player> players)
         {
@@ -319,16 +344,10 @@ namespace Cyclotron2D.Screens.Main
                         setupMsg = new NetworkMessage(type, content);
 
                         Game.ReliableUdpSender.Initialize(Game.Communicator.Connections.Keys.ToList());
-                        Game.ReliableUdpSender.SendReliableAll(setupMsg);
+                        m_pendingSetupConfirmations = Game.ReliableUdpSender.SendReliableAll(setupMsg);
                     //    Game.Communicator.MessageAll(setupMsg);
 
-                        Thread.Sleep(15);
-
-                        Game.Communicator.StartIgnoreDisconnect();
-
-                        Game.RttService.Pause();
-
-                        Game.Communicator.StartUdp();
+                     
                     }
                     break;
                 case GameState.PlayingAsClient:

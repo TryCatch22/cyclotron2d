@@ -172,7 +172,10 @@ namespace Cyclotron2D.Network
         /// <param name="message"></param>
         public void Send(NetworkMessage message, string playerName)
         {
-           message.SequenceNumber = ++m_lastSeqNum;
+           if(message.SequenceNumber == 0)
+           {
+               message.SequenceNumber = ++m_lastSeqNum;
+           }
            if(message.Type != MessageType.Ping)
            {
                DebugMessages.AddLogOnly("Sending Message: " + message.Type +", To: "+ playerName + ", SeqId: " +message.SequenceNumber+ "\n" + message.Content + "\n");

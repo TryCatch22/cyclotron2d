@@ -123,23 +123,29 @@ namespace Cyclotron2D.Network
             m_confirmations.Clear();
         }
 
-        public void SendReliableAll(NetworkMessage msg)
+        public List<long> SendReliableAll(NetworkMessage msg)
         {
 
             msg.RequiresConfirmation = true;
+
+            List<long> nums = new List<long>();
 
             foreach (var key in m_confirmations.Keys)
             {
                 Game.Communicator.MessagePlayer(key, msg);
                 m_confirmations[key].Add(msg.SequenceNumber, new Confirmation(){Msg = msg, LastNotification = Game.GameTime.TotalGameTime});
+                nums.Add(msg.SequenceNumber);
             }
+
+            return nums;
         }
 
-        public void SendReliable(RemotePlayer player, NetworkMessage msg)
+        public long SendReliable(RemotePlayer player, NetworkMessage msg)
         {
             msg.RequiresConfirmation = true;
             Game.Communicator.MessagePlayer(player, msg);
             m_confirmations[player].Add(msg.SequenceNumber, new Confirmation() { Msg = msg, LastNotification = Game.GameTime.TotalGameTime });
+            return msg.SequenceNumber;
         }
 
         #endregion
