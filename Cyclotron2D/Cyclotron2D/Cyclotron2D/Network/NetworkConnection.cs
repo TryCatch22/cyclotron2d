@@ -176,47 +176,12 @@ namespace Cyclotron2D.Network
 
         }
 
-
-        private void TcpSendCallback(IAsyncResult ar)
-        {
-            var data = m_message.Data;
-            int b = Socket.EndSend(ar);
-            if (b != data.Length)
-            {
-                Socket.BeginSend(data, 0, data.Length, SocketFlags.None, TcpSendCallback, null);
-                DebugMessages.AddLogOnly("Send problem resending: " + m_message.Type);
-            }
-            else
-            {
-                DebugMessages.AddLogOnly("endsendTCP: " + m_message.Type);
-            }
-        }
-
-
-        private void UdpSendCallback(IAsyncResult ar)
-        {
-            var data = m_message.Data;
-            int b = Socket.EndSend(ar);
-            if (b != data.Length)
-            {
-                Socket.BeginSendTo(data, 0, data.Length, SocketFlags.None, RemoteEP, UdpSendCallback, null);
-                DebugMessages.AddLogOnly("Send problem resending: " + m_message.Type);
-            }
-            else
-            {
-                DebugMessages.AddLogOnly("endsendUdp: " + m_message.Type);
-            }
-        }
-
-        private NetworkMessage m_message;
-
         /// <summary>
         /// Sends the message async
         /// </summary>
         /// <param name="message"></param>
         public void Send(NetworkMessage message, string playerName)
         {
-            m_message = message;
             message.SequenceNumber = ++m_lastSeqNum;
            
             if(message.Type != MessageType.Ping)
@@ -228,13 +193,15 @@ namespace Cyclotron2D.Network
 				switch (Mode)
 				{
 					case NetworkMode.Tcp:
-						{
-							Socket.BeginSend(message.Data, 0, message.Data.Length, SocketFlags.None, TcpSendCallback, null);
+				        {
+				            var handler = new SendCallbackHandler(message, Socket, null);
+							Socket.BeginSend(message.Data, 0, message.Data.Length, SocketFlags.None, handler.TcpSendCallback, null);
 						}
 						break;
 					case NetworkMode.Udp:
-						{
-							UdpSocket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, UdpSendCallback, null);
+				        {
+				            var handler = new SendCallbackHandler(message, UdpSocket, RemoteEP);
+							UdpSocket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, handler.UdpSendCallback, null);
 						}
 						break;
 				}
@@ -409,6 +376,52 @@ namespace Cyclotron2D.Network
         #endregion
 
     }
+
+
+    internal class SendCallbackHandler
+    {
+        private NetworkMessage m_message;
+        private Socket m_socket;
+        private EndPoint m_remoteEP;
+
+        public SendCallbackHandler(NetworkMessage message, Socket socket, EndPoint remoteEP)
+        {
+            m_message = message;
+        }
+
+
+        public void TcpSendCallback(IAsyncResult ar)
+        {
+            var data = m_message.Data;
+            int b = m_socket.EndSend(ar);
+            if (b != data.Length)
+            {
+                m_socket.BeginSend(data, 0, data.Length, SocketFlags.None, TcpSendCallback, null);
+                DebugMessages.AddLogOnly("Send problem resending: " + m_message.Type);
+            }
+            else
+            {
+                DebugMessages.AddLogOnly("endsendTCP: " + m_message.Type);
+            }
+        }
+
+
+        public void UdpSendCallback(IAsyncResult ar)
+        {
+            var data = m_message.Data;
+            int b = m_socket.EndSend(ar);
+            if (b != data.Length)
+            {
+                m_socket.BeginSendTo(data, 0, data.Length, SocketFlags.None, m_remoteEP, UdpSendCallback, null);
+                DebugMessages.AddLogOnly("Send problem resending: " + m_message.Type);
+            }
+            else
+            {
+                DebugMessages.AddLogOnly("endsendUdp: " + m_message.Type);
+            }
+        }
+    }
+
 
 
     public class AlreadyConnectedException : Exception
