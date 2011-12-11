@@ -96,6 +96,7 @@ namespace Cyclotron2D.Network
             {
                 foreach (var kvp in m_confirmations[key])
                 {
+
                     if (gameTime.TotalGameTime > kvp.Value.LastNotification + MaxAckDelay)
                     {
                         DebugMessages.AddLogOnly("unconfirmed Msg. Resending: " + kvp.Value.Msg.Type);
@@ -134,7 +135,7 @@ namespace Cyclotron2D.Network
             {
                 Game.Communicator.MessagePlayer(key, msg);
                 m_confirmations[key].Add(msg.SequenceNumber, new Confirmation(){Msg = msg, LastNotification = Game.GameTime.TotalGameTime});
-                nums.Add(msg.SequenceNumber);
+
             }
 
             return nums;
@@ -144,6 +145,7 @@ namespace Cyclotron2D.Network
         {
             msg.RequiresConfirmation = true;
             Game.Communicator.MessagePlayer(player, msg);
+
             m_confirmations[player].Add(msg.SequenceNumber, new Confirmation() { Msg = msg, LastNotification = Game.GameTime.TotalGameTime });
             return msg.SequenceNumber;
         }

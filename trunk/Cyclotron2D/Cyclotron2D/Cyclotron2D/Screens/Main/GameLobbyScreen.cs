@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
-using System.Threading;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Helpers;
 using Cyclotron2D.Mod;
