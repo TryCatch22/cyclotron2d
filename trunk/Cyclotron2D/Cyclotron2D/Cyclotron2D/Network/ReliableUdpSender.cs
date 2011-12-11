@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Cyclotron2D.Components;
 using Cyclotron2D.Core.Players;
 using Cyclotron2D.Helpers;
@@ -10,10 +8,11 @@ using Microsoft.Xna.Framework;
 namespace Cyclotron2D.Network
 {
 
+
     
     internal class Confirmation
     {
-        public bool Confirmed { get; set; }
+        public NetworkMessage Msg { get; set; }
 
         public TimeSpan LastNotification { get; set; }
     }
@@ -23,12 +22,12 @@ namespace Cyclotron2D.Network
     {
         public TimeSpan MaxAckDelay { get { return TimeSpanExtension.Max(Game.Communicator.AverageRtt.Mult(2), Game.Communicator.MaximumRtt); } }
 
-        private Dictionary<RemotePlayer, Dictionary<long, Tuple<NetworkMessage, TimeSpan>>> m_confirmations;
+        private Dictionary<RemotePlayer, Dictionary<long, Confirmation>> m_confirmations;
 
         public ReliableUdpSender(Game game)
             : base(game)
         {
-            m_confirmations = new Dictionary<RemotePlayer, Dictionary<long, Tuple<NetworkMessage, TimeSpan>>>();
+            m_confirmations = new Dictionary<RemotePlayer, Dictionary<long, Confirmation>>();
             SubscribeCommunicator();
         }
 
@@ -97,11 +96,11 @@ namespace Cyclotron2D.Network
             {
                 foreach (var kvp in m_confirmations[key])
                 {
-                    if (gameTime.TotalGameTime > kvp.Value.Item2 + MaxAckDelay)
+                    if (gameTime.TotalGameTime > kvp.Value.LastNotification + MaxAckDelay)
                     {
-                        DebugMessages.AddLogOnly("unconfirmed Msg. Resending: " + kvp.Value.Item1.Type);
-                        Game.Communicator.MessagePlayer(key, kvp.Value.Item1);
-                        m_confirmations[key][kvp.Key] = new Tuple<NetworkMessage, TimeSpan>(kvp.Value.Item1, gameTime.TotalGameTime);
+                        DebugMessages.AddLogOnly("unconfirmed Msg. Resending: " + kvp.Value.Msg.Type);
+                        Game.Communicator.MessagePlayer(key, kvp.Value.Msg);
+                        m_confirmations[key][kvp.Key].LastNotification = gameTime.TotalGameTime;
                     }
                     
                 }
@@ -114,7 +113,7 @@ namespace Cyclotron2D.Network
             {
                 if(!m_confirmations.ContainsKey(remotePlayer))
                 {
-                    m_confirmations.Add(remotePlayer, new Dictionary<long, Tuple<NetworkMessage, TimeSpan>>());
+                    m_confirmations.Add(remotePlayer, new Dictionary<long, Confirmation>());
                 }
             }
         }
@@ -132,7 +131,7 @@ namespace Cyclotron2D.Network
             foreach (var key in m_confirmations.Keys)
             {
                 Game.Communicator.MessagePlayer(key, msg);
-                m_confirmations[key].Add(msg.SequenceNumber, new Tuple<NetworkMessage, TimeSpan>(msg, Game.GameTime.TotalGameTime));
+                m_confirmations[key].Add(msg.SequenceNumber, new Confirmation(){Msg = msg, LastNotification = Game.GameTime.TotalGameTime});
             }
         }
 
@@ -140,7 +139,7 @@ namespace Cyclotron2D.Network
         {
             msg.RequiresConfirmation = true;
             Game.Communicator.MessagePlayer(player, msg);
-            m_confirmations[player].Add(msg.SequenceNumber, new Tuple<NetworkMessage, TimeSpan>(msg, Game.GameTime.TotalGameTime));
+            m_confirmations[player].Add(msg.SequenceNumber, new Confirmation() { Msg = msg, LastNotification = Game.GameTime.TotalGameTime });
         }
 
         #endregion
