@@ -21,14 +21,9 @@ namespace Cyclotron2D.Network
 
     public class ReliableUdpSender : CyclotronComponent
     {
-
-
         public TimeSpan MaxAckDelay { get { return TimeSpanExtension.Max(Game.Communicator.AverageRtt.Mult(2), Game.Communicator.MaximumRtt); } }
 
         private Dictionary<RemotePlayer, Dictionary<long, Tuple<NetworkMessage, TimeSpan>>> m_confirmations;
-
-
-
 
         public ReliableUdpSender(Game game)
             : base(game)
@@ -102,9 +97,9 @@ namespace Cyclotron2D.Network
             {
                 foreach (var kvp in m_confirmations[key])
                 {
-
                     if(kvp.Value.Item2 > gameTime.TotalGameTime + MaxAckDelay)
                     {
+                        DebugMessages.Add("unconfirmed Msg. Resending: " + kvp.Value.Item1.Type);
                         Game.Communicator.MessagePlayer(key, kvp.Value.Item1);
                         m_confirmations[key][kvp.Key] = new Tuple<NetworkMessage, TimeSpan>(kvp.Value.Item1, gameTime.TotalGameTime);
                     }
