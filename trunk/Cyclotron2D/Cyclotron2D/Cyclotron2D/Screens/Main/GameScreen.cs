@@ -23,7 +23,7 @@ namespace Cyclotron2D.Screens.Main
 
         #region Fields
 
-        private int m_udpSetupConfirmations;
+        private List<byte> m_udpSetupConfirmations;
 
         private Engine m_engine;
 
@@ -160,8 +160,11 @@ namespace Cyclotron2D.Screens.Main
                         }
                         else if (e.Message.Type == MessageType.UdpReady)
                         {
-                            m_udpSetupConfirmations++;
-                            if(m_udpSetupConfirmations == ActivePlayers.Count -1)
+                            if(!m_udpSetupConfirmations.Contains(e.Message.Source))
+                            {
+                                m_udpSetupConfirmations.Add(e.Message.Source);
+                            }
+                            if(m_udpSetupConfirmations.Count == ActivePlayers.Count -1)
                             {
 
                                 AcceleratePings();
