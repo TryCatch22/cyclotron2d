@@ -317,7 +317,10 @@ namespace Cyclotron2D.Screens.Main
                         }
                        //game setup message
                         setupMsg = new NetworkMessage(type, content);
-                        Game.Communicator.MessageAll(setupMsg);
+
+                        Game.ReliableUdpSender.Initialize(Game.Communicator.Connections.Keys.ToList());
+                        Game.ReliableUdpSender.SendReliableAll(setupMsg);
+                    //    Game.Communicator.MessageAll(setupMsg);
 
                         Thread.Sleep(15);
 
