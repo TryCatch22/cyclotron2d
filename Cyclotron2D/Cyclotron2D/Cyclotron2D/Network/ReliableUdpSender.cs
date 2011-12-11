@@ -74,13 +74,13 @@ namespace Cyclotron2D.Network
                     }
                     break;
                 default:
-                    {
-                        if(e.Message.RequiresConfirmation)
-                        {
-                            Game.Communicator.MessagePlayer(Game.Communicator.GetPlayer(e.Message.Source), 
-                                                    new NetworkMessage(MessageType.MsgReceived, e.Message.SequenceNumber.ToString()));
-                        }
-                    }
+//                    {
+//                        if(e.Message.RequiresConfirmation)
+//                        {
+//                            Game.Communicator.MessagePlayer(Game.Communicator.GetPlayer(e.Message.Source), 
+//                                                    new NetworkMessage(MessageType.MsgReceived, e.Message.SequenceNumber.ToString()));
+//                        }
+//                    }
                     break;
             }
         }
