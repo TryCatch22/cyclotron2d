@@ -66,7 +66,7 @@ namespace Cyclotron2D.Screens.Main
             m_startTimeUtc = DateTime.MaxValue;
             isGameSetup = false;
             gameScreenSwitch = TimeSpan.MaxValue - new TimeSpan(0, 0, 10);
-            m_pendingSetupConfirmations = new List<long>();
+            m_udpSetupConfirmations = new List<byte>();
         }
 
         public Player GetPlayer(int id)
@@ -263,19 +263,14 @@ namespace Cyclotron2D.Screens.Main
             gameScreenSwitch = TimeSpan.MaxValue - new TimeSpan(0, 0, 10);
 
             m_lobbyPlayers.Clear();
-            m_udpSetupConfirmations = 0;
+            m_udpSetupConfirmations = new List<byte>();
 
             setupMsg = null;
             m_gameStarted = false;
 
-            m_pendingSetupConfirmations = new List<long>();
-
             GameSettings = Settings.SinglePlayer;
             m_startTimeUtc = DateTime.MaxValue;
         }
-
-
-        private List<long> m_pendingSetupConfirmations; 
 
         private void SetupGame(List<Player> players)
         {
