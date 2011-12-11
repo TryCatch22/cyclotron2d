@@ -112,7 +112,10 @@ namespace Cyclotron2D.Network
         {
             foreach (var remotePlayer in players)
             {
-                m_confirmations.Add(remotePlayer, new Dictionary<long, Tuple<NetworkMessage, TimeSpan>>());
+                if(!m_confirmations.ContainsKey(remotePlayer))
+                {
+                    m_confirmations.Add(remotePlayer, new Dictionary<long, Tuple<NetworkMessage, TimeSpan>>());
+                }
             }
         }
 
