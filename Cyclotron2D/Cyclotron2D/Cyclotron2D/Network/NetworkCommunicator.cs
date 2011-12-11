@@ -425,7 +425,10 @@ namespace Cyclotron2D.Network
 
         private void OnMessageReceived(object sender, MessageEventArgs e)
         {
-            DebugMessages.AddLogOnly("Received Message: " + e.Message.Type +", From: " + GetPlayer(e.Message.Source) +  ", SeqId: " + e.Message.SequenceNumber + "\n" + e.Message.Content + "\n");
+            if(e.Message.Type != MessageType.Ping)
+            {
+                DebugMessages.AddLogOnly("Received Message: " + e.Message.Type +", From: " + GetPlayer(e.Message.Source) +  ", SeqId: " + e.Message.SequenceNumber + "\n" + e.Message.Content + "\n");
+            }
             m_receivedMessages.Enqueue(e);
 
             if (e.Message.Type == MessageType.Ping && e.Message.Content == "in")

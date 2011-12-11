@@ -42,16 +42,6 @@ namespace Cyclotron2D.Network
 
         public static bool IsConnectedUdp(Socket socket)
         {
-//            if (socket != null)
-//            {
-//                bool read = socket.Poll(-1, SelectMode.SelectRead);
-//                bool write = socket.Poll(-1, SelectMode.SelectWrite);
-//                bool error = socket.Poll(-1, SelectMode.SelectWrite);
-//
-//                return ((read && socket.Available > 0) || write) && !error;
-//
-//            }
-//            return false;
             return true;
         }
     }
@@ -183,7 +173,10 @@ namespace Cyclotron2D.Network
         public void Send(NetworkMessage message, string playerName)
         {
             message.SequenceNumber = ++m_lastSeqNum;
-            DebugMessages.AddLogOnly("Sending Message: " + message.Type +", To: "+ playerName + ", SeqId: " +message.SequenceNumber+ "\n" + message.Content + "\n");
+           if(message.Type != MessageType.Ping)
+           {
+               DebugMessages.AddLogOnly("Sending Message: " + message.Type +", To: "+ playerName + ", SeqId: " +message.SequenceNumber+ "\n" + message.Content + "\n");
+           }
 			try
 			{
 				switch (Mode)
