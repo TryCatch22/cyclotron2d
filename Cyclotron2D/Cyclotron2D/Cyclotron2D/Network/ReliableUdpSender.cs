@@ -97,9 +97,9 @@ namespace Cyclotron2D.Network
             {
                 foreach (var kvp in m_confirmations[key])
                 {
-                    if(kvp.Value.Item2 > gameTime.TotalGameTime + MaxAckDelay)
+                    if (gameTime.TotalGameTime > kvp.Value.Item2 + MaxAckDelay)
                     {
-                        DebugMessages.Add("unconfirmed Msg. Resending: " + kvp.Value.Item1.Type);
+                        DebugMessages.AddLogOnly("unconfirmed Msg. Resending: " + kvp.Value.Item1.Type);
                         Game.Communicator.MessagePlayer(key, kvp.Value.Item1);
                         m_confirmations[key][kvp.Key] = new Tuple<NetworkMessage, TimeSpan>(kvp.Value.Item1, gameTime.TotalGameTime);
                     }
