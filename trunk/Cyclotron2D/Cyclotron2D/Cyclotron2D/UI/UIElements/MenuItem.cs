@@ -30,7 +30,7 @@ namespace Cyclotron2D.UI.UIElements
         protected override void OnClick(object sender, EventArgs e)
         {
             Menu.Select(this);
-			Sound.PlaySound(Sound.Clink, 0.5f);
+		//	Sound.PlaySound(Sound.Clink, 0.5f);
         }
 
         public override void Draw(GameTime gameTime)
