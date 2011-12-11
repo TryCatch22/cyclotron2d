@@ -176,13 +176,49 @@ namespace Cyclotron2D.Network
 
         }
 
+
+        private void TcpSendCallback(IAsyncResult ar)
+        {
+            var data = m_message.Data;
+            int b = Socket.EndSend(ar);
+            if (b != data.Length)
+            {
+                Socket.BeginSend(data, 0, data.Length, SocketFlags.None, TcpSendCallback, null);
+                DebugMessages.AddLogOnly("Send problem resending: " + m_message.Type);
+            }
+            else
+            {
+                DebugMessages.AddLogOnly("endsendTCP: " + m_message.Type);
+            }
+        }
+
+
+        private void UdpSendCallback(IAsyncResult ar)
+        {
+            var data = m_message.Data;
+            int b = Socket.EndSend(ar);
+            if (b != data.Length)
+            {
+                Socket.BeginSendTo(data, 0, data.Length, SocketFlags.None, RemoteEP, UdpSendCallback, null);
+                DebugMessages.AddLogOnly("Send problem resending: " + m_message.Type);
+            }
+            else
+            {
+                DebugMessages.AddLogOnly("endsendUdp: " + m_message.Type);
+            }
+        }
+
+        private NetworkMessage m_message;
+
         /// <summary>
         /// Sends the message async
         /// </summary>
         /// <param name="message"></param>
         public void Send(NetworkMessage message, string playerName)
         {
+            m_message = message;
             message.SequenceNumber = ++m_lastSeqNum;
+           
             if(message.Type != MessageType.Ping)
             {
                 DebugMessages.AddLogOnly("Sending Message: " + message.Type +", To: "+ playerName + ", SeqId: " +message.SequenceNumber+ "\n" + message.Content + "\n");
@@ -193,21 +229,12 @@ namespace Cyclotron2D.Network
 				{
 					case NetworkMode.Tcp:
 						{
-							Socket.BeginSend(message.Data, 0, message.Data.Length, SocketFlags.None, (ar =>
-							                                                                              {
-							                                                                                  Socket.EndSend(ar);
-                                                                                                              DebugMessages.AddLogOnly("endsendTCP: " + message.Type);
-							                                                                              }), null);
+							Socket.BeginSend(message.Data, 0, message.Data.Length, SocketFlags.None, TcpSendCallback, null);
 						}
 						break;
 					case NetworkMode.Udp:
 						{
-							UdpSocket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, (ar =>
-							                                                                                             {
-							                                                                                                 UdpSocket.EndSend(ar);
-                                                                                                                             DebugMessages.AddLogOnly("endsendUDP: " + message.Type);
-
-							                                                                                             }), null);
+							UdpSocket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, UdpSendCallback, null);
 						}
 						break;
 				}
