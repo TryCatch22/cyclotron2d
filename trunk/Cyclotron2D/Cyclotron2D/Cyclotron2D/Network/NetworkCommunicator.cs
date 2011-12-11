@@ -187,7 +187,7 @@ namespace Cyclotron2D.Network
 					        pingArgs[e.Message.Source] = e;
 					    }
 					}
-					else // not a ping in msg
+					else // not a "ping in" msg
 					{
 					    InvokeMessageReceived(e);
 					}
@@ -438,6 +438,11 @@ namespace Cyclotron2D.Network
             if (e.Message.Type == MessageType.Ping && e.Message.Content == "in")
             {
                 e.Message.Content += "\n" + Game.GameTime.TotalGameTime;
+            }
+            //send confirmation right away.
+            if (e.Message.RequiresConfirmation)
+            {
+                MessagePlayer(GetPlayer(e.Message.Source), new NetworkMessage(MessageType.MsgReceived, e.Message.SequenceNumber.ToString()));
             }
         }
 
