@@ -275,12 +275,12 @@ namespace Cyclotron2D.Network
             }
         }
 
-        public void MessageAll(NetworkMessage message)
+        public void MessageAll(NetworkMessage message, int sleep = 0)
         {
-            MessageAll(message, (byte)LocalId);
+            MessageAll(message, (byte)LocalId, sleep);
         }
 
-        public void MessageAll(NetworkMessage message, byte source)
+        public void MessageAll(NetworkMessage message, byte source, int sleep = 0)
         {
             message.Source = source;
 
@@ -288,6 +288,7 @@ namespace Cyclotron2D.Network
             {
                 foreach (RemotePlayer remotePlayer in Connections.Keys)
                 {
+                    Thread.Sleep(sleep);
                     Connections[remotePlayer].Send(message, remotePlayer.ToString());
                 }
             }

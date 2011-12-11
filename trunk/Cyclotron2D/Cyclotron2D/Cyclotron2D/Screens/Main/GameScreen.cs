@@ -324,7 +324,7 @@ namespace Cyclotron2D.Screens.Main
 
                        // Game.ReliableUdpSender.Initialize(Game.Communicator.Connections.Keys.ToList());
                       //  m_pendingSetupConfirmations = Game.ReliableUdpSender.SendReliableAll(setupMsg);
-                        Game.Communicator.MessageAll(setupMsg);
+                        Game.Communicator.MessageAll(setupMsg, 3 * ActivePlayers.Count);
 
                         Thread.Sleep(15);
 
