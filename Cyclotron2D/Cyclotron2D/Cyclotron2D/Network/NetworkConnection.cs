@@ -183,19 +183,31 @@ namespace Cyclotron2D.Network
         public void Send(NetworkMessage message, string playerName)
         {
             message.SequenceNumber = ++m_lastSeqNum;
-            DebugMessages.AddLogOnly("Sending Message: " + message.Type +", To: "+ playerName + ", SeqId: " +message.SequenceNumber+ "\n" + message.Content + "\n");
+            if(message.Type != MessageType.Ping)
+            {
+                DebugMessages.AddLogOnly("Sending Message: " + message.Type +", To: "+ playerName + ", SeqId: " +message.SequenceNumber+ "\n" + message.Content + "\n");
+            }
 			try
 			{
 				switch (Mode)
 				{
 					case NetworkMode.Tcp:
 						{
-							Socket.BeginSend(message.Data, 0, message.Data.Length, SocketFlags.None, (ar => Socket.EndSend(ar)), null);
+							Socket.BeginSend(message.Data, 0, message.Data.Length, SocketFlags.None, (ar =>
+							                                                                              {
+							                                                                                  Socket.EndSend(ar);
+                                                                                                              DebugMessages.AddLogOnly("endsendTCP: " + message.Type);
+							                                                                              }), null);
 						}
 						break;
 					case NetworkMode.Udp:
 						{
-							UdpSocket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, (ar => UdpSocket.EndSend(ar)), null);
+							UdpSocket.BeginSendTo(message.Data, 0, message.Data.Length, SocketFlags.None, RemoteEP, (ar =>
+							                                                                                             {
+							                                                                                                 UdpSocket.EndSend(ar);
+                                                                                                                             DebugMessages.AddLogOnly("endsendUDP: " + message.Type);
+
+							                                                                                             }), null);
 						}
 						break;
 				}
