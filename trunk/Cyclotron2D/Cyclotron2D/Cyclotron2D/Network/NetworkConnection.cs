@@ -387,6 +387,8 @@ namespace Cyclotron2D.Network
         public SendCallbackHandler(NetworkMessage message, Socket socket, EndPoint remoteEP)
         {
             m_message = message;
+            m_socket = socket;
+            m_remoteEP = remoteEP;
         }
 
 
