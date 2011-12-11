@@ -170,9 +170,14 @@ namespace Cyclotron2D
             //updates the rest of the game
             base.Update(gameTime);
 
-			MediaPlayer.IsMuted = Settings.SinglePlayer.Mute.Value;
+            if(IsActive)
+            {
+                MediaPlayer.IsMuted = Settings.SinglePlayer.Mute.Value;
 
-            DebugMessages.Update(gameTime);
+                DebugMessages.Update(gameTime);
+            }
+
+
         }
 
 
