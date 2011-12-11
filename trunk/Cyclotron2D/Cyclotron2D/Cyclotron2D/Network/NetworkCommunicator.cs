@@ -256,7 +256,6 @@ namespace Cyclotron2D.Network
             if (Connections.ContainsKey(player))
             {
                 message.Source = source;
-               // Thread.Sleep(5);
                 Connections[player].Send(message, player.ToString());
             }
         }
@@ -272,7 +271,6 @@ namespace Cyclotron2D.Network
 
             foreach (RemotePlayer remotePlayer in Connections.Keys.Where(key => key != player))
             {
-                //Thread.Sleep(5);
                 Connections[remotePlayer].Send(message, remotePlayer.ToString());
             }
         }
@@ -290,7 +288,6 @@ namespace Cyclotron2D.Network
             {
                 foreach (RemotePlayer remotePlayer in Connections.Keys)
                 {
-                 //   Thread.Sleep(5);
                     Connections[remotePlayer].Send(message, remotePlayer.ToString());
                 }
             }
