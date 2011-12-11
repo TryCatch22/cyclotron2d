@@ -60,7 +60,7 @@ namespace Cyclotron2D.Network
 
         #endregion
 
-        private long m_lastSeqNum;
+        private static long s_lastSeqNum;
 
         #region Properties
 
@@ -174,8 +174,9 @@ namespace Cyclotron2D.Network
         {
            if(message.SequenceNumber == 0)
            {
-               message.SequenceNumber = ++m_lastSeqNum;
+               message.SequenceNumber = ++s_lastSeqNum;
            }
+
            if(message.Type != MessageType.Ping)
            {
                DebugMessages.AddLogOnly("Sending Message: " + message.Type +", To: "+ playerName + ", SeqId: " +message.SequenceNumber+ "\n" + message.Content + "\n");
